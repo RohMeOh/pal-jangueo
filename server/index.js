@@ -1,6 +1,8 @@
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config();
+const pool = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -12,13 +14,36 @@ app.use(cors({
 
 app.use(express.json());
 
-// Health check endpoint
+// Health check
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
     application: "Pa'l Jangueo",
     service: 'backend'
   });
+});
+
+// Database connection test
+app.get('/api/db-health', async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT COUNT(*) FROM public.events'
+    );
+
+    res.json({
+      status: 'ok',
+      database: 'connected',
+      events: Number(result.rows[0].count)
+    });
+
+  } catch (error) {
+    console.error('Database error:', error.code || error.message);
+
+    res.status(500).json({
+      status: 'error',
+      database: 'disconnected'
+    });
+  }
 });
 
 // Start server
