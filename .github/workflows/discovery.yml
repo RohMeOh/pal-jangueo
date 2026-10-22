@@ -2,6 +2,12 @@ name: Pa'l Jangueo - Event Discovery
 
 on:
   workflow_dispatch:
+    inputs:
+      stage_candidates:
+        description: 'Save candidates for review without publishing'
+        required: false
+        type: boolean
+        default: false
 
   schedule:
     - cron: '17 */6 * * *'
@@ -74,6 +80,13 @@ jobs:
 
       - name: Discover events from all sources
         run: node scripts/discover-all.js
+
+      - name: Stage candidates for manual review
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SUPABASE_CA_PATH: ${{ runner.temp }}/supabase-ca.crt
+        run: node scripts/run-discovery.js --stage
 
       - name: Remove temporary certificate
         if: always() && github.event_name == 'workflow_dispatch'
