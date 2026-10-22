@@ -43,7 +43,7 @@ jobs:
         run: npm ci
 
       - name: Prepare Supabase certificate
-        if: github.event_name == 'workflow_dispatch'
+        if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true) }}
         env:
           SUPABASE_CA_CERT: ${{ secrets.SUPABASE_CA_CERT }}
         run: |
@@ -52,7 +52,7 @@ jobs:
           printf '%s\n' "$SUPABASE_CA_CERT" > "$RUNNER_TEMP/supabase-ca.crt"
 
       - name: Test Supabase connection
-        if: github.event_name == 'workflow_dispatch'
+        if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true) }}
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SUPABASE_CA_PATH: ${{ runner.temp }}/supabase-ca.crt
@@ -82,12 +82,12 @@ jobs:
         run: node scripts/discover-all.js
 
       - name: Stage candidates for manual review
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true }}
+        if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true) }}
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SUPABASE_CA_PATH: ${{ runner.temp }}/supabase-ca.crt
         run: node scripts/run-discovery.js --stage
 
       - name: Remove temporary certificate
-        if: always() && github.event_name == 'workflow_dispatch'
+        if: ${{ always() && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true)) }}
         run: rm -f "$RUNNER_TEMP/supabase-ca.crt"
