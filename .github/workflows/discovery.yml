@@ -36,5 +36,45 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Prepare Supabase certificate
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          SUPABASE_CA_CERT: ${{ secrets.SUPABASE_CA_CERT }}
+        run: |
+          test -n "$SUPABASE_CA_CERT"
+          umask 077
+          printf '%s\n' "$SUPABASE_CA_CERT" > "$RUNNER_TEMP/supabase-ca.crt"
+
+      - name: Test Supabase connection
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SUPABASE_CA_PATH: ${{ runner.temp }}/supabase-ca.crt
+        run: |
+          test -n "$DATABASE_URL"
+          node -e '
+            const pool = require("./db");
+
+            pool.query("SELECT 1 AS ok")
+              .then(result => {
+                if (result.rows[0]?.ok !== 1) {
+                  throw new Error("Respuesta inesperada");
+                }
+                console.log("Supabase: conexión OK");
+              })
+              .catch(error => {
+                console.error(
+                  "Error de conexión:",
+                  error.code || error.message
+                );
+                process.exitCode = 1;
+              })
+              .finally(() => pool.end());
+          '
+
       - name: Discover events from all sources
         run: node scripts/discover-all.js
+
+      - name: Remove temporary certificate
+        if: always() && github.event_name == 'workflow_dispatch'
+        run: rm -f "$RUNNER_TEMP/supabase-ca.crt"
