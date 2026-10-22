@@ -1,3 +1,14 @@
+/* ================================
+   PA'L JANGUEO - EVENT FILTERS
+   ================================ */
+
+.pj-filters,
+.pj-filters * {
+  box-sizing: border-box;
+}
+
+/* Main filter container */
+
 .pj-filters {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -7,13 +18,18 @@
   background: #1d1d24;
   border: 1px solid #303038;
   border-radius: 18px;
+  text-align: left;
+  align-items: end;
 }
+
+/* Individual filters */
 
 .pj-filter {
   display: flex;
   flex-direction: column;
   gap: 8px;
   min-width: 0;
+  max-width: 100%;
 }
 
 .pj-filter-search {
@@ -21,15 +37,22 @@
 }
 
 .pj-filter label {
+  display: block;
+  width: 100%;
   font-size: 13px;
   font-weight: 700;
   color: #d5d4dc;
+  text-align: left;
 }
+
+/* Regular inputs and dropdowns */
 
 .pj-filter input,
 .pj-filter select {
+  display: block;
   width: 100%;
   min-width: 0;
+  max-width: 100%;
   padding: 12px;
   color: #f8f7f4;
   background: #101014;
@@ -37,6 +60,7 @@
   border-radius: 9px;
   font: inherit;
   color-scheme: dark;
+  text-align: left;
 }
 
 .pj-filter input:focus,
@@ -45,94 +69,27 @@
   outline-offset: 1px;
 }
 
-.pj-clear-filters {
-  align-self: end;
-  padding: 12px;
-  border: 1px solid #ff955f;
-  background: transparent;
-  color: #ff955f;
-  border-radius: 9px;
-  font-weight: 700;
-  cursor: pointer;
-}
+/* ================================
+   DATE INPUTS - MOBILE SAFARI FIX
+   ================================ */
 
-@media (max-width: 850px) {
-  .pj-filters {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 520px) {
-  .pj-filters {
-    grid-template-columns: 1fr;
-    padding: 18px;
-  }
-
-  .pj-filter-search {
-    grid-column: span 1;
-  }
-}
-
-
-/* PJ FILTERS FINAL LAYOUT */
-
-.pj-filters,
-.pj-filters * {
-  box-sizing: border-box;
-}
-
-.pj-filters {
-  text-align: left;
-  align-items: end;
-}
-
-.pj-filter label {
-  display: block;
-  width: 100%;
-  text-align: left;
-}
-
-.pj-filter input,
-.pj-filter select {
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  text-align: left;
-}
-
-.pj-filter input[type="date"] {
-  min-width: 0;
-  max-width: 100%;
-}
-
-.pj-clear-filters {
-  grid-column: -2 / -1;
-  justify-self: stretch;
-  width: 100%;
-  text-align: center;
-}
-
-@media (max-width: 520px) {
-  .pj-filters {
-    gap: 18px;
-  }
-
-  .pj-clear-filters {
-    grid-column: 1 / -1;
-  }
-}
-
-/* Date fields: mobile layout */
-.pj-filter,
-.pj-date-field {
-  min-width: 0;
-  max-width: 100%;
-  box-sizing: border-box;
-}
+/*
+   The wrapper owns the visible border.
+   This prevents Safari's native date input
+   from stretching beyond the filter area.
+*/
 
 .pj-date-field {
   position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  background: #101014;
+  border: 1px solid #41414b;
+  border-radius: 9px;
 }
 
 .pj-date-field input[type="date"] {
@@ -140,12 +97,33 @@
   width: 100%;
   min-width: 0;
   max-width: 100%;
+  margin: 0;
+  padding: 12px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   box-sizing: border-box;
+  font-size: 16px;
 }
+
+/* Focus outline on the date wrapper */
+
+.pj-date-field:focus-within {
+  outline: 2px solid #ff955f;
+  outline-offset: 1px;
+}
+
+.pj-date-field input[type="date"]:focus {
+  outline: none;
+}
+
+/* Hide the empty native date text */
 
 .pj-date-empty::-webkit-datetime-edit {
   opacity: 0;
 }
+
+/* Placeholder shown when date is empty */
 
 .pj-date-hint {
   position: absolute;
@@ -160,10 +138,61 @@
   pointer-events: none;
 }
 
+/* Restore native text when focused */
+
 .pj-date-field:focus-within .pj-date-hint {
   display: none;
 }
 
 .pj-date-field:focus-within .pj-date-empty::-webkit-datetime-edit {
   opacity: 1;
+}
+
+/* ================================
+   CLEAR FILTERS BUTTON
+   ================================ */
+
+.pj-clear-filters {
+  grid-column: -2 / -1;
+  align-self: end;
+  justify-self: stretch;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ff955f;
+  background: transparent;
+  color: #ff955f;
+  border-radius: 9px;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* ================================
+   TABLET LAYOUT
+   ================================ */
+
+@media (max-width: 850px) {
+  .pj-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ================================
+   MOBILE LAYOUT
+   ================================ */
+
+@media (max-width: 520px) {
+  .pj-filters {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+    padding: 18px;
+  }
+
+  .pj-filter-search {
+    grid-column: 1 / -1;
+  }
+
+  .pj-clear-filters {
+    grid-column: 1 / -1;
+  }
 }
