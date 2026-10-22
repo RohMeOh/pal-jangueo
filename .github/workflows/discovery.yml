@@ -1,0 +1,40 @@
+name: Pa'l Jangueo - Event Discovery
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    - cron: '17 */6 * * *'
+      timezone: 'America/Puerto_Rico'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pal-jangueo-discovery
+  cancel-in-progress: false
+
+jobs:
+  discover:
+    name: Discover music events
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        working-directory: server
+
+    steps:
+      - name: Download repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Discover events from all sources
+        run: node scripts/discover-all.js
