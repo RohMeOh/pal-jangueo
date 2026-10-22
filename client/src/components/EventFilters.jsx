@@ -126,24 +126,40 @@ export default function EventFilters({
 
       <div className="pj-filter">
         <label htmlFor="filter-from">Desde</label>
-        <input
-          id="filter-from"
-          type="date"
-          value={filters.fromDate}
-          max={filters.toDate || undefined}
-          onChange={e => update('fromDate', e.target.value)}
-        />
+        <div className="pj-date-field">
+          <input
+            id="filter-from"
+            type="date"
+            className={!filters.fromDate ? 'pj-date-empty' : ''}
+            value={filters.fromDate}
+            max={filters.toDate || undefined}
+            onChange={e => update('fromDate', e.target.value)}
+          />
+          {!filters.fromDate && (
+            <span className="pj-date-hint" aria-hidden="true">
+              Selecciona una fecha
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="pj-filter">
         <label htmlFor="filter-to">Hasta</label>
-        <input
-          id="filter-to"
-          type="date"
-          value={filters.toDate}
-          min={filters.fromDate || undefined}
-          onChange={e => update('toDate', e.target.value)}
-        />
+        <div className="pj-date-field">
+          <input
+            id="filter-to"
+            type="date"
+            className={!filters.toDate ? 'pj-date-empty' : ''}
+            value={filters.toDate}
+            min={filters.fromDate || undefined}
+            onChange={e => update('toDate', e.target.value)}
+          />
+          {!filters.toDate && (
+            <span className="pj-date-hint" aria-hidden="true">
+              Selecciona una fecha
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="pj-filter">

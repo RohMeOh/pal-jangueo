@@ -121,3 +121,49 @@
     grid-column: 1 / -1;
   }
 }
+
+/* Date fields: mobile layout */
+.pj-filter,
+.pj-date-field {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.pj-date-field {
+  position: relative;
+  width: 100%;
+}
+
+.pj-date-field input[type="date"] {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.pj-date-empty::-webkit-datetime-edit {
+  opacity: 0;
+}
+
+.pj-date-hint {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  right: 42px;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+.pj-date-field:focus-within .pj-date-hint {
+  display: none;
+}
+
+.pj-date-field:focus-within .pj-date-empty::-webkit-datetime-edit {
+  opacity: 1;
+}
