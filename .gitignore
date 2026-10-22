@@ -6,3 +6,6 @@ dist/
 
 # Local flyers for testing
 server/samples/
+
+# Local frontend backups
+client/src/*.backup

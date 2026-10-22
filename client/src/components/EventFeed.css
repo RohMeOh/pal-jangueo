@@ -1,0 +1,292 @@
+.pj-discovery {
+  min-height: 100vh;
+  padding: 48px 24px 80px;
+  background: #101014;
+  color: #f8f7f4;
+  font-family: system-ui, sans-serif;
+}
+
+.pj-hero,
+.pj-events {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.pj-hero {
+  padding: 72px 0;
+}
+
+.pj-eyebrow {
+  color: #ff8a54;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.pj-hero h1 {
+  max-width: 750px;
+  margin: 20px 0;
+  font-size: clamp(38px, 6vw, 70px);
+  line-height: 1.08;
+  letter-spacing: -2px;
+}
+
+.pj-hero > p:last-child {
+  color: #b8b6bf;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.pj-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 26px;
+}
+
+.pj-section-heading h2 {
+  margin: 0;
+  font-size: 26px;
+}
+
+.pj-section-heading span {
+  color: #b8b6bf;
+}
+
+.pj-event-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 22px;
+}
+
+.pj-event-card,
+.pj-empty {
+  border: 1px solid #303038;
+  background: #1d1d24;
+  border-radius: 18px;
+}
+
+.pj-event-content {
+  padding: 28px;
+}
+
+.pj-event-category {
+  color: #ff9b68;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.pj-event-card h3 {
+  margin: 16px 0;
+  font-size: 24px;
+  line-height: 1.25;
+}
+
+.pj-event-date {
+  color: #ffb38e;
+  text-transform: capitalize;
+}
+
+.pj-event-venue {
+  color: #d5d4dc;
+}
+
+.pj-event-price {
+  margin: 22px 0;
+  font-weight: 700;
+}
+
+.pj-event-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.pj-event-actions a {
+  padding: 11px 15px;
+  border-radius: 9px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.pj-event-map {
+  color: #f8f7f4;
+  border: 1px solid #55545f;
+}
+
+.pj-event-ticket {
+  color: #151015;
+  background: #ff955f;
+}
+
+.pj-empty {
+  padding: 52px 24px;
+  text-align: center;
+}
+
+.pj-empty h3 {
+  font-size: 24px;
+}
+
+.pj-empty p {
+  color: #b8b6bf;
+}
+
+@media (max-width: 600px) {
+  .pj-discovery {
+    padding: 24px 16px 60px;
+  }
+
+  .pj-hero {
+    padding: 48px 0;
+  }
+
+  .pj-section-heading h2 {
+    font-size: 22px;
+  }
+}
+
+/* Center the main headline */
+.pj-hero h1 {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+/* Center event card buttons */
+.pj-event-actions {
+  justify-content: center;
+}
+
+/* Keep Spanish date capitalization natural */
+.pj-event-date {
+  text-transform: none;
+}
+
+/* ======================================
+   Pa'l Jangueo - Event flyers
+   ====================================== */
+
+.pj-event-grid {
+  grid-template-columns:
+    repeat(auto-fit, minmax(270px, 340px));
+  justify-content: center;
+}
+
+.pj-event-card {
+  overflow: hidden;
+}
+
+.pj-event-poster {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  background: #15151b;
+  overflow: hidden;
+}
+
+.pj-event-poster img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.pj-event-poster-fallback {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+  background:
+    radial-gradient(circle at 50% 35%, #703c4f, transparent 65%),
+    linear-gradient(145deg, #282333, #15151b);
+  color: #ffb38e;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.pj-poster-symbol {
+  font-size: 80px;
+  line-height: 1;
+}
+
+.pj-event-poster-fallback small {
+  color: #e0c5bc;
+  font-size: 12px;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+
+@media (max-width: 600px) {
+  .pj-event-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Wider, responsive event cards */
+.pj-event-grid {
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(100%, 310px), 420px)
+  );
+  justify-content: center;
+}
+
+@media (max-width: 600px) {
+  .pj-event-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ====================================
+   Responsive, consistent event posters
+   ==================================== */
+
+.pj-event-poster {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: #18161d;
+}
+
+/* Blurred background fills the unused space */
+.pj-event-poster img.pj-event-poster-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  object-fit: cover;
+  transform: scale(1.12);
+  filter: blur(24px) brightness(0.35);
+  pointer-events: none;
+}
+
+/* Original flyer remains fully visible */
+.pj-event-poster img.pj-event-poster-image {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  object-fit: contain;
+}
+
+/* Consistent fallback when no flyer exists */
+.pj-event-poster-fallback {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+}
