@@ -4,9 +4,13 @@ const fs = require('fs');
 const path = require('path');
 const { Pool } = require('pg');
 
-// Load Supabase SSL certificate
+// Use Render's certificate or the local development certificate
+const certificatePath =
+  process.env.SUPABASE_CA_PATH ||
+  path.join(__dirname, 'certs', 'supabase-ca.crt');
+
 const certificate = fs.readFileSync(
-  path.join(__dirname, 'certs', 'supabase-ca.crt'),
+  certificatePath,
   'utf8'
 );
 

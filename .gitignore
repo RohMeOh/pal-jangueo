@@ -9,3 +9,6 @@ server/samples/
 
 # Local frontend backups
 client/src/*.backup
+
+# Local database certificates
+server/certs/

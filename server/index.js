@@ -9,8 +9,18 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
+// Allowed frontend origins for development and production
+const allowedOrigins = (
+  process.env.CLIENT_ORIGINS || 'http://localhost:5173'
+)
+  .split(',')
+  .map(origin => origin.trim().replace(/\/$/, ''))
+  .filter(Boolean);
+
 app.use(cors({
-  origin: 'http://localhost:5173'
+  origin(origin, callback) {
+    callback(null, !origin || allowedOrigins.includes(origin));
+  }
 }));
 
 app.use(express.json());
@@ -50,6 +60,6 @@ app.get('/api/db-health', async (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Pa'l Jangueo API running on port ${PORT}`);
 });
