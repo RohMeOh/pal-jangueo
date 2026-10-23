@@ -4,6 +4,11 @@
 
 const pool = require('../db');
 
+const {
+  checkSceneApprovalEligibility
+} = require('../utils/checkSceneApprovalEligibility');
+
+
 const candidateId = process.argv[2];
 const approve = process.argv.includes('--approve');
 
@@ -54,9 +59,22 @@ async function main() {
       problems.push('Falta el título.');
     }
 
-    if (event.is_music_event !== true ||
-        event.local_music_confirmed !== true) {
-      problems.push('Música local sin confirmar.');
+    if (event.is_music_event !== true) {
+      problems.push('No es un evento musical confirmado.');
+    }
+
+    // Recheck the three pillars against current evidence.
+    // Do not trust a manually edited local_music_confirmed flag.
+    const sceneCheck = await checkSceneApprovalEligibility(
+      client,
+      candidate
+    );
+
+    if (!sceneCheck.eligible) {
+      problems.push(
+        'Relevancia de la escena sin corroborar: ' +
+        sceneCheck.status
+      );
     }
 
     if (analysis.validation?.basic_checks_passed !== true) {

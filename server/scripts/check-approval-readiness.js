@@ -3,6 +3,11 @@
 
 const pool = require('../db');
 
+const {
+  checkSceneApprovalEligibility
+} = require('../utils/checkSceneApprovalEligibility');
+
+
 const candidateId = process.argv[2];
 
 async function main() {
@@ -17,6 +22,10 @@ async function main() {
         is_test,
         review_status,
         source_name,
+        source_url,
+        source_content_hash,
+        caption_text,
+        approved_event_id,
         analysis_result
       FROM public.event_candidates
       WHERE id = $1
@@ -47,8 +56,16 @@ async function main() {
       problems.push('No está confirmado como evento musical.');
     }
 
-    if (event.local_music_confirmed !== true) {
-      problems.push('Falta confirmar su relevancia musical local.');
+    const sceneCheck = await checkSceneApprovalEligibility(
+      pool,
+      candidate
+    );
+
+    if (!sceneCheck.eligible) {
+      problems.push(
+        'Relevancia de la escena sin corroborar: ' +
+        sceneCheck.status
+      );
     }
 
     const start = new Date(normalized.start_at);
