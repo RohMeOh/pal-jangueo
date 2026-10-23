@@ -10,6 +10,10 @@ const SOURCES = [
     script: 'run-discovery.js'
   },
   {
+    name: 'PRticket',
+    script: 'discover-prticket.js'
+  },
+  {
     name: 'Coca-Cola Music Hall',
     script: 'preview-venue-details.js'
   }
