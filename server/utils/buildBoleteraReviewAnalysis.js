@@ -4,12 +4,23 @@ const {
   normalizeBoleteraCandidate
 } = require('./normalizeBoleteraCandidate');
 
+const {
+  assessLocalMusicEvidence
+} = require('./assessLocalMusicEvidence');
+
 function buildBoleteraReviewAnalysis(rawEvent) {
   const candidate = normalizeBoleteraCandidate(rawEvent);
+
+  const musicEvidence = assessLocalMusicEvidence({
+    rawDescription: rawEvent.description_raw,
+    sourceUrl: candidate.source_url
+  });
 
   return {
     status: 'pending_review',
     review_required: true,
+
+    music_evidence: musicEvidence,
 
     validation: {
       basic_checks_passed: Boolean(

@@ -38,6 +38,34 @@ function validUrl(value, baseUrl) {
   }
 }
 
+function extractNamedEntities(value, sourceUrl) {
+  return asArray(value)
+    .slice(0, 50)
+    .map(item => {
+      const data = typeof item === 'string'
+        ? { name: item }
+        : item;
+
+      if (!data || typeof data !== 'object') {
+        return null;
+      }
+
+      const name = typeof data.name === 'string'
+        ? data.name.trim()
+        : '';
+
+      if (!name || name.length > 200) {
+        return null;
+      }
+
+      return {
+        name,
+        url: validUrl(data.url, sourceUrl)
+      };
+    })
+    .filter(Boolean);
+}
+
 function extractEventJsonLd(html, sourceUrl) {
   const events = [];
 
@@ -92,7 +120,17 @@ function extractEventJsonLd(html, sourceUrl) {
         offers.find(offer => offer.url)?.url ||
         validUrl(item.url, sourceUrl);
 
-      events.push({
+      const performers = extractNamedEntities(
+        item.performer,
+        sourceUrl
+      );
+
+      const organizers = extractNamedEntities(
+        item.organizer,
+        sourceUrl
+      );
+
+      const eventRecord = {
         source: 'Boletera',
         source_url: sourceUrl,
         event_type: 'MusicEvent',
@@ -113,7 +151,19 @@ function extractEventJsonLd(html, sourceUrl) {
         description_raw: item.description || null,
         music_status: 'likely_music',
         review_required: true
-      });
+      };
+
+      // Preserve existing event hashes when these
+      // optional structured fields are absent.
+      if (performers.length > 0) {
+        eventRecord.performers = performers;
+      }
+
+      if (organizers.length > 0) {
+        eventRecord.organizers = organizers;
+      }
+
+      events.push(eventRecord);
     }
   }
 
