@@ -87,6 +87,16 @@ jobs:
           SUPABASE_CA_PATH: ${{ runner.temp }}/supabase-ca.crt
         run: node scripts/stage-prticket-candidates.js --stage --limit=20
 
+      - name: Verify trusted PRticket venues
+        id: prticket_venues
+        if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true) }}
+        continue-on-error: true
+        working-directory: server
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SUPABASE_CA_PATH: ${{ runner.temp }}/supabase-ca.crt
+        run: node scripts/auto-verify-prticket-venues.js --apply
+
       - name: Publish verified PRticket events
         id: prticket_publication
         if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true) }}
@@ -140,6 +150,7 @@ jobs:
         if: ${{ always() }}
         env:
           PRTICKET: ${{ steps.prticket_stage.outcome }}
+          PRTICKET_VENUES: ${{ steps.prticket_venues.outcome }}
           PRTICKET_PUBLISH: ${{ steps.prticket_publication.outcome }}
           DISCOVERY: ${{ steps.multisource_discovery.outcome }}
           BOLETERA: ${{ steps.boletera_stage.outcome }}
@@ -147,13 +158,14 @@ jobs:
           SCENE: ${{ steps.scene_evaluation.outcome }}
         run: |
           echo "PRticket: $PRTICKET"
+          echo "PRticket venues: $PRTICKET_VENUES"
           echo "PRticket publication: $PRTICKET_PUBLISH"
           echo "Multi-source discovery: $DISCOVERY"
           echo "Boletera staging: $BOLETERA"
           echo "Artist enrichment: $ARTISTS"
           echo "Scene evaluation: $SCENE"
 
-          for result in "$PRTICKET" "$PRTICKET_PUBLISH" "$DISCOVERY" "$BOLETERA" "$ARTISTS" "$SCENE"; do
+          for result in "$PRTICKET" "$PRTICKET_VENUES" "$PRTICKET_PUBLISH" "$DISCOVERY" "$BOLETERA" "$ARTISTS" "$SCENE"; do
             if [ "$result" = "failure" ]; then
               echo "::error::One or more discovery stages failed."
               exit 1
