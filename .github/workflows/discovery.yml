@@ -98,6 +98,13 @@ jobs:
           test -n "$GEMINI_API_KEY"
           node scripts/enrich-pending-artists.js --save
 
+      - name: Evaluate independent scene relevance
+        if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true) }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SUPABASE_CA_PATH: ${{ runner.temp }}/supabase-ca.crt
+        run: node scripts/evaluate-pending-scene.js --save
+
       - name: Remove temporary certificate
         if: ${{ always() && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true)) }}
         run: rm -f "$RUNNER_TEMP/supabase-ca.crt"

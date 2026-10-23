@@ -194,6 +194,14 @@ async function evaluateCandidateSceneRelevance(pool, candidate) {
     },
     matched_venue: verifiedVenue?.venue_name || null,
     matched_organization: verifiedOrganizer?.name || null,
+    evidence_references: {
+      artist_profile_ids: (identities.artists || [])
+        .filter(item => item.stored_identity_match_valid)
+        .map(item => item.profile_id),
+      scene_venue_id: verifiedVenue?.scene_entity_id || null,
+      scene_organization_id:
+        verifiedOrganizer?.scene_entity_id || null
+    },
     musical_performance_detected:
       assessment.musical_performance_detected,
     scene_relevance_documented:
