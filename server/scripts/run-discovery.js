@@ -55,6 +55,14 @@ async function stageCandidate(url) {
     }
   );
 
+  if (stdout.includes('Candidato existente actualizado.')) {
+    return 'ACTUALIZADO';
+  }
+
+  if (stdout.includes('Candidato revisado: actualización bloqueada.')) {
+    return 'OMITIDO';
+  }
+
   if (stdout.includes('Candidato existente reutilizado.')) {
     return 'REUTILIZADO';
   }
@@ -118,6 +126,8 @@ async function main() {
     skippedPublished: 0,
     saved: 0,
     reused: 0,
+    updated: 0,
+    skippedReviewed: 0,
     errors: 0
   };
 
@@ -157,6 +167,19 @@ async function main() {
           continue;
         }
 
+        const startDate = new Date(
+          prepared.event.normalized?.start_at || ''
+        );
+
+        if (
+          Number.isNaN(startDate.getTime()) ||
+          startDate <= new Date()
+        ) {
+          totals.notEligible++;
+          console.log('Resultado: evento pasado o fecha inválida');
+          continue;
+        }
+
         if (!assessment.has_musical_program_evidence) {
           totals.needsReview++;
           console.log('Resultado: evidencia musical insuficiente');
@@ -181,8 +204,12 @@ async function main() {
 
           if (outcome === 'GUARDADO') {
             totals.saved++;
-          } else {
+          } else if (outcome === 'REUTILIZADO') {
             totals.reused++;
+          } else if (outcome === 'ACTUALIZADO') {
+            totals.updated++;
+          } else if (outcome === 'OMITIDO') {
+            totals.skippedReviewed++;
           }
 
           console.log('Supabase:', outcome);
@@ -211,6 +238,8 @@ async function main() {
   console.log('Ya aprobados:', totals.skippedPublished);
   console.log('Candidatos nuevos guardados:', totals.saved);
   console.log('Candidatos reutilizados:', totals.reused);
+  console.log('Candidatos actualizados:', totals.updated);
+  console.log('Candidatos revisados omitidos:', totals.skippedReviewed);
   console.log('Errores:', totals.errors);
   console.log('Eventos publicados automáticamente: 0');
 

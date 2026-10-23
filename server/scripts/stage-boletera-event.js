@@ -118,43 +118,38 @@ async function main() {
 
     // Serialize staging of the same source and content.
     await client.query(
-      'SELECT pg_advisory_xact_lock(hashtext($1), hashtext($2))',
-      [url.href, contentHash]
+      'SELECT pg_advisory_xact_lock(hashtext($1))',
+      [url.href]
     );
 
     const existing = await client.query(`
-      SELECT id
+      SELECT id, review_status, approved_event_id,
+             source_content_hash, caption_text, analysis_result
       FROM public.event_candidates
       WHERE is_test = FALSE
         AND source_url = $1
-        AND source_content_hash = $2
-      LIMIT 1
-    `, [url.href, contentHash]);
+      FOR UPDATE
+    `, [url.href]);
+
+    if (existing.rows.length > 1) {
+      throw new Error(
+        'Hay candidatos duplicados para esta URL. Requiere conciliación.'
+      );
+    }
 
     let candidateId;
+    let finalStatus = 'pending_review';
 
-    if (existing.rows.length) {
-      candidateId = existing.rows[0].id;
-      console.log('\nCandidato existente reutilizado.');
-    } else {
+    if (existing.rows.length === 0) {
       const saved = await client.query(`
         INSERT INTO public.event_candidates (
-          source_name,
-          source_url,
-          caption_text,
-          analysis_result,
-          review_status,
-          is_test,
-          source_content_hash
+          source_name, source_url, caption_text,
+          analysis_result, review_status,
+          is_test, source_content_hash
         )
         VALUES (
-          'Boletera',
-          $1,
-          $2,
-          $3::jsonb,
-          'pending_review',
-          FALSE,
-          $4
+          'Boletera', $1, $2, $3::jsonb,
+          'pending_review', FALSE, $4
         )
         RETURNING id
       `, [
@@ -166,13 +161,81 @@ async function main() {
 
       candidateId = saved.rows[0].id;
       console.log('\nCandidato real guardado para revisión.');
+
+    } else {
+      const previous = existing.rows[0];
+      candidateId = previous.id;
+      finalStatus = previous.review_status;
+
+      if (previous.source_content_hash === contentHash) {
+        console.log('\nCandidato existente reutilizado.');
+
+      } else if (
+        previous.review_status !== 'pending_review' ||
+        previous.approved_event_id != null
+      ) {
+        console.log('\nCandidato revisado: actualización bloqueada.');
+
+      } else {
+        const previousAnalysis = previous.analysis_result || {};
+
+        const history = Array.isArray(
+          previousAnalysis.source_change_history
+        )
+          ? previousAnalysis.source_change_history
+          : [];
+
+        history.push({
+          detected_at: new Date().toISOString(),
+          previous_hash: previous.source_content_hash,
+          new_hash: contentHash,
+          previous_event: previousAnalysis.event || null,
+          previous_caption_text: previous.caption_text,
+          previous_editorial_review:
+            previousAnalysis.editorial_review || null
+        });
+
+        const newAnalysis = {
+          ...analysis,
+          source_change_history: history.slice(-10),
+          merged_candidate_archive:
+            previousAnalysis.merged_candidate_archive || []
+        };
+
+        const updated = await client.query(`
+          UPDATE public.event_candidates
+          SET caption_text = $2,
+              analysis_result = $3::jsonb,
+              source_content_hash = $4,
+              reviewed_at = NULL
+          WHERE id = $1
+            AND review_status = 'pending_review'
+            AND approved_event_id IS NULL
+          RETURNING id
+        `, [
+          candidateId,
+          captionText,
+          JSON.stringify(newAnalysis),
+          contentHash
+        ]);
+
+        if (updated.rowCount !== 1) {
+          throw new Error('No se pudo actualizar el candidato.');
+        }
+
+        console.log('\nCandidato existente actualizado.');
+        console.log(
+          'Versiones anteriores conservadas:',
+          newAnalysis.source_change_history.length
+        );
+      }
     }
 
     await client.query('COMMIT');
 
     console.log('ID:', candidateId);
-    console.log('Estado: pending_review');
-    console.log('Publicado: NO');
+    console.log('Estado:', finalStatus);
+    console.log('Publicación ejecutada: NO');
 
   } catch (error) {
     await client.query('ROLLBACK');
