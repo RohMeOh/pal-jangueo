@@ -17,6 +17,10 @@ const {
   buildSourceContentHash
 } = require('../utils/sourceContentHash');
 
+const {
+  assessBoleteraMusicCandidate
+} = require('../utils/assessBoleteraMusicCandidate');
+
 async function main() {
   const input = process.argv[2];
   const stage = process.argv[3] === '--stage';
@@ -89,6 +93,16 @@ async function main() {
     console.log('\nMODO VISTA PREVIA');
     console.log('Registros guardados: 0');
     return;
+  }
+
+  const { assessment, eligibleForReview } =
+    assessBoleteraMusicCandidate(event);
+
+  if (!eligibleForReview) {
+    throw new Error(
+      'Candidato bloqueado por evidencia musical: ' +
+      assessment.classification
+    );
   }
 
   if (

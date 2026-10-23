@@ -54,6 +54,25 @@ function assessMusicEvidence(rawDescription) {
   const text = normalize(description);
   const signals = [];
 
+  // Detect explicit non-musical event types.
+  // A theater venue name alone does not count.
+  const nonMusicRules = [
+    {
+      name: 'Evento teatral',
+      pattern: /\b(pieza teatral|obra de teatro|obra teatral|gira teatral|montaje teatral|funcion teatral|produccion teatral|festival de teatro)\b/
+    },
+    {
+      name: 'Evento deportivo',
+      pattern: /\b(baloncesto|basketball|bsnf|beisbol|baseball|voleibol|volleyball|futbol|soccer|partido deportivo|competencia deportiva)\b/
+    }
+  ];
+
+  const nonMusicSignals = nonMusicRules
+    .filter(rule => rule.pattern.test(text))
+    .map(rule => rule.name);
+
+  signals.push(...nonMusicSignals);
+
   const rules = [
     {
       name: 'Concierto o presentación en vivo',
@@ -79,25 +98,49 @@ function assessMusicEvidence(rawDescription) {
     }
   }
 
-  const hasMusicalProgram = signals.some(signal =>
+  // Detect performances with musicians and instruments.
+  if (
+    /\b(acompanado por|acompanada por|junto a)\b/.test(text) &&
+    /\b(piano|percusion|guitarra|bateria|violin|saxofon|trompeta)\b/.test(text) &&
+    /\b(musica|boleros?|baladas?|canciones?|cantante|artista)\b/.test(text)
+  ) {
+    signals.push('Músicos e instrumentos en presentación');
+  }
+
+  const nonMusicEventDetected = nonMusicSignals.length > 0;
+
+  const musicalPerformanceSignalDetected = signals.some(signal =>
     signal === 'Concierto o presentación en vivo' ||
-    signal === 'DJs o música electrónica'
+    signal === 'DJs o música electrónica' ||
+    signal === 'Músicos e instrumentos en presentación'
   );
 
-  const musicalContext =
-    /\b(musica|musical|orquesta|album|disco|feat|featuring|k-pop|dancehall|afrobeats|techno|electronica)\b/.test(text);
+  const mixedEventDetected =
+    nonMusicEventDetected && musicalPerformanceSignalDetected;
 
-  const classification = hasMusicalProgram
-    ? 'indicios_de_actuacion_musical'
-    : musicalContext
-      ? 'contexto_musical_pendiente_de_verificar'
-      : 'evidencia_insuficiente';
+  const hasMusicalProgram =
+    musicalPerformanceSignalDetected && !nonMusicEventDetected;
+
+  const musicalContext =
+    /\b(musica|music|musical|orquesta|album|disco|feat|featuring|k-pop|dancehall|afrobeats|techno|electronica|reggaeton|regueton|boleros?|baladas?|canciones?|piano|percusion)\b/.test(text);
+
+  const classification = mixedEventDetected
+    ? 'evento_mixto_pendiente_de_verificar'
+    : nonMusicEventDetected
+      ? 'evento_no_musical'
+      : hasMusicalProgram
+        ? 'indicios_de_actuacion_musical'
+        : musicalContext
+          ? 'contexto_musical_pendiente_de_verificar'
+          : 'evidencia_insuficiente';
 
   return {
     description,
     signals,
     classification,
     has_musical_program_evidence: hasMusicalProgram,
+    non_music_event_detected: nonMusicEventDetected,
+    mixed_event_detected: mixedEventDetected,
     local_music_confirmed: false,
     safe_to_publish: false,
     review_required: true

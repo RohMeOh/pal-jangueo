@@ -9,7 +9,7 @@ const { promisify } = require('node:util');
 const { extractEvents } = require('./discover-boletera');
 const { extractEventJsonLd } = require('../utils/extractEventJsonLd');
 const { adaptBoleteraEvent } = require('../adapters/boleteraAdapter');
-const { assessMusicEvidence } = require('../utils/assessMusicEvidence');
+const { assessBoleteraMusicCandidate } = require('../utils/assessBoleteraMusicCandidate');
 
 const execFileAsync = promisify(execFile);
 
@@ -154,7 +154,8 @@ async function main() {
 
         const raw = events[0];
         const prepared = adaptBoleteraEvent(raw);
-        const assessment = assessMusicEvidence(raw.description_raw);
+        const { assessment, eligibleForReview } =
+          assessBoleteraMusicCandidate(raw);
 
         console.log('Evento:', prepared.event.title);
         console.log('Local:', prepared.event.venue);
@@ -180,7 +181,24 @@ async function main() {
           continue;
         }
 
-        if (!assessment.has_musical_program_evidence) {
+        if (
+          assessment.classification ===
+          'evento_mixto_pendiente_de_verificar'
+        ) {
+          totals.needsReview++;
+          console.log('Resultado: evento mixto pendiente de verificar');
+          console.log('Guardado automático: NO');
+          continue;
+        }
+
+        if (assessment.classification === 'evento_no_musical') {
+          totals.notEligible++;
+          console.log('Resultado: evento no musical (fuera del MVP)');
+          console.log('Guardado automático: NO');
+          continue;
+        }
+
+        if (!eligibleForReview) {
           totals.needsReview++;
           console.log('Resultado: evidencia musical insuficiente');
           console.log('Guardado automático: NO');
@@ -188,6 +206,13 @@ async function main() {
         }
 
         totals.musicEvidence++;
+
+        console.log(
+          'Base de evidencia:',
+          assessment.has_musical_program_evidence
+            ? 'Actuación musical descrita'
+            : 'MusicEvent + contexto musical (sin actuación confirmada)'
+        );
 
         console.log('Resultado: candidato con indicios musicales');
         console.log('Música local confirmada: NO');
