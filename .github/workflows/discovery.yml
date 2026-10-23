@@ -78,10 +78,23 @@ jobs:
               .finally(() => pool.end());
           '
 
+      - name: Stage PRticket candidates
+        id: prticket_stage
+        continue-on-error: true
+        if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true) }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SUPABASE_CA_PATH: ${{ runner.temp }}/supabase-ca.crt
+        run: node scripts/stage-prticket-candidates.js --stage --limit=20
+
       - name: Discover events from all sources
+        id: multisource_discovery
+        continue-on-error: true
         run: node scripts/discover-all.js
 
       - name: Stage candidates for manual review
+        id: boletera_stage
+        continue-on-error: true
         if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true) }}
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
@@ -89,6 +102,8 @@ jobs:
         run: node scripts/run-discovery.js --stage
 
       - name: Enrich pending artists with Gemini
+        id: artist_enrichment
+        continue-on-error: true
         if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true) }}
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
@@ -99,6 +114,8 @@ jobs:
           node scripts/enrich-pending-artists.js --save
 
       - name: Evaluate independent scene relevance
+        id: scene_evaluation
+        continue-on-error: true
         if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true) }}
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
@@ -108,3 +125,27 @@ jobs:
       - name: Remove temporary certificate
         if: ${{ always() && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true)) }}
         run: rm -f "$RUNNER_TEMP/supabase-ca.crt"
+
+      - name: Report discovery stage failures
+        if: ${{ always() }}
+        env:
+          PRTICKET: ${{ steps.prticket_stage.outcome }}
+          DISCOVERY: ${{ steps.multisource_discovery.outcome }}
+          BOLETERA: ${{ steps.boletera_stage.outcome }}
+          ARTISTS: ${{ steps.artist_enrichment.outcome }}
+          SCENE: ${{ steps.scene_evaluation.outcome }}
+        run: |
+          echo "PRticket: $PRTICKET"
+          echo "Multi-source discovery: $DISCOVERY"
+          echo "Boletera staging: $BOLETERA"
+          echo "Artist enrichment: $ARTISTS"
+          echo "Scene evaluation: $SCENE"
+
+          for result in "$PRTICKET" "$DISCOVERY" "$BOLETERA" "$ARTISTS" "$SCENE"; do
+            if [ "$result" = "failure" ]; then
+              echo "::error::One or more discovery stages failed."
+              exit 1
+            fi
+          done
+
+          echo "No discovery stage failures."
