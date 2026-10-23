@@ -70,43 +70,81 @@
 }
 
 /* ================================
-   DATE INPUTS - MOBILE SAFARI FIX
+   DATE INPUTS - MOBILE SAFE
    ================================ */
 
-/*
-   The wrapper owns the visible border.
-   This prevents Safari's native date input
-   from stretching beyond the filter area.
-*/
+/* Fixed-size wrapper prevents native overflow. */
 
 .pj-date-field {
   position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
   width: 100%;
   min-width: 0;
   max-width: 100%;
+  height: 48px;
   overflow: hidden;
   background: #101014;
   border: 1px solid #41414b;
   border-radius: 9px;
+  box-sizing: border-box;
 }
 
+/* Keep the native picker interactive but invisible.
+   Our own text displays the selected date. */
+
 .pj-date-field input[type="date"] {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   min-width: 0;
   max-width: 100%;
+  height: 100%;
   margin: 0;
-  padding: 12px;
+  padding: 0;
   border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-sizing: border-box;
-  font-size: 16px;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
 }
 
-/* Focus outline on the date wrapper */
+/* Visible placeholder and selected date. */
+
+.pj-date-hint {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  right: 44px;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.pj-date-selected {
+  color: #f8f7f4;
+}
+
+/* Decorative calendar symbol. */
+
+.pj-date-field::after {
+  content: '';
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  width: 17px;
+  height: 16px;
+  transform: translateY(-50%);
+  border: 2px solid #a8a8b0;
+  border-radius: 3px;
+  box-shadow: inset 0 4px 0 #a8a8b0;
+  box-sizing: border-box;
+  pointer-events: none;
+  z-index: 1;
+}
 
 .pj-date-field:focus-within {
   outline: 2px solid #ff955f;
@@ -115,37 +153,6 @@
 
 .pj-date-field input[type="date"]:focus {
   outline: none;
-}
-
-/* Hide the empty native date text */
-
-.pj-date-empty::-webkit-datetime-edit {
-  opacity: 0;
-}
-
-/* Placeholder shown when date is empty */
-
-.pj-date-hint {
-  position: absolute;
-  top: 50%;
-  left: 12px;
-  right: 42px;
-  transform: translateY(-50%);
-  color: #9ca3af;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  pointer-events: none;
-}
-
-/* Restore native text when focused */
-
-.pj-date-field:focus-within .pj-date-hint {
-  display: none;
-}
-
-.pj-date-field:focus-within .pj-date-empty::-webkit-datetime-edit {
-  opacity: 1;
 }
 
 /* ================================

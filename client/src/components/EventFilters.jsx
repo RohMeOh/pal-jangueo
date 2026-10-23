@@ -9,6 +9,21 @@ const REGIONS = [
   'El Centro'
 ];
 
+function formatFilterDate(value) {
+  if (!value) return 'Selecciona una fecha';
+
+  const [year, month, day] = value.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+
+  if (Number.isNaN(date.getTime())) return value;
+
+  return new Intl.DateTimeFormat('es-PR', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  }).format(date);
+}
+
 export default function EventFilters({
   events,
   filters,
@@ -135,11 +150,12 @@ export default function EventFilters({
             max={filters.toDate || undefined}
             onChange={e => update('fromDate', e.target.value)}
           />
-          {!filters.fromDate && (
-            <span className="pj-date-hint" aria-hidden="true">
-              Selecciona una fecha
-            </span>
-          )}
+          <span
+            className={`pj-date-hint${filters.fromDate ? ' pj-date-selected' : ''}`}
+            aria-hidden="true"
+          >
+            {formatFilterDate(filters.fromDate)}
+          </span>
         </div>
       </div>
 
@@ -154,11 +170,12 @@ export default function EventFilters({
             min={filters.fromDate || undefined}
             onChange={e => update('toDate', e.target.value)}
           />
-          {!filters.toDate && (
-            <span className="pj-date-hint" aria-hidden="true">
-              Selecciona una fecha
-            </span>
-          )}
+          <span
+            className={`pj-date-hint${filters.toDate ? ' pj-date-selected' : ''}`}
+            aria-hidden="true"
+          >
+            {formatFilterDate(filters.toDate)}
+          </span>
         </div>
       </div>
 
