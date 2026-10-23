@@ -33,7 +33,10 @@ async function main() {
       approved_event_id,
       is_test
     FROM public.event_candidates
-    WHERE source_name = 'Boletera'
+    WHERE (
+        source_name = 'Boletera'
+        OR analysis_result->>'submission_method' = 'manual'
+      )
       AND is_test = FALSE
       AND review_status = 'pending_review'
       AND approved_event_id IS NULL

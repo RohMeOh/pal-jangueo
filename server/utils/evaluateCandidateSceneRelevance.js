@@ -22,6 +22,10 @@ const {
   assessIndependentMusicScene
 } = require('./assessIndependentMusicScene');
 
+const {
+  normalizeSceneCandidate
+} = require('./normalizeSceneCandidate');
+
 function normalize(value) {
   return String(value ?? '')
     .normalize('NFKD')
@@ -64,13 +68,18 @@ async function evaluateCandidateSceneRelevance(pool, candidate) {
     safe_to_publish: false
   };
 
-  if (
-    candidate.source_name !== 'Boletera' ||
-    candidate.is_test !== false ||
-    candidate.review_status !== 'pending_review' ||
-    !validBoleteraUrl(candidate.source_url)
-  ) {
-    result.status = 'candidate_not_eligible_for_assessment';
+  const normalizedCandidate =
+    normalizeSceneCandidate(candidate);
+
+  if (!normalizedCandidate.assessment_allowed) {
+    result.status = normalizedCandidate.status;
+    return result;
+  }
+
+  // Only independently validated source formats can
+  // proceed to the existing scene evidence checks.
+  if (normalizedCandidate.source_type !== 'boletera') {
+    result.status = 'unsupported_scene_assessment_path';
     return result;
   }
 
