@@ -148,9 +148,36 @@ function extractDetail(html) {
     /\b(?:0?[1-9]|1[0-2]):[0-5]\d\s*(?:AM|PM)\b/i
   )?.[0] || null;
 
+  const pageTitle = findMeta(html, 'og:title');
+  const separator = pageTitle?.lastIndexOf(' - ') ?? -1;
+
+  const eventTitle = separator >= 0
+    ? pageTitle.slice(0, separator).trim()
+    : null;
+
+  const beforeDate = date
+    ? text.slice(0, text.indexOf(date))
+    : '';
+
+  const titlePosition = eventTitle
+    ? beforeDate.toLocaleLowerCase('es')
+        .lastIndexOf(eventTitle.toLocaleLowerCase('es'))
+    : -1;
+
+  const bodyDescription = titlePosition >= 0
+    ? beforeDate
+        .slice(titlePosition + eventTitle.length)
+        .trim()
+        .slice(0, 1800)
+    : '';
+
   return {
-    page_title: findMeta(html, 'og:title'),
+    page_title: pageTitle,
     poster_url: safeHttps(findMeta(html, 'og:image')),
+    description_evidence:
+      findMeta(html, 'og:description') ||
+      findMeta(html, 'description') ||
+      (bodyDescription.length >= 40 ? bodyDescription : null),
     date_evidence: date,
     time_evidence: time
   };

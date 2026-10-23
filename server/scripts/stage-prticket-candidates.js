@@ -21,6 +21,10 @@ const {
   storePendingEventCandidate
 } = require('../utils/storePendingEventCandidate');
 
+const {
+  assessMusicEvidence
+} = require('../utils/assessMusicEvidence');
+
 const args = process.argv.slice(2);
 const save = args.includes('--stage');
 
@@ -73,6 +77,9 @@ function buildCandidate(card, detail, normalized) {
   const evidence = {
     title: card.title,
     page_title: detail.page_title,
+    ...(detail.description_evidence
+      ? { description_text: detail.description_evidence }
+      : {}),
     venue: normalized.venue,
     date_text: normalized.source_date_text,
     time_text: normalized.source_time_text,
@@ -82,6 +89,12 @@ function buildCandidate(card, detail, normalized) {
   };
 
   const captionText = JSON.stringify(evidence);
+
+  const music = assessMusicEvidence(
+    [card.title, detail.description_evidence]
+      .filter(Boolean)
+      .join(' ')
+  );
 
   const analysis = {
     status: 'pending_review',
@@ -110,6 +123,17 @@ function buildCandidate(card, detail, normalized) {
       }
     },
     extracted_evidence: evidence,
+    preliminary_music_assessment: {
+      classification: music.classification,
+      signals: music.signals,
+      has_musical_program_evidence:
+        music.has_musical_program_evidence,
+      non_music_event_detected:
+        music.non_music_event_detected,
+      mixed_event_detected:
+        music.mixed_event_detected,
+      safe_to_publish: false
+    },
     verification: {
       source_page_extracted: true,
       musical_program_verified: false,
