@@ -1,0 +1,53 @@
+name: Pa'l Jangueo - Scene Evaluation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pal-jangueo-discovery
+  cancel-in-progress: false
+
+jobs:
+  evaluate:
+    name: Evaluate independent music scene
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    defaults:
+      run:
+        working-directory: server
+
+    steps:
+      - name: Download repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prepare Supabase certificate
+        env:
+          SUPABASE_CA_CERT: ${{ secrets.SUPABASE_CA_CERT }}
+        run: |
+          test -n "$SUPABASE_CA_CERT"
+          umask 077
+          printf '%s\n' "$SUPABASE_CA_CERT" > "$RUNNER_TEMP/supabase-ca.crt"
+
+      - name: Evaluate independent scene relevance
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SUPABASE_CA_PATH: ${{ runner.temp }}/supabase-ca.crt
+        run: |
+          test -n "$DATABASE_URL"
+          node scripts/evaluate-pending-scene.js --save
+
+      - name: Remove temporary certificate
+        if: always()
+        run: rm -f "$RUNNER_TEMP/supabase-ca.crt"
