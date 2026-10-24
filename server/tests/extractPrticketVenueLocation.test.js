@@ -33,6 +33,26 @@ test('PRticket extracts Barranquitas', () => {
   assert.equal(result.region, 'El Centro');
 });
 
+test('Santurce with San Juan resolves municipality', () => {
+  const result = extractPrticketVenueLocation(
+    'Café Teatro El Shorty - Santurce, San Juan'
+  );
+
+  assert.equal(result.venue, 'Café Teatro El Shorty');
+  assert.equal(result.municipality, 'San Juan');
+  assert.equal(result.region, 'La Metro');
+});
+
+test('Santurce with Puerto Rico resolves municipality', () => {
+  const result = extractPrticketVenueLocation(
+    'Teatro Victoria Espinosa - Santurce, Puerto Rico'
+  );
+
+  assert.equal(result.venue, 'Teatro Victoria Espinosa');
+  assert.equal(result.municipality, 'San Juan');
+  assert.equal(result.region, 'La Metro');
+});
+
 test('Unknown locations are not invented', () => {
   const result = extractPrticketVenueLocation(
     'Local Desconocido - Ciudad Desconocida'
