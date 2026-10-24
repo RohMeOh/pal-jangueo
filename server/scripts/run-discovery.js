@@ -16,7 +16,6 @@ const execFileAsync = promisify(execFile);
 const BASE_URL = 'https://boletos.boletera.net/';
 const ORIGIN = new URL(BASE_URL).origin;
 const MAX_PREVIEW = 10;
-const MAX_BULK_STAGE = 50;
 const DELAY_MS = 1000;
 
 const sleep = ms =>
@@ -121,9 +120,7 @@ async function main() {
   const discovered = extractEvents(homepage);
 
   const selected = scanAll
-    ? (stage
-        ? discovered.slice(0, MAX_BULK_STAGE)
-        : discovered)
+    ? discovered
     : discovered.slice(0, MAX_PREVIEW);
 
   console.log('Enlaces descubiertos:', discovered.length);

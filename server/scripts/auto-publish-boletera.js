@@ -11,8 +11,8 @@ const { assessBoleteraMusicCandidate } = require('../utils/assessBoleteraMusicCa
 const { extractBoleteraFlyer } = require('../utils/extractBoleteraFlyer');
 const { buildSourceContentHash } = require('../utils/sourceContentHash');
 const {
-  assessMusicCatalogEligibility
-} = require('../utils/assessMusicCatalogEligibility');
+  assessTicketPublication
+} = require('../utils/assessTicketPublication');
 
 const args = process.argv.slice(2);
 const publish = args.includes('--publish');
@@ -88,7 +88,8 @@ async function getLiveEvent(sourceUrl) {
 async function verifyImage(url) {
   if (!url) return false;
 
-  const parsed = new URL(url);
+  let parsed;
+  try { parsed = new URL(url); } catch { return false; }
 
   if (
     parsed.protocol !== 'https:' ||
@@ -187,25 +188,16 @@ async function evaluate(candidate) {
     problems.push('Enlace oficial de boletos inconsistente');
   }
 
-  const priceType = normalized.price_type;
-  const priceMin = normalized.price_min;
-  const priceMax = normalized.price_max;
-
-  if (
-    !['free', 'paid', 'unknown'].includes(priceType) ||
-    [priceMin, priceMax].some(value =>
-      value != null &&
-      (typeof value !== 'number' ||
-       !Number.isFinite(value) ||
-       value < 0)
-    ) ||
-    (priceMin != null && priceMax != null && priceMax < priceMin)
-  ) {
-    problems.push('Precio inválido o contradictorio');
-  }
-
-  if (!flyer || !(await verifyImage(flyer))) {
-    problems.push('Flyer oficial no verificado');
+  // A missing flyer must never block a verified concert. Store only
+  // images that pass the provider-specific authenticity check; the
+  // existing frontend handles a null flyer with its fallback image.
+  let verifiedFlyer = null;
+  if (flyer) {
+    try {
+      if (await verifyImage(flyer)) verifiedFlyer = flyer;
+    } catch {
+      // The flyer is optional. Keep the fallback, never an unverified URL.
+    }
   }
 
   let venuePlan = null;
@@ -267,30 +259,21 @@ async function evaluate(candidate) {
   // Apply the same publication policy used by the catalog.
   // Verification statuses are derived from live checks,
   // not copied from candidate claims.
-  const musicConfirmed =
-    eligibleForReview === true &&
-    assessment.has_musical_program_evidence === true &&
-    ![
-      'evento_no_musical',
-      'evento_mixto_pendiente_de_verificar'
-    ].includes(assessment.classification);
-
   const sourceConfirmed =
     validSource(candidate.source_url) &&
     candidate.source_content_hash === liveHash &&
     live.ticket_url === expectedTickets &&
     liveEvent.ticket_url === expectedTickets;
 
-  const policy = assessMusicCatalogEligibility({
+  const { policy } = assessTicketPublication({
     event: {
       ...liveEvent,
       source_url: candidate.source_url
     },
+    description: raw.description_raw,
     verification: {
       source_status: sourceConfirmed
         ? 'verified' : 'needs_review',
-      music_status: musicConfirmed
-        ? 'verified_music' : 'needs_review',
       venue_status: venuePlan
         ? 'verified' : 'needs_review',
       duplicate_status:
@@ -309,7 +292,7 @@ async function evaluate(candidate) {
   }
 
   return {
-    problems, live, raw, flyer, normalized, date,
+    problems, live, raw, verifiedFlyer, normalized, date,
     venuePlan, source: sources.rows[0],
     assessment, liveHash
   };
@@ -443,7 +426,7 @@ async function writeEvent(candidate, result) {
       result.normalized.price_type,
       result.normalized.price_min ?? null,
       result.normalized.price_max ?? null,
-      result.flyer,
+      result.verifiedFlyer,
       result.live.ticket_url
     ]);
 
@@ -478,7 +461,7 @@ async function writeEvent(candidate, result) {
         venue_independently_verified: venueRecord.verified,
         music_classification: result.assessment.classification,
         musical_program_verified: true,
-        flyer_url: result.flyer
+        flyer_url: result.verifiedFlyer
       }
     };
 
@@ -497,7 +480,7 @@ async function writeEvent(candidate, result) {
     `, [
       eventId,
       candidate.id,
-      result.flyer,
+      result.verifiedFlyer,
       JSON.stringify(analysis)
     ]);
 
@@ -539,7 +522,6 @@ async function main() {
       AND review_status = 'pending_review'
       AND approved_event_id IS NULL
     ORDER BY source_url
-    LIMIT 50
   `);
 
   let ready = 0;

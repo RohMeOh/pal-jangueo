@@ -86,6 +86,25 @@ function assessMusicCatalogEligibility({
     blockers.push('invalid_source_url');
   }
 
+  // The same price rules apply to every ticketing provider. An unknown
+  // price is allowed; inconsistent or fabricated numeric prices are not.
+  const normalized = event.normalized || {};
+  const priceType = normalized.price_type ?? 'unknown';
+  const min = normalized.price_min;
+  const max = normalized.price_max;
+  if (
+    !['free', 'paid', 'unknown'].includes(priceType) ||
+    [min, max].some(value =>
+      value != null &&
+      (typeof value !== 'number' || !Number.isFinite(value) || value < 0)
+    ) ||
+    (min != null && max != null && max < min) ||
+    (priceType === 'free' &&
+      ((min != null && min !== 0) || (max != null && max !== 0)))
+  ) {
+    blockers.push('invalid_price');
+  }
+
   const eligible = blockers.length === 0;
 
   return {

@@ -15,6 +15,7 @@ function attribute(tag, name) {
 function decode(text) {
   const entities = {
     amp: '&', quot: '"', apos: "'",
+    ldquo: '“', rdquo: '”', lsquo: '‘', rsquo: '’',
     nbsp: ' ', ntilde: 'ñ', Ntilde: 'Ñ',
     aacute: 'á', eacute: 'é',
     iacute: 'í', oacute: 'ó', uacute: 'ú',
@@ -140,12 +141,25 @@ function extractDetail(html) {
       .replace(/<[^>]+>/g, ' ')
   ).replace(/\s+/g, ' ');
 
-  const date = text.match(
+  // Official listings can omit the weekday; require a labelled date
+  // before accepting an unlabelled Spanish date to avoid picking up
+  // arbitrary years mentioned in descriptions.
+  const labelledDateMatch = text.match(
+    /(?:🗓️?|📅|fecha\s*:)\s*((?:(?:lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|domingo)\s*,?\s*)?\d{1,2}\s+de\s+[a-záéíóúñ]+\s+de\s+20\d{2})/i
+  );
+  const labelled = labelledDateMatch?.[1] || null;
+
+  const weekdayDate = text.match(
     /\b(?:lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|domingo)\s*,?\s*\d{1,2}\s+de\s+[a-záéíóúñ]+\s+de\s+20\d{2}/i
   )?.[0] || null;
 
+  const date = labelled || weekdayDate;
+
+  // PRticket may write 4:30 PM, 4:30 p.m. or 4:30 p. m.
+  // This only normalizes the provider's time representation; it does
+  // not bypass event/date/venue/music verification.
   const time = text.match(
-    /\b(?:0?[1-9]|1[0-2]):[0-5]\d\s*(?:AM|PM)\b/i
+    /\b(?:0?[1-9]|1[0-2]):[0-5]\d\s*[ap]\.?\s*m\.?(?![a-z])/i
   )?.[0] || null;
 
   const pageTitle = findMeta(html, 'og:title');
@@ -155,8 +169,15 @@ function extractDetail(html) {
     ? pageTitle.slice(0, separator).trim()
     : null;
 
-  const beforeDate = date
-    ? text.slice(0, text.indexOf(date))
+  // A date mentioned inside the event prose is not the end of its
+  // description. Prefer the explicit date label as the boundary; this
+  // also keeps pricing and site-wide legal text out of the evidence.
+  const descriptionEnd = labelledDateMatch
+    ? labelledDateMatch.index
+    : date ? text.indexOf(date) : -1;
+
+  const beforeDate = descriptionEnd >= 0
+    ? text.slice(0, descriptionEnd)
     : '';
 
   const titlePosition = eventTitle

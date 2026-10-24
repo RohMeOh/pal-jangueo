@@ -19,8 +19,8 @@ const {
 } = require('../utils/normalizePrticketEvent');
 
 const {
-  assessMusicEvidence
-} = require('../utils/assessMusicEvidence');
+  assessTicketPublication
+} = require('../utils/assessTicketPublication');
 
 const {
   buildSourceContentHash
@@ -80,20 +80,38 @@ async function publishCandidate(candidate, live, venuePlan, flyer, description, 
     await db.query('BEGIN');
 
     const sourceAddress = new URL(candidate.source_url);
-    const music = assessMusicEvidence(description);
-
     if (
       sourceAddress.protocol !== 'https:' ||
       sourceAddress.hostname !== 'boletos.prticket.com' ||
       !/^\/events\/es\/[a-z0-9_-]+\/?$/i.test(sourceAddress.pathname) ||
-      live.status !== 'structured_data_ready' ||
-      description.trim().length < 40 ||
-      !music.has_musical_program_evidence ||
-      music.non_music_event_detected ||
-      music.mixed_event_detected
+      live.status !== 'structured_data_ready'
     ) {
-      throw new Error('Verificación musical o de fuente fallida.');
+      throw new Error('Verificación de fuente fallida.');
     }
+
+    const musicCheck = assessTicketPublication({
+      event: {
+        title: live.title,
+        venue: live.venue,
+        normalized: { start_at: live.start_at, price_type: 'unknown',
+          price_min: null, price_max: null },
+        event_status: 'EventScheduled',
+        source_url: candidate.source_url
+      },
+      description,
+      verification: {
+        source_status: 'verified',
+        venue_status: venuePlan ? 'verified' : 'needs_review',
+        duplicate_status: 'clear',
+        conflict_status: 'clear'
+      }
+    });
+
+    if (!musicCheck.policy.eligible_for_auto_publication) {
+      throw new Error('Política compartida: ' +
+        musicCheck.policy.blockers.join(', '));
+    }
+    const music = musicCheck.music;
 
     const locked = await db.query(`
       SELECT *
@@ -289,7 +307,6 @@ async function main() {
       AND review_status = 'pending_review'
       AND approved_event_id IS NULL
     ORDER BY source_url
-    LIMIT 40
   `);
 
   const cards = extractCards(await fetchHtml(LIST_URL));
@@ -392,16 +409,9 @@ async function main() {
       }
 
       const description = detail.description_evidence || '';
-      const music = assessMusicEvidence(description);
 
-      if (
-        description.length < 40 ||
-        !music.has_musical_program_evidence ||
-        music.non_music_event_detected ||
-        music.mixed_event_detected
-      ) {
-        problems.push('Actuación musical no verificada');
-      }
+      // The common music evidence threshold is applied below, together
+      // with all other source-independent publication requirements.
 
       let venuePlan = null;
 
@@ -435,13 +445,15 @@ async function main() {
               SELECT v.id
               FROM public.venues v
               WHERE LOWER(TRIM(v.name)) = LOWER(TRIM($3))
+                AND LOWER(TRIM(v.municipality)) = LOWER(TRIM($4))
             )
           )
         LIMIT 1
       `, [
         live.start_at,
         live.title,
-        live.venue
+        live.venue,
+        venuePlan?.municipality || ''
       ]);
 
       const linked = await pool.query(`
@@ -452,6 +464,38 @@ async function main() {
 
       if (linked.rowCount) {
         problems.push('Fuente ya vinculada');
+      }
+
+      const sourceConfirmed =
+        url.protocol === 'https:' &&
+        url.hostname === 'boletos.prticket.com' &&
+        !url.username && !url.password &&
+        /^\/events\/es\/[a-z0-9_-]+\/?$/i.test(url.pathname) &&
+        live.status === 'structured_data_ready';
+
+      // Source verification comes from the official live URL, the listing,
+      // and the guarded candidate hash checked inside the transaction.
+      const { policy } = assessTicketPublication({
+        event: {
+          title: live.title,
+          venue: live.venue,
+          source_url: candidate.source_url,
+          event_status: 'EventScheduled',
+          normalized: { start_at: live.start_at, price_type: 'unknown',
+            price_min: null, price_max: null }
+        },
+        description,
+        verification: {
+          source_status: sourceConfirmed ? 'verified' : 'needs_review',
+          venue_status: venuePlan ? 'verified' : 'needs_review',
+          duplicate_status: !duplicates.rowCount && !linked.rowCount
+            ? 'clear' : 'needs_review',
+          conflict_status: problems.length === 0
+            ? 'clear' : 'needs_review'
+        }
+      });
+      if (!policy.eligible_for_auto_publication) {
+        problems.push('Política compartida: ' + policy.blockers.join(', '));
       }
 
       console.log('\nEvento:', live.title);

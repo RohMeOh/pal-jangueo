@@ -27,6 +27,7 @@ const {
 
 const args = process.argv.slice(2);
 const save = args.includes('--stage');
+const scanAll = args.includes('--all');
 
 const slugsArgument = args.find(arg =>
   arg.startsWith('--slugs=')
@@ -38,10 +39,15 @@ const limitArgument = args.find(arg =>
 
 if (args.some(arg =>
   arg !== '--stage' &&
+  arg !== '--all' &&
   !/^--slugs=[a-z0-9,_-]+$/i.test(arg) &&
   !/^--limit=\d+$/.test(arg)
 )) {
   throw new Error('Argumentos no reconocidos.');
+}
+
+if (scanAll && (slugsArgument || limitArgument)) {
+  throw new Error('--all no se combina con --limit ni --slugs.');
 }
 
 const limit = limitArgument
@@ -184,13 +190,19 @@ async function main() {
     const listing = await fetchHtml(LIST_URL);
     const cards = extractCards(listing);
 
-    const selected = requestedSlugs
-      ? cards.filter(card => {
-          const slug = new URL(card.source_url)
-            .pathname.split('/').pop();
-          return requestedSlugs.has(slug);
-        })
-      : cards.slice(0, limit);
+    if (cards.length === 0) {
+      throw new Error('Catálogo PRticket vacío: revisar extractor.');
+    }
+
+    const selected = scanAll
+      ? cards
+      : requestedSlugs
+        ? cards.filter(card => {
+            const slug = new URL(card.source_url)
+              .pathname.split('/').pop();
+            return requestedSlugs.has(slug);
+          })
+        : cards.slice(0, limit);
 
     if (save) {
       pool = require('../db');

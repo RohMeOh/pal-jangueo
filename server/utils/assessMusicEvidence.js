@@ -98,6 +98,44 @@ function assessMusicEvidence(rawDescription) {
     }
   }
 
+  // Explicit live acts can be described without the words "concierto"
+  // or "musica en vivo". Require corroborating context, not a bare genre.
+  const liveBandAnnounced =
+    /\b(?:banda|orquesta|grupo musical)\s+en\s+vivo\b/.test(text);
+
+  const namedMusicalPerformance =
+    /\b(?:se presentara|se presentaran|presentacion estelar|interpretando)\b/.test(text) &&
+    /\b(?:banda|orquesta|canciones?|sencillo|album|temas?|reggae|dub|rock|musica)\b/.test(text);
+
+  const announcedBandLineup =
+    /\b(?:bandas?|grupos musicales?)\b/.test(text) &&
+    /\b(?:musica|rock|reggae|metal|punk|salsa|hardcore)\b/.test(text) &&
+    /\b(?:presentan|presenta|con el regreso|escenario|en vivo)\b/.test(text);
+
+// A source may announce a musical performance through its stage,
+// the songs or genre being performed, and an explicit interpretation,
+// without using the words "concierto" or "en vivo".
+// All three independent clues are required; film screenings are excluded.
+const stagePerformanceAnnounced =
+  /\b(?:escenario|tarima)\b/.test(text) &&
+  /\b(?:interpretacion(?:es)?|interpretara(?:n)?|cantara(?:n)?|cantando)\b/.test(text) &&
+  /\b(?:musica|boleros?|canciones?|salsa|rock|plena|bachata|reggae)\b/.test(text) &&
+  !/\b(?:cine|pelicula|documental|proyeccion|musica de fondo|karaoke)\b/.test(text);
+
+if (stagePerformanceAnnounced) {
+  signals.push('Interpretación musical anunciada en escenario');
+}
+
+  if (liveBandAnnounced) {
+    signals.push('Banda u orquesta en vivo');
+  }
+  if (namedMusicalPerformance) {
+    signals.push('Presentación musical explícita');
+  }
+  if (announcedBandLineup) {
+    signals.push('Cartel de bandas con anuncio de actuación');
+  }
+
   // Detect performances with musicians and instruments.
   if (
     /\b(acompanado por|acompanada por|junto a)\b/.test(text) &&
@@ -112,7 +150,11 @@ function assessMusicEvidence(rawDescription) {
   const musicalPerformanceSignalDetected = signals.some(signal =>
     signal === 'Concierto o presentación en vivo' ||
     signal === 'DJs o música electrónica' ||
-    signal === 'Músicos e instrumentos en presentación'
+    signal === 'Músicos e instrumentos en presentación' ||
+    signal === 'Banda u orquesta en vivo' ||
+    signal === 'Presentación musical explícita' ||
+    signal === 'Cartel de bandas con anuncio de actuación' ||
+    signal === 'Interpretación musical anunciada en escenario'
   );
 
   const mixedEventDetected =

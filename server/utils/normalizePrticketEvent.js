@@ -23,11 +23,11 @@ function plain(value) {
 
 function parsePuertoRicoDate(dateText, timeText) {
   const date = plain(dateText).match(
-    /^(lunes|martes|miercoles|jueves|viernes|sabado|domingo),?\s*(\d{1,2})\s+de\s+([a-z]+)\s+de\s+(20\d{2})$/
+    /^(?:(lunes|martes|miercoles|jueves|viernes|sabado|domingo),?\s*)?(\d{1,2})\s+de\s+([a-z]+)\s+de\s+(20\d{2})$/
   );
 
-  const time = String(timeText || '').match(
-    /^(\d{1,2}):([0-5]\d)\s*(AM|PM)$/i
+  const time = String(timeText || '').trim().match(
+    /^(\d{1,2}):([0-5]\d)\s*([ap])\.?\s*m\.?$/i
   );
 
   if (!date || !time) return null;
@@ -47,7 +47,7 @@ function parsePuertoRicoDate(dateText, timeText) {
     calendar.getUTCFullYear() !== year ||
     calendar.getUTCMonth() !== month - 1 ||
     calendar.getUTCDate() !== day ||
-    WEEKDAYS[calendar.getUTCDay()] !== weekday
+    (weekday && WEEKDAYS[calendar.getUTCDay()] !== weekday)
   ) {
     return null;
   }
@@ -57,7 +57,7 @@ function parsePuertoRicoDate(dateText, timeText) {
   if (hour12 < 1 || hour12 > 12) return null;
 
   const hour24 =
-    (hour12 % 12) + (time[3].toUpperCase() === 'PM' ? 12 : 0);
+    (hour12 % 12) + (time[3].toUpperCase() === 'P' ? 12 : 0);
 
   // Puerto Rico remains UTC-4 throughout the year.
   const utcHour = Date.UTC(
