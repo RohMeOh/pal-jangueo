@@ -486,11 +486,19 @@ export default function EventFeed() {
           >
             ×
           </button>
-          <span className="pj-about-label">PA'L JANGUEO <span>BETA</span></span>
+          <span className="pj-about-label">PA'L JANGUEO™ <span>BETA</span></span>
           <h2 id="pj-about-title">Sobre Pa'l Jangueo</h2>
           <p id="pj-about-description">
-            Una idea en desarrollo para descubrir la música en vivo de Puerto Rico.
-            Esta versión beta sigue evolucionando y su registro formal está previsto próximamente.
+            Pa'l Jangueo es una aplicación en desarrollo dedicada a descubrir
+            la música en vivo de Puerto Rico.
+          </p>
+          <p className="pj-about-registration">
+            Esta versión beta continúa evolucionando. El registro de la marca
+            está previsto para una próxima etapa.
+          </p>
+          <p className="pj-about-copyright">
+            © 2026 Pa'l Jangueo. Derechos reservados sobre el contenido
+            original de la aplicación.
           </p>
         </div>
       </dialog>

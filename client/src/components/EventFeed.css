@@ -284,3 +284,14 @@
   .pj-navigation { gap: 6px; }
   .pj-about-dialog-content { padding: 25px 22px 26px; }
 }
+
+/* Clear distinction between beta notice and original-content copyright. */
+.pj-about-dialog .pj-about-registration { margin-top: 12px; }
+.pj-about-dialog .pj-about-copyright {
+  margin-top: 19px;
+  padding-top: 15px;
+  border-top: 1px solid #34465b;
+  color: #95a4b6;
+  font-size: 11px;
+  line-height: 1.55;
+}
