@@ -1,4 +1,8 @@
 const pool = require('../db');
+const {
+  planTicketVenue,
+  ensureTicketVenue
+} = require('../utils/ticketVenueRegistry');
 
 const { extractEventJsonLd } = require('../utils/extractEventJsonLd');
 const { normalizeBoleteraCandidate } = require('../utils/normalizeBoleteraCandidate');
@@ -204,16 +208,17 @@ async function evaluate(candidate) {
     problems.push('Flyer oficial no verificado');
   }
 
-  const venues = await pool.query(`
-    SELECT id, name, municipality
-    FROM public.venues
-    WHERE LOWER(TRIM(name)) = LOWER(TRIM($1))
-      AND LOWER(TRIM(municipality)) = LOWER(TRIM($2))
-      AND location_verification_status = 'verified'
-  `, [live.venue || '', live.municipality || '']);
+  let venuePlan = null;
 
-  if (venues.rows.length !== 1) {
-    problems.push('Local no registrado o no verificado');
+  try {
+    venuePlan = planTicketVenue({
+      sourceName: 'Boletera',
+      sourceUrl: candidate.source_url,
+      venueName: live.venue,
+      municipality: live.municipality
+    });
+  } catch (error) {
+    problems.push('Ubicación del venue: ' + error.message);
   }
 
   const sources = await pool.query(`
@@ -225,17 +230,25 @@ async function evaluate(candidate) {
   }
 
   const duplicates = await pool.query(`
-    SELECT id FROM public.events
-    WHERE start_at = $1
+    SELECT e.id
+    FROM public.events e
+    WHERE e.start_at = $1
       AND (
-        venue_id = $2
-        OR LOWER(TRIM(title)) = LOWER(TRIM($3))
+        LOWER(TRIM(e.title)) = LOWER(TRIM($2))
+        OR e.venue_id IN (
+          SELECT v.id
+          FROM public.venues v
+          WHERE LOWER(TRIM(v.name)) = LOWER(TRIM($3))
+            AND LOWER(TRIM(v.municipality)) =
+                LOWER(TRIM($4))
+        )
       )
     LIMIT 1
   `, [
     Number.isNaN(date.getTime()) ? null : date.toISOString(),
-    venues.rows[0]?.id || null,
-    live.title || ''
+    live.title || '',
+    live.venue || '',
+    venuePlan?.municipality || ''
   ]);
 
   if (duplicates.rows.length) {
@@ -278,7 +291,7 @@ async function evaluate(candidate) {
         ? 'verified' : 'needs_review',
       music_status: musicConfirmed
         ? 'verified_music' : 'needs_review',
-      venue_status: venues.rows.length === 1
+      venue_status: venuePlan
         ? 'verified' : 'needs_review',
       duplicate_status:
         duplicates.rows.length === 0 &&
@@ -297,7 +310,7 @@ async function evaluate(candidate) {
 
   return {
     problems, live, raw, flyer, normalized, date,
-    venue: venues.rows[0], source: sources.rows[0],
+    venuePlan, source: sources.rows[0],
     assessment, liveHash
   };
 }
@@ -334,9 +347,13 @@ async function writeEvent(candidate, result) {
       throw new Error('El candidato cambió durante la verificación.');
     }
 
+    const venueRecord = await ensureTicketVenue(
+      db, result.venuePlan
+    );
+
     await db.query(
       'SELECT pg_advisory_xact_lock(hashtext($1))',
-      [result.venue.id + '|' + result.date.toISOString()]
+      [venueRecord.id + '|' + result.date.toISOString()]
     );
 
     await db.query(
@@ -348,16 +365,18 @@ async function writeEvent(candidate, result) {
     );
 
     const venue = await db.query(`
-      SELECT id FROM public.venues
+      SELECT id
+      FROM public.venues
       WHERE id = $1
         AND LOWER(TRIM(name)) = LOWER(TRIM($2))
-        AND LOWER(TRIM(municipality)) = LOWER(TRIM($3))
-        AND location_verification_status = 'verified'
+        AND LOWER(TRIM(municipality)) =
+            LOWER(TRIM($3))
+        AND location_verification_status <> 'conflict'
       FOR SHARE
     `, [
-      result.venue.id,
+      venueRecord.id,
       result.live.venue,
-      result.live.municipality
+      result.venuePlan.municipality
     ]);
 
     const source = await db.query(`
@@ -384,7 +403,7 @@ async function writeEvent(candidate, result) {
       LIMIT 1
     `, [
       result.date.toISOString(),
-      result.venue.id,
+      venueRecord.id,
       result.live.title
     ]);
 
@@ -419,7 +438,7 @@ async function writeEvent(candidate, result) {
     `, [
       result.live.title,
       description,
-      result.venue.id,
+      venueRecord.id,
       result.date.toISOString(),
       result.normalized.price_type,
       result.normalized.price_min ?? null,
@@ -454,7 +473,9 @@ async function writeEvent(candidate, result) {
         checked_at: new Date().toISOString(),
         source_url: candidate.source_url,
         source_content_hash: result.liveHash,
-        venue_id: result.venue.id,
+        venue_id: venueRecord.id,
+        venue_source_confirmed: true,
+        venue_independently_verified: venueRecord.verified,
         music_classification: result.assessment.classification,
         musical_program_verified: true,
         flyer_url: result.flyer

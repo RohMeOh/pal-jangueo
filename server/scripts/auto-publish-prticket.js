@@ -1,4 +1,8 @@
 const pool = require('../db');
+const {
+  planTicketVenue,
+  ensureTicketVenue
+} = require('../utils/ticketVenueRegistry');
 
 const {
   LIST_URL, fetchHtml, extractCards, extractDetail
@@ -63,7 +67,7 @@ function trustedFlyer(value) {
   }
 }
 
-async function publishCandidate(candidate, live, venue, flyer, description, simulate) {
+async function publishCandidate(candidate, live, venuePlan, flyer, description, simulate) {
   const db = await pool.connect();
 
   try {
@@ -113,10 +117,14 @@ async function publishCandidate(candidate, live, venue, flyer, description, simu
       throw new Error('El candidato cambió o su evidencia no coincide.');
     }
 
+    const venueRecord = await ensureTicketVenue(
+      db, venuePlan
+    );
+
     await db.query(`
       SELECT pg_advisory_xact_lock(hashtext($1))
     `, [
-      venue.id + '|' + new Date(live.start_at).toISOString()
+      venueRecord.id + '|' + new Date(live.start_at).toISOString()
     ]);
 
     await db.query(
@@ -124,19 +132,8 @@ async function publishCandidate(candidate, live, venue, flyer, description, simu
       ['event-title:' + normalize(live.title) + '|' + live.start_at]
     );
 
-    const verified = await db.query(`
-      SELECT id FROM public.venues
-      WHERE id = $1
-        AND location_verification_status = 'verified'
-        AND LOWER(TRIM(name)) = LOWER(TRIM($2))
-      FOR SHARE
-    `, [venue.id, live.venue]);
-
-    if (
-      verified.rowCount !== 1 ||
-      new Date(live.start_at) <= new Date()
-    ) {
-      throw new Error('Local o fecha ya no son válidos.');
+    if (new Date(live.start_at) <= new Date()) {
+      throw new Error('Fecha vencida.');
     }
 
     const source = await db.query(`
@@ -156,7 +153,7 @@ async function publishCandidate(candidate, live, venue, flyer, description, simu
           OR LOWER(TRIM(title)) = LOWER(TRIM($3))
         )
       LIMIT 1
-    `, [live.start_at, venue.id, live.title]);
+    `, [live.start_at, venueRecord.id, live.title]);
 
     const linked = await db.query(`
       SELECT event_id FROM public.event_sources
@@ -181,7 +178,7 @@ async function publishCandidate(candidate, live, venue, flyer, description, simu
       )
       RETURNING id
     `, [
-      live.title, description, venue.id, live.start_at,
+      live.title, description, venueRecord.id, live.start_at,
       flyer, candidate.source_url
     ]);
 
@@ -203,7 +200,7 @@ async function publishCandidate(candidate, live, venue, flyer, description, simu
       source_content_hash: current.source_content_hash,
       music_classification: music.classification,
       musical_performance_detected: true,
-      venue_id: venue.id,
+      venue_id: venueRecord.id,
       start_at: live.start_at,
       music_evidence: description.slice(0, 800),
       safe_to_publish: true
@@ -224,7 +221,8 @@ async function publishCandidate(candidate, live, venue, flyer, description, simu
         ...originalAnalysis.verification,
         source_page_extracted: true,
         musical_program_verified: true,
-        venue_verified: true
+        venue_verified: venueRecord.verified,
+        venue_source_confirmed: true
       },
       validation: {
         ...originalAnalysis.validation,
@@ -360,35 +358,36 @@ async function main() {
         problems.push('Actuación musical no verificada');
       }
 
-      const venues = await pool.query(`
-        SELECT id FROM public.venues
-        WHERE LOWER(TRIM(name)) = LOWER(TRIM($1))
-          AND location_verification_status = 'verified'
-      `, [live.venue || '']);
+      let venuePlan = null;
 
-      if (venues.rowCount !== 1) {
-        problems.push('Local no verificado');
+      try {
+        venuePlan = planTicketVenue({
+          sourceName: 'PRticket',
+          sourceUrl: candidate.source_url,
+          venueName: live.venue
+        });
+      } catch (error) {
+        problems.push('Venue inválido: ' + error.message);
       }
 
-      const venue = venues.rows[0];
-
       const duplicates = await pool.query(`
-        SELECT id FROM public.events
-        WHERE start_at = $1
+        SELECT e.id
+        FROM public.events e
+        WHERE e.start_at = $1
           AND (
-            venue_id = $2
-            OR LOWER(TRIM(title)) = LOWER(TRIM($3))
+            LOWER(TRIM(e.title)) = LOWER(TRIM($2))
+            OR e.venue_id IN (
+              SELECT v.id
+              FROM public.venues v
+              WHERE LOWER(TRIM(v.name)) = LOWER(TRIM($3))
+            )
           )
         LIMIT 1
       `, [
         live.start_at,
-        venue?.id || null,
-        live.title
+        live.title,
+        live.venue
       ]);
-
-      if (duplicates.rowCount) {
-        problems.push('Posible evento duplicado');
-      }
 
       const linked = await pool.query(`
         SELECT event_id FROM public.event_sources
@@ -417,7 +416,7 @@ async function main() {
         );
 
         const id = await publishCandidate(
-          candidate, live, venue, flyer, description, simulate
+          candidate, live, venuePlan, flyer, description, simulate
         );
 
         if (simulate) {
