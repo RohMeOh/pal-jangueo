@@ -368,7 +368,14 @@ export default function EventFeed() {
             </div>
             <div className="pj-feature-copy">
               <h2>Todos los ritmos.<span>Un solo archipiélago.</span></h2>
-              <p>Salsa · Rock · Indie · Urbana · Jazz · Y más</p>
+              <div className="pj-feature-genres">
+                <ul className="pj-genre-list" aria-label="Géneros musicales">
+                  {['Salsa', 'Rock', 'Indie', 'Urbana', 'Jazz'].map((genre) => (
+                    <li key={genre}>{genre}</li>
+                  ))}
+                </ul>
+                <p className="pj-feature-more">Y mucho más.</p>
+              </div>
             </div>
           </div>
         </section>
@@ -381,7 +388,10 @@ export default function EventFeed() {
               <circle cx="16" cy="12" r="2" fill="#0e141c" />
               <circle cx="11" cy="17" r="2" fill="#0e141c" />
             </svg>
-            <h2 id="pj-filters-heading">Encuentra tu próximo jangueo</h2>
+            <div className="pj-filter-heading-copy">
+              <h2 id="pj-filters-heading">Busca tu próximo jangueo</h2>
+              <p>Explora eventos a tu manera.</p>
+            </div>
           </div>
           <EventFilters events={events} filters={filters} setFilters={setFilters} />
           <div className="pj-region-chips" aria-label="Filtrar por región">
