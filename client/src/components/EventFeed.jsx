@@ -354,7 +354,7 @@ export default function EventFeed() {
               </button>
             </div>
           </div>
-          <div className="pj-hero-feature" aria-label="Todos los ritmos. Una sola isla.">
+          <div className="pj-hero-feature" aria-label="Todos los ritmos. Un solo archipiélago.">
             <div className="pj-feature-top">
               <span>EN VIVO · PR</span>
               <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
@@ -367,7 +367,7 @@ export default function EventFeed() {
               ))}
             </div>
             <div className="pj-feature-copy">
-              <h2>Todos los ritmos.<span>Una sola isla.</span></h2>
+              <h2>Todos los ritmos.<span>Un solo archipiélago.</span></h2>
               <p>Salsa · Rock · Indie · Urbana · Jazz · Y más</p>
             </div>
           </div>
