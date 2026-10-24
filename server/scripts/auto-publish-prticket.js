@@ -1,5 +1,11 @@
 const pool = require('../db');
 const {
+  extractPrticketFrontpageVenues
+} = require('../utils/extractPrticketFrontpageVenues');
+
+const PRTICKET_FRONT_URL =
+  'https://boletos.prticket.com/events/es/frontpage';
+const {
   planTicketVenue,
   ensureTicketVenue
 } = require('../utils/ticketVenueRegistry');
@@ -288,6 +294,45 @@ async function main() {
 
   const cards = extractCards(await fetchHtml(LIST_URL));
 
+  let locationMap = new Map();
+
+  try {
+    locationMap = extractPrticketFrontpageVenues(
+      await fetchHtml(PRTICKET_FRONT_URL)
+    );
+
+    console.log(
+      'Ubicaciones oficiales detectadas:',
+      locationMap.size
+    );
+  } catch (error) {
+    console.error(
+      'No se pudieron extraer municipios de frontpage:',
+      error.message
+    );
+  }
+
+  let matchedLocations = 0;
+
+  for (const card of cards) {
+    const location = locationMap.get(
+      card.source_url.replace(/\/$/, '')
+    );
+
+    if (!location) continue;
+
+    card.listing_venue = location.venue;
+    card.municipality = location.municipality;
+    card.region = location.region;
+
+    matchedLocations++;
+  }
+
+  console.log(
+    'Eventos con municipio asociado:',
+    matchedLocations
+  );
+
   let ready = 0;
   let blocked = 0;
   let published = 0;
@@ -360,11 +405,21 @@ async function main() {
 
       let venuePlan = null;
 
+      if (
+        card.listing_venue &&
+        normalize(card.listing_venue) !== normalize(live.venue)
+      ) {
+        problems.push(
+          'El venue del listado no coincide con la ficha.'
+        );
+      }
+
       try {
         venuePlan = planTicketVenue({
           sourceName: 'PRticket',
           sourceUrl: candidate.source_url,
-          venueName: live.venue
+          venueName: live.venue,
+          municipality: card.municipality
         });
       } catch (error) {
         problems.push('Venue inválido: ' + error.message);

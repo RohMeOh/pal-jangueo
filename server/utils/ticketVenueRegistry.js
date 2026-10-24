@@ -130,7 +130,7 @@ async function ensureTicketVenue(db, plan) {
   );
 
   const existing = await db.query(`
-    SELECT id, name, municipality,
+    SELECT id, name, municipality, region,
            location_verification_status
     FROM public.venues
     WHERE LOWER(TRIM(name)) = LOWER(TRIM($1))
@@ -155,6 +155,30 @@ async function ensureTicketVenue(db, plan) {
 
     if (venue.location_verification_status === 'conflict') {
       throw new Error('Venue con ubicación contradictoria.');
+    }
+
+    if (plan.municipality) {
+      const region = getMunicipalityRegion(plan.municipality);
+
+      if (venue.region && region && venue.region !== region) {
+        throw new Error(
+          'La región existente contradice la ubicación oficial.'
+        );
+      }
+
+      await db.query(`
+        UPDATE public.venues
+        SET municipality = COALESCE(municipality, $2),
+            region = COALESCE(region, $3),
+            location_source_url =
+              COALESCE(location_source_url, $4)
+        WHERE id = $1
+      `, [
+        venue.id,
+        plan.municipality,
+        region,
+        plan.sourceUrl
+      ]);
     }
 
     return {
