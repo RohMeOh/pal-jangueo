@@ -1,0 +1,68 @@
+/* Pa'l Jangueo — shared visual language for small icon actions.
+   Used by the About dialog close button and the floating back-to-top button. */
+.pj-icon-action {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border: 1px solid #2fb6ff;
+  border-radius: 50%;
+  background: rgba(17, 23, 32, .96);
+  color: #2fb6ff;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .5);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  appearance: none;
+  transition:
+    background-color 200ms ease,
+    color 200ms ease,
+    border-color 200ms ease,
+    box-shadow 200ms ease,
+    transform 200ms cubic-bezier(.2, .7, .2, 1);
+}
+
+.pj-icon-action svg {
+  display: block;
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pj-icon-action:focus-visible {
+  outline: 3px solid #f8fafc;
+  outline-offset: 3px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pj-icon-action:hover {
+    background: #2fb6ff;
+    color: #05070a;
+    box-shadow: 0 7px 25px rgba(47, 182, 255, .25);
+  }
+}
+
+.pj-icon-action:active {
+  background: #2fb6ff;
+  color: #05070a;
+  transform: scale(.92);
+}
+
+/* Same entrance animation for both controls. */
+.pj-about-dialog[open] .pj-about-close,
+.pj-back-to-top {
+  animation: pj-icon-action-enter 220ms cubic-bezier(.2, .7, .2, 1) backwards;
+}
+
+@keyframes pj-icon-action-enter {
+  from { opacity: 0; transform: translateY(8px) scale(.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pj-icon-action { animation: none !important; transition: none !important; }
+}

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import './EventFeed.css';
+import './IconAction.css';
 import EventFilters, { REGIONS } from './EventFilters';
 import BrandLogo from './BrandLogo';
 
@@ -490,11 +491,13 @@ export default function EventFeed() {
         <div className="pj-about-dialog-content">
           <button
             type="button"
-            className="pj-about-close"
+            className="pj-about-close pj-icon-action"
             aria-label="Cerrar"
             onClick={() => aboutDialogRef.current?.close()}
           >
-            ×
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
           </button>
           <span className="pj-about-label">PA'L JANGUEO™ <span>BETA</span></span>
           <h2 id="pj-about-title">Sobre Pa'l Jangueo</h2>

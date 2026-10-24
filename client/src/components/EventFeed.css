@@ -262,24 +262,13 @@
 }
 .pj-about-dialog h2 { margin: 16px 0 12px; color: #f8fafc; font-size: 23px; font-weight: 900; line-height: 1.25; }
 .pj-about-dialog p { margin: 0; color: #c1ccda; font-size: 15px; line-height: 1.7; }
+/* Position only: appearance and animation come from IconAction.css. */
 .pj-about-close {
   position: absolute;
-  right: 17px;
+  right: 15px;
   top: 15px;
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  border: 1px solid #35465b;
-  border-radius: 50%;
-  background: #192330;
-  color: #f8fafc;
-  font-size: 25px;
-  line-height: 1;
-  cursor: pointer;
+  z-index: 1;
 }
-.pj-about-close:hover { border-color: #2fb6ff; color: #2fb6ff; }
-.pj-about-close:focus-visible { outline: 2px solid #2fb6ff; outline-offset: 2px; }
 @media (max-width: 620px) {
   .pj-navigation { gap: 6px; }
   .pj-about-dialog-content { padding: 25px 22px 26px; }
