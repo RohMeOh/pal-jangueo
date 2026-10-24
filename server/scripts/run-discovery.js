@@ -16,6 +16,7 @@ const execFileAsync = promisify(execFile);
 const BASE_URL = 'https://boletos.boletera.net/';
 const ORIGIN = new URL(BASE_URL).origin;
 const MAX_PREVIEW = 10;
+const MAX_BULK_STAGE = 50;
 const DELAY_MS = 1000;
 
 const sleep = ms =>
@@ -90,7 +91,7 @@ async function alreadyPublished(pool, url) {
 async function main() {
   const args = process.argv.slice(2);
 
-  if (args.some(arg => !['--all', '--stage'].includes(arg))) {
+  if (args.some(arg => !['--all', '--stage', '--bulk-stage'].includes(arg))) {
     throw new Error(
       'Uso: node scripts/run-discovery.js [--all] [--stage]'
     );
@@ -98,11 +99,18 @@ async function main() {
 
   const stage = args.includes('--stage');
   const scanAll = args.includes('--all');
+  const bulkStage = args.includes('--bulk-stage');
 
-  // Do not enable bulk database writes during initial testing.
-  if (stage && scanAll) {
+  // Bulk staging requires an explicit flag.
+  if (stage && scanAll && !bulkStage) {
     throw new Error(
-      'Guardado masivo deshabilitado por seguridad.'
+      'El guardado completo requiere --bulk-stage.'
+    );
+  }
+
+  if (bulkStage && !(stage && scanAll)) {
+    throw new Error(
+      '--bulk-stage requiere --all y --stage.'
     );
   }
 
@@ -113,7 +121,9 @@ async function main() {
   const discovered = extractEvents(homepage);
 
   const selected = scanAll
-    ? discovered
+    ? (stage
+        ? discovered.slice(0, MAX_BULK_STAGE)
+        : discovered)
     : discovered.slice(0, MAX_PREVIEW);
 
   console.log('Enlaces descubiertos:', discovered.length);

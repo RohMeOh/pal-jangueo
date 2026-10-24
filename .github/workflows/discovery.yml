@@ -42,6 +42,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Validate discovery and publication code
+        run: |
+          npm test
+          node --check scripts/run-discovery.js
+          node --check scripts/stage-boletera-event.js
+          node --check scripts/auto-publish-boletera.js
+          node --check utils/extractBoleteraFlyer.js
+
       - name: Prepare Supabase certificate
         if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true) }}
         env:
@@ -119,7 +127,7 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SUPABASE_CA_PATH: ${{ runner.temp }}/supabase-ca.crt
-        run: node scripts/run-discovery.js --stage
+        run: node scripts/run-discovery.js --all --stage --bulk-stage
 
       - name: Enrich pending artists with Gemini
         id: artist_enrichment
@@ -142,6 +150,15 @@ jobs:
           SUPABASE_CA_PATH: ${{ runner.temp }}/supabase-ca.crt
         run: node scripts/evaluate-pending-scene.js --save
 
+      - name: Publish verified Boletera events
+        id: boletera_publication
+        continue-on-error: true
+        if: ${{ vars.BOLETERA_AUTO_PUBLISH == 'true' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true)) }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SUPABASE_CA_PATH: ${{ runner.temp }}/supabase-ca.crt
+        run: node scripts/auto-publish-boletera.js --all --publish
+
       - name: Remove temporary certificate
         if: ${{ always() && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true)) }}
         run: rm -f "$RUNNER_TEMP/supabase-ca.crt"
@@ -154,6 +171,7 @@ jobs:
           PRTICKET_PUBLISH: ${{ steps.prticket_publication.outcome }}
           DISCOVERY: ${{ steps.multisource_discovery.outcome }}
           BOLETERA: ${{ steps.boletera_stage.outcome }}
+          BOLETERA_PUBLISH: ${{ steps.boletera_publication.outcome }}
           ARTISTS: ${{ steps.artist_enrichment.outcome }}
           SCENE: ${{ steps.scene_evaluation.outcome }}
         run: |
@@ -162,10 +180,11 @@ jobs:
           echo "PRticket publication: $PRTICKET_PUBLISH"
           echo "Multi-source discovery: $DISCOVERY"
           echo "Boletera staging: $BOLETERA"
+          echo "Boletera publication: $BOLETERA_PUBLISH"
           echo "Artist enrichment: $ARTISTS"
           echo "Scene evaluation: $SCENE"
 
-          for result in "$PRTICKET" "$PRTICKET_VENUES" "$PRTICKET_PUBLISH" "$DISCOVERY" "$BOLETERA" "$ARTISTS" "$SCENE"; do
+          for result in "$PRTICKET" "$PRTICKET_VENUES" "$PRTICKET_PUBLISH" "$DISCOVERY" "$BOLETERA" "$BOLETERA_PUBLISH" "$ARTISTS" "$SCENE"; do
             if [ "$result" = "failure" ]; then
               echo "::error::One or more discovery stages failed."
               exit 1

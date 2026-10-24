@@ -6,6 +6,10 @@ const {
 } = require('../utils/extractEventJsonLd');
 
 const {
+  extractBoleteraFlyer
+} = require('../utils/extractBoleteraFlyer');
+
+const {
   normalizeBoleteraCandidate
 } = require('../utils/normalizeBoleteraCandidate');
 
@@ -57,6 +61,7 @@ async function main() {
   }
 
   const html = await response.text();
+  const flyerUrl = extractBoleteraFlyer(html);
 
   const events = extractEventJsonLd(html, url.href);
 
@@ -80,6 +85,7 @@ async function main() {
   console.log('Fuente:', candidate.source_name);
   console.log('URL:', candidate.source_url);
   console.log('Boletos:', candidate.ticket_url);
+  console.log('Flyer:', flyerUrl || 'NO DETECTADO');
   console.log('Precio mínimo:', candidate.price_min);
   console.log('Precio máximo:', candidate.price_max);
   console.log('Evento futuro:', candidate.is_upcoming);
@@ -243,6 +249,18 @@ async function main() {
           newAnalysis.source_change_history.length
         );
       }
+    }
+
+    // Store the official flyer for new or existing candidates.
+    if (flyerUrl) {
+      await client.query(`
+        UPDATE public.event_candidates
+        SET flyer_url = $2
+        WHERE id = $1
+          AND source_name = 'Boletera'
+          AND is_test = FALSE
+          AND NULLIF(TRIM(flyer_url), '') IS NULL
+      `, [candidateId, flyerUrl]);
     }
 
     await client.query('COMMIT');
