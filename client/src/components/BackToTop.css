@@ -1,0 +1,47 @@
+/* Pa'l Jangueo: floating back-to-top control, independent of the event feed. */
+.pj-back-to-top {
+  position: fixed;
+  right: calc(20px + env(safe-area-inset-right, 0px));
+  bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 1px solid #2fb6ff;
+  border-radius: 50%;
+  background: rgba(17, 23, 32, .96);
+  color: #2fb6ff;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .5);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  animation: pj-back-to-top-enter .18s ease-out both;
+  transition: background-color .18s ease, color .18s ease, border-color .18s ease;
+}
+
+.pj-back-to-top svg { display: block; }
+.pj-back-to-top:focus-visible { outline: 3px solid #f8fafc; outline-offset: 3px; }
+.pj-back-to-top:active { background: #2fb6ff; color: #05070a; }
+
+@media (hover: hover) and (pointer: fine) {
+  .pj-back-to-top:hover { background: #2fb6ff; color: #05070a; }
+}
+
+@media (max-width: 620px) {
+  .pj-back-to-top {
+    right: calc(16px + env(safe-area-inset-right, 0px));
+    bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+    width: 46px;
+    height: 46px;
+  }
+}
+
+@keyframes pj-back-to-top-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pj-back-to-top { animation: none; transition: none; }
+}
