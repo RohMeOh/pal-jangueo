@@ -221,3 +221,66 @@
   .pj-favorites { flex-direction: column; align-items: flex-start; padding: 21px; }
   .pj-footer-inner { align-items: flex-start; flex-direction: column; justify-content: center; padding-top: 22px; padding-bottom: 22px; }
 }
+
+/* Minimal About / Beta dialog, using the native accessible modal element. */
+.pj-navigation button:focus-visible { outline: 2px solid var(--pj-blue); outline-offset: 4px; border-radius: 3px; }
+.pj-about-dialog {
+  width: min(420px, calc(100% - 32px));
+  max-width: calc(100% - 32px);
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 0;
+  border: 1px solid #34465b;
+  border-radius: 18px;
+  background: #111720;
+  color: #f8fafc;
+  box-shadow: 0 24px 75px rgba(0, 0, 0, .55);
+  overflow: auto;
+}
+.pj-about-dialog::backdrop {
+  background: rgba(0, 0, 0, .76);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+.pj-about-dialog-content { position: relative; padding: 29px 26px 28px; }
+.pj-about-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding-right: 40px;
+  color: #aebbcB;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .1em;
+}
+.pj-about-label span {
+  padding: 4px 8px;
+  border: 1px solid #2fb6ff;
+  border-radius: 20px;
+  color: #2fb6ff;
+  letter-spacing: .08em;
+}
+.pj-about-dialog h2 { margin: 16px 0 12px; color: #f8fafc; font-size: 23px; font-weight: 900; line-height: 1.25; }
+.pj-about-dialog p { margin: 0; color: #c1ccda; font-size: 15px; line-height: 1.7; }
+.pj-about-close {
+  position: absolute;
+  right: 17px;
+  top: 15px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #35465b;
+  border-radius: 50%;
+  background: #192330;
+  color: #f8fafc;
+  font-size: 25px;
+  line-height: 1;
+  cursor: pointer;
+}
+.pj-about-close:hover { border-color: #2fb6ff; color: #2fb6ff; }
+.pj-about-close:focus-visible { outline: 2px solid #2fb6ff; outline-offset: 2px; }
+@media (max-width: 620px) {
+  .pj-navigation { gap: 6px; }
+  .pj-about-dialog-content { padding: 25px 22px 26px; }
+}

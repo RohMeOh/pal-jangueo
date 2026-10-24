@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import './EventFeed.css';
 import EventFilters, { REGIONS } from './EventFilters';
 import BrandLogo from './BrandLogo';
@@ -159,6 +159,7 @@ function EventCard({ event }) {
 }
 
 export default function EventFeed() {
+  const aboutDialogRef = useRef(null);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -171,6 +172,15 @@ export default function EventFeed() {
     toDate: '',
     price: ''
   });
+
+  // Mostrar el aviso beta una sola vez por carga de la aplicación.
+  // El botón About puede volver a abrirlo después de cerrarlo.
+  useEffect(() => {
+    const dialog = aboutDialogRef.current;
+    if (dialog && !dialog.open) {
+      dialog.showModal();
+    }
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -308,6 +318,14 @@ export default function EventFeed() {
             <a href="#eventos">Explorar</a>
             <button type="button" onClick={focusSearch}>Artistas</button>
             <button type="button" onClick={focusSearch}>Lugares</button>
+            <button
+              type="button"
+              onClick={() => aboutDialogRef.current?.showModal()}
+              aria-haspopup="dialog"
+              aria-controls="pj-about-dialog"
+            >
+              About
+            </button>
             <a href="#mi-jangueo" className="pj-navigation-heart" aria-label="Mi Jangueo, próximamente">
               <HeartIcon />
             </a>
@@ -441,6 +459,41 @@ export default function EventFeed() {
           <p>La isla suena. Sigue la música.</p>
         </div>
       </footer>
+
+      <dialog
+        id="pj-about-dialog"
+        ref={aboutDialogRef}
+        className="pj-about-dialog"
+        aria-labelledby="pj-about-title"
+        aria-describedby="pj-about-description"
+        onClick={(event) => {
+          const rect = event.currentTarget.getBoundingClientRect();
+          const { clientX, clientY } = event;
+          if (
+            clientX < rect.left || clientX > rect.right ||
+            clientY < rect.top || clientY > rect.bottom
+          ) {
+            event.currentTarget.close();
+          }
+        }}
+      >
+        <div className="pj-about-dialog-content">
+          <button
+            type="button"
+            className="pj-about-close"
+            aria-label="Cerrar"
+            onClick={() => aboutDialogRef.current?.close()}
+          >
+            ×
+          </button>
+          <span className="pj-about-label">PA'L JANGUEO <span>BETA</span></span>
+          <h2 id="pj-about-title">Sobre Pa'l Jangueo</h2>
+          <p id="pj-about-description">
+            Una idea en desarrollo para descubrir la música en vivo de Puerto Rico.
+            Esta versión beta sigue evolucionando y su registro formal está previsto próximamente.
+          </p>
+        </div>
+      </dialog>
     </div>
   );
 }
