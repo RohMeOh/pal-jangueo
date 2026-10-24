@@ -103,3 +103,12 @@
 .pj-clear-filters:hover { border-color: #2fb6ff; }
 @media (max-width: 900px) { .pj-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } .pj-clear-filters { grid-column: 2; } }
 @media (max-width: 530px) { .pj-filters { grid-template-columns: minmax(0, 1fr); gap: 13px; padding: 15px; } .pj-filter-search, .pj-clear-filters { grid-column: 1; } }
+
+/* Prevent iOS Safari from zooming the page when a filter is focused.
+   Keep the original compact desktop typography. */
+@media (pointer: coarse) {
+  .pj-filter input:not([type="date"]),
+  .pj-filter select {
+    font-size: 16px;
+  }
+}
