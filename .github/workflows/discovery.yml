@@ -8,6 +8,11 @@ on:
         required: false
         type: boolean
         default: false
+      publish_boletera:
+        description: 'Publish verified Boletera events in this manual run'
+        required: false
+        type: boolean
+        default: false
 
   schedule:
     - cron: '17 */6 * * *'
@@ -153,7 +158,7 @@ jobs:
       - name: Publish verified Boletera events
         id: boletera_publication
         continue-on-error: true
-        if: ${{ vars.BOLETERA_AUTO_PUBLISH == 'true' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true)) }}
+        if: ${{ (github.event_name == 'schedule' && vars.BOLETERA_AUTO_PUBLISH == 'true') || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true && inputs.publish_boletera == true) }}
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SUPABASE_CA_PATH: ${{ runner.temp }}/supabase-ca.crt
