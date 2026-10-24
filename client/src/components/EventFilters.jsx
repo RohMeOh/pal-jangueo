@@ -1,6 +1,6 @@
 import './EventFilters.css';
 
-const REGIONS = [
+export const REGIONS = [
   'La Metro',
   'Norte',
   'Sur',

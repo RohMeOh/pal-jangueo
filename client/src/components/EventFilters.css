@@ -1,99 +1,52 @@
-/* ================================
-   PA'L JANGUEO - EVENT FILTERS
-   ================================ */
-
-.pj-filters,
-.pj-filters * {
-  box-sizing: border-box;
-}
-
-/* Main filter container */
-
+/* Filter controls: compact dark cards, native mobile-safe dates preserved. */
+.pj-filters, .pj-filters * { box-sizing: border-box; }
 .pj-filters {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
-  margin-bottom: 32px;
-  padding: 24px;
-  background: #1d1d24;
-  border: 1px solid #303038;
+  gap: 14px;
+  padding: 20px;
+  background: #0e141c;
+  border: 1px solid #27313f;
   border-radius: 18px;
   text-align: left;
   align-items: end;
 }
-
-/* Individual filters */
-
-.pj-filter {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 0;
-  max-width: 100%;
-}
-
-.pj-filter-search {
-  grid-column: span 2;
-}
-
-.pj-filter label {
-  display: block;
-  width: 100%;
-  font-size: 13px;
-  font-weight: 700;
-  color: #d5d4dc;
-  text-align: left;
-}
-
-/* Regular inputs and dropdowns */
-
-.pj-filter input,
-.pj-filter select {
+.pj-filter { display: flex; flex-direction: column; min-width: 0; gap: 8px; }
+.pj-filter-search { grid-column: span 2; }
+.pj-filter label { color: #bfcbd8; font-weight: 800; font-size: 12px; }
+.pj-filter input:not([type="date"]), .pj-filter select {
   display: block;
   width: 100%;
   min-width: 0;
   max-width: 100%;
-  padding: 12px;
-  color: #f8f7f4;
-  background: #101014;
-  border: 1px solid #41414b;
+  height: 47px;
+  padding: 11px 12px;
+  background: #111720;
+  color: #f8fafc;
+  border: 1px solid #303d50;
   border-radius: 9px;
-  font: inherit;
+  font-size: 13px;
   color-scheme: dark;
-  text-align: left;
 }
-
-.pj-filter input:focus,
-.pj-filter select:focus {
-  outline: 2px solid #ff955f;
-  outline-offset: 1px;
-}
-
-/* ================================
-   DATE INPUTS - MOBILE SAFE
-   ================================ */
-
-/* Fixed-size wrapper prevents native overflow. */
-
+.pj-filter input::placeholder { color: #91a1b4; }
+.pj-filter select { text-overflow: ellipsis; }
+.pj-filter input:focus-visible, .pj-filter select:focus-visible { outline: 2px solid #2fb6ff; outline-offset: 1px; }
 .pj-date-field {
   position: relative;
   width: 100%;
   min-width: 0;
   max-width: 100%;
-  height: 48px;
+  height: 47px;
   overflow: hidden;
-  background: #101014;
-  border: 1px solid #41414b;
+  background: #111720;
+  border: 1px solid #303d50;
   border-radius: 9px;
-  box-sizing: border-box;
 }
-
-/* Keep the native picker interactive but invisible.
-   Our own text displays the selected date. */
-
+/* Invisible native picker remains clickable; visible text avoids iPhone overflow */
 .pj-date-field input[type="date"] {
   position: absolute;
   inset: 0;
+  z-index: 2;
   display: block;
   width: 100%;
   min-width: 0;
@@ -104,102 +57,49 @@
   border: 0;
   opacity: 0;
   cursor: pointer;
-  z-index: 2;
 }
-
-/* Visible placeholder and selected date. */
-
 .pj-date-hint {
   position: absolute;
   top: 50%;
   left: 12px;
-  right: 44px;
+  right: 41px;
+  z-index: 1;
   transform: translateY(-50%);
-  color: #9ca3af;
-  font-size: 14px;
-  white-space: nowrap;
   overflow: hidden;
+  white-space: nowrap;
   text-overflow: ellipsis;
   pointer-events: none;
-  z-index: 1;
+  color: #91a1b4;
+  font-size: 13px;
 }
-
-.pj-date-selected {
-  color: #f8f7f4;
-}
-
-/* Decorative calendar symbol. */
-
+.pj-date-selected { color: #f8fafc; }
 .pj-date-field::after {
   content: '';
   position: absolute;
-  right: 14px;
+  right: 13px;
   top: 50%;
-  width: 17px;
+  width: 16px;
   height: 16px;
   transform: translateY(-50%);
-  border: 2px solid #a8a8b0;
+  border: 2px solid #2fb6ff;
   border-radius: 3px;
-  box-shadow: inset 0 4px 0 #a8a8b0;
-  box-sizing: border-box;
+  box-shadow: inset 0 4px 0 #2fb6ff;
   pointer-events: none;
-  z-index: 1;
 }
-
-.pj-date-field:focus-within {
-  outline: 2px solid #ff955f;
-  outline-offset: 1px;
-}
-
-.pj-date-field input[type="date"]:focus {
-  outline: none;
-}
-
-/* ================================
-   CLEAR FILTERS BUTTON
-   ================================ */
-
+.pj-date-field:focus-within { outline: 2px solid #2fb6ff; outline-offset: 1px; }
+.pj-date-field input[type="date"]:focus { outline: none; }
 .pj-clear-filters {
   grid-column: -2 / -1;
-  align-self: end;
-  justify-self: stretch;
+  height: 47px;
   width: 100%;
-  padding: 12px;
-  border: 1px solid #ff955f;
-  background: transparent;
-  color: #ff955f;
+  padding: 10px;
+  border: 1px solid #394d65;
   border-radius: 9px;
-  font-weight: 700;
-  text-align: center;
-  cursor: pointer;
+  background: #151c26;
+  color: #2fb6ff;
+  font-size: 13px;
+  font-weight: 800;
 }
-
-/* ================================
-   TABLET LAYOUT
-   ================================ */
-
-@media (max-width: 850px) {
-  .pj-filters {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-/* ================================
-   MOBILE LAYOUT
-   ================================ */
-
-@media (max-width: 520px) {
-  .pj-filters {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 18px;
-    padding: 18px;
-  }
-
-  .pj-filter-search {
-    grid-column: 1 / -1;
-  }
-
-  .pj-clear-filters {
-    grid-column: 1 / -1;
-  }
-}
+.pj-clear-filters:hover { border-color: #2fb6ff; }
+@media (max-width: 900px) { .pj-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } .pj-clear-filters { grid-column: 2; } }
+@media (max-width: 530px) { .pj-filters { grid-template-columns: minmax(0, 1fr); gap: 13px; padding: 15px; } .pj-filter-search, .pj-clear-filters { grid-column: 1; } }

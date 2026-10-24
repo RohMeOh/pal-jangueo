@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import './EventFeed.css';
-import EventFilters from './EventFilters';
+import EventFilters, { REGIONS } from './EventFilters';
+import BrandLogo from './BrandLogo';
 
 const API_BASE = (
   import.meta.env.VITE_API_URL || 'http://localhost:3001'
@@ -51,6 +52,16 @@ function safeLink(value) {
   } catch {
     return null;
   }
+}
+
+const WAVE_HEIGHTS = [14, 32, 19, 50, 70, 43, 25, 59, 77, 47, 21, 35, 66, 40, 18, 49, 73, 35, 23, 51, 30];
+
+function HeartIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0l-1 1-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/>
+    </svg>
+  );
 }
 
 function EventCard({ event }) {
@@ -272,69 +283,164 @@ export default function EventFeed() {
     return true;
   });
 
+  function focusSearch() {
+    document.getElementById('filter-search')?.focus();
+    document.getElementById('filtros')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function chooseRegion(region) {
+    setFilters(previous => ({
+      ...previous,
+      region: previous.region === region ? '' : region,
+      municipality: '',
+      neighborhood: ''
+    }));
+  }
+
   return (
-    <main className="pj-discovery">
-      <header className="pj-hero">
-        <p className="pj-eyebrow">PA'L JANGUEO · PUERTO RICO</p>
-
-        <h1>La música de aquí, en un solo lugar.</h1>
-
-        <p>
-          Descubre eventos, artistas y espacios de
-          nuestra escena musical.
-        </p>
+    <div className="pj-site" id="inicio">
+      <header className="pj-site-header">
+        <div className="pj-header-inner">
+          <a href="#inicio" className="pj-home-link" aria-label="Pa'l Jangueo, inicio">
+            <BrandLogo />
+          </a>
+          <nav className="pj-navigation" aria-label="Navegación principal">
+            <a href="#eventos">Explorar</a>
+            <button type="button" onClick={focusSearch}>Artistas</button>
+            <button type="button" onClick={focusSearch}>Lugares</button>
+            <a href="#mi-jangueo" className="pj-navigation-heart" aria-label="Mi Jangueo, próximamente">
+              <HeartIcon />
+            </a>
+          </nav>
+        </div>
       </header>
 
-      <section className="pj-events">
-        <div className="pj-section-heading">
-          <h2>Próximos eventos</h2>
-
-          {!loading && !error && (
-            <span>{filteredEvents.length} {filteredEvents.length === 1 ? 'evento' : 'eventos'}</span>
-          )}
-        </div>
-
-        <EventFilters
-          events={events}
-          filters={filters}
-          setFilters={setFilters}
-        />
-
-        {loading && (
-          <p role="status">Buscando eventos...</p>
-        )}
-
-        {error && (
-          <p role="alert">{error}</p>
-        )}
-
-        {!loading && !error && events.length === 0 && (
-          <div className="pj-empty">
-            <h3>Pronto habrá música por aquí.</h3>
-            <p>
-              Estamos preparando los próximos eventos
-              de la escena local.
+      <main className="pj-discovery">
+        <section className="pj-hero" aria-labelledby="pj-main-heading">
+          <div className="pj-hero-copy">
+            <p className="pj-eyebrow">LA ESCENA MUSICAL DE PUERTO RICO</p>
+            <h1 id="pj-main-heading">
+              <span>La isla suena.</span>
+              <strong>Sigue la música.</strong>
+            </h1>
+            <p className="pj-hero-description">
+              De los escenarios más íntimos a los conciertos más grandes.
+              Descubre la música en vivo que mueve a Puerto Rico.
             </p>
+            <div className="pj-hero-actions">
+              <a className="pj-button pj-button-primary" href="#eventos">
+                Explorar eventos <span aria-hidden="true">↗</span>
+              </a>
+              <button className="pj-button" type="button" onClick={focusSearch}>
+                Descubrir artistas
+              </button>
+            </div>
           </div>
-        )}
+          <div className="pj-hero-feature" aria-label="Todos los ritmos. Una sola isla.">
+            <div className="pj-feature-top">
+              <span>EN VIVO · PR</span>
+              <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                <path d="M4 9v6M8 5v14M12 2v20M16 6v12M20 9v6" />
+              </svg>
+            </div>
+            <div className="pj-waveform" aria-hidden="true">
+              {WAVE_HEIGHTS.map((height, i) => (
+                <span key={i} style={{ '--bar-height': `${height}px` }} />
+              ))}
+            </div>
+            <div className="pj-feature-copy">
+              <h2>Todos los ritmos.<span>Una sola isla.</span></h2>
+              <p>Salsa · Rock · Indie · Urbana · Jazz · Y más</p>
+            </div>
+          </div>
+        </section>
 
-        {!loading && !error &&
-          events.length > 0 &&
-          filteredEvents.length === 0 && (
+        <section className="pj-filters-section" id="filtros" aria-labelledby="pj-filters-heading">
+          <div className="pj-filter-heading">
+            <svg width="22" height="22" viewBox="0 0 24 24" strokeWidth="1.8" fill="none" strokeLinecap="round" aria-hidden="true">
+              <path d="M4 7h16M4 12h16M4 17h16" />
+              <circle cx="9" cy="7" r="2" fill="#0e141c" />
+              <circle cx="16" cy="12" r="2" fill="#0e141c" />
+              <circle cx="11" cy="17" r="2" fill="#0e141c" />
+            </svg>
+            <h2 id="pj-filters-heading">Encuentra tu próximo jangueo</h2>
+          </div>
+          <EventFilters events={events} filters={filters} setFilters={setFilters} />
+          <div className="pj-region-chips" aria-label="Filtrar por región">
+            <button type="button" className="pj-region-chip" aria-pressed={!filters.region} onClick={() => chooseRegion('')}>
+              Toda la isla
+            </button>
+            {REGIONS.map(region => (
+              <button
+                type="button"
+                key={region}
+                className="pj-region-chip"
+                aria-pressed={filters.region === region}
+                onClick={() => chooseRegion(region)}
+              >
+                {region}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section className="pj-events" id="eventos" aria-labelledby="pj-events-heading">
+          <div className="pj-section-heading">
+            <div>
+              <h2 id="pj-events-heading">Explora lo que suena</h2>
+              <p>Descubre experiencias musicales por toda la isla.</p>
+            </div>
+            {!loading && !error && (
+              <span className="pj-event-count">
+                {filteredEvents.length} {filteredEvents.length === 1 ? 'evento' : 'eventos'}
+              </span>
+            )}
+          </div>
+
+          {loading && <p className="pj-event-status" role="status">Buscando eventos...</p>}
+          {error && <p className="pj-event-status" role="alert">{error}</p>}
+
+          {!loading && !error && events.length === 0 && (
+            <div className="pj-empty">
+              <h3>Pronto habrá música por aquí.</h3>
+              <p>Estamos preparando los próximos eventos de la escena local.</p>
+            </div>
+          )}
+
+          {!loading && !error && events.length > 0 && filteredEvents.length === 0 && (
             <div className="pj-empty">
               <h3>No encontramos eventos con esos filtros.</h3>
               <p>Prueba otra región, fecha o precio.</p>
             </div>
           )}
 
-        {!loading && !error && filteredEvents.length > 0 && (
-          <div className="pj-event-grid">
-            {filteredEvents.map(event => (
-              <EventCard key={event.id} event={event} />
-            ))}
+          {!loading && !error && filteredEvents.length > 0 && (
+            <div className="pj-event-grid">
+              {filteredEvents.map(event => <EventCard key={event.id} event={event} />)}
+            </div>
+          )}
+        </section>
+
+        <section className="pj-favorites" id="mi-jangueo" aria-labelledby="pj-favorites-heading">
+          <div>
+            <div className="pj-favorites-title">
+              <HeartIcon />
+              <h2 id="pj-favorites-heading">Mi Jangueo</h2>
+            </div>
+            <p>Tu espacio para guardar artistas, lugares y eventos favoritos. Todo lo que te gusta, en un mismo sitio.</p>
           </div>
-        )}
-      </section>
-    </main>
+          <span className="pj-favorites-badge">Próximamente</span>
+        </section>
+      </main>
+
+      <footer className="pj-site-footer">
+        <div className="pj-footer-inner">
+          <a href="#inicio" className="pj-home-link" aria-label="Pa'l Jangueo, volver al inicio">
+            <BrandLogo footer />
+          </a>
+          <p>La isla suena. Sigue la música.</p>
+        </div>
+      </footer>
+    </div>
   );
 }
