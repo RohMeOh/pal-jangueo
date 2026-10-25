@@ -192,13 +192,29 @@ function extractDetail(html) {
         .slice(0, 1800)
     : '';
 
+  // Some official listings put their performer lineup after the date
+  // and location. Only accept an explicitly labelled stage lineup,
+  // stopping before prices and website footer information.
+  const afterDate = labelledDateMatch
+    ? text.slice(labelledDateMatch.index + labelledDateMatch[0].length)
+    : '';
+
+  const stageLineup = afterDate.match(
+    /\ben tarima\s*:\s*(.{40,1800}?)(?=\bprecios?\s*:|\bacerca de\b|©|$)/i
+  )?.[0]?.trim() || '';
+
+  const extractedDescription = [bodyDescription, stageLineup]
+    .filter(Boolean)
+    .join(' ')
+    .slice(0, 1800);
+
   return {
     page_title: pageTitle,
     poster_url: safeHttps(findMeta(html, 'og:image')),
     description_evidence:
       findMeta(html, 'og:description') ||
       findMeta(html, 'description') ||
-      (bodyDescription.length >= 40 ? bodyDescription : null),
+      (extractedDescription.length >= 40 ? extractedDescription : null),
     date_evidence: date,
     time_evidence: time
   };

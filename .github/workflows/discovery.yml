@@ -53,6 +53,10 @@ jobs:
           node --check scripts/run-discovery.js
           node --check scripts/stage-boletera-event.js
           node --check scripts/auto-publish-boletera.js
+          node --check scripts/auto-publish-prticket.js
+          node --check scripts/discover-prticket.js
+          node --check scripts/stage-prticket-candidates.js
+          node --check utils/assessMusicEvidence.js
           node --check utils/extractBoleteraFlyer.js
 
       - name: Prepare Supabase certificate

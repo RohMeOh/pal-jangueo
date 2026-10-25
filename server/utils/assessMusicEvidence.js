@@ -64,6 +64,12 @@ function assessMusicEvidence(rawDescription) {
     {
       name: 'Evento deportivo',
       pattern: /\b(baloncesto|basketball|bsnf|beisbol|baseball|voleibol|volleyball|futbol|soccer|partido deportivo|competencia deportiva)\b/
+    },
+    {
+      // An announced screening is a mixed event when live music also appears.
+      // A venue name containing "Cine" alone must not exclude a concert.
+      name: 'Documental o cine',
+      pattern: /\b(?:documental|punkumental|pelicula|proyeccion(?:es)?|noche de cine|festival de cine|funcion de cine)\b/
     }
   ];
 
@@ -77,14 +83,6 @@ function assessMusicEvidence(rawDescription) {
     {
       name: 'Concierto o presentación en vivo',
       pattern: /\b(concierto|tocando|musica en vivo|acto de apertura|live performance|live music)\b/
-    },
-    {
-      name: 'DJs o música electrónica',
-      pattern: /\b(dj|djs|dj set|techno|afterhours|electronic dance party)\b/
-    },
-    {
-      name: 'Documental o cine',
-      pattern: /\b(documental|punkumental|pelicula|proyeccion|cine)\b/
     },
     {
       name: 'Experiencia temática',
@@ -103,6 +101,24 @@ function assessMusicEvidence(rawDescription) {
   const liveBandAnnounced =
     /\b(?:banda|orquesta|grupo musical)\s+en\s+vivo\b/.test(text);
 
+  // Acoustic acts may announce live songs, performers and instruments
+  // without the exact wording "concierto" or "musica en vivo".
+  const liveAcousticAct =
+    /\ben vivo\b/.test(text) &&
+    /\b(?:canciones?|cantar|cantando|cantautores?|cantantes?)\b/.test(text) &&
+    (
+      /\bacustic[oa]s?\b/.test(text) ||
+      (/\bguitarras?\b/.test(text) &&
+        /\b(?:cantar|cantando|cantautores?|voces)\b/.test(text))
+    );
+
+  // A provider's explicit "En tarima:" lineup corroborated by
+  // orchestras or bands is stronger than a genre-only description.
+  const onStageEnsemble =
+    /\ben tarima\s*:/.test(text) &&
+    (text.match(/\b(?:orquestas?|bandas?)\b/g) || []).length >= 2 &&
+    !/\b(?:musica de fondo|karaoke|charla|conferencia|panel)\b/.test(text);
+
   const namedMusicalPerformance =
     /\b(?:se presentara|se presentaran|presentacion estelar|interpretando)\b/.test(text) &&
     /\b(?:banda|orquesta|canciones?|sencillo|album|temas?|reggae|dub|rock|musica)\b/.test(text);
@@ -112,19 +128,37 @@ function assessMusicEvidence(rawDescription) {
     /\b(?:musica|rock|reggae|metal|punk|salsa|hardcore)\b/.test(text) &&
     /\b(?:presentan|presenta|con el regreso|escenario|en vivo)\b/.test(text);
 
-// A source may announce a musical performance through its stage,
-// the songs or genre being performed, and an explicit interpretation,
-// without using the words "concierto" or "en vivo".
-// All three independent clues are required; film screenings are excluded.
-const stagePerformanceAnnounced =
-  /\b(?:escenario|tarima)\b/.test(text) &&
-  /\b(?:interpretacion(?:es)?|interpretara(?:n)?|cantara(?:n)?|cantando)\b/.test(text) &&
-  /\b(?:musica|boleros?|canciones?|salsa|rock|plena|bachata|reggae)\b/.test(text) &&
-  !/\b(?:cine|pelicula|documental|proyeccion|musica de fondo|karaoke)\b/.test(text);
+  // A stage, an interpretation, and musical context must corroborate
+  // one another. Film screenings and background music are not enough.
+  const stagePerformanceAnnounced =
+    /\b(?:escenario|tarima)\b/.test(text) &&
+    /\b(?:interpretacion(?:es)?|interpretara(?:n)?|cantara(?:n)?|cantando)\b/.test(text) &&
+    /\b(?:musica|boleros?|canciones?|salsa|rock|plena|bachata|reggae)\b/.test(text) &&
+    !/\b(?:cine|pelicula|documental|proyeccion|musica de fondo|karaoke)\b/.test(text);
 
-if (stagePerformanceAnnounced) {
-  signals.push('Interpretación musical anunciada en escenario');
-}
+  // An actual DJ set is a performance. A genre, party name, or the
+  // letters "DJ" by themselves do not prove anyone will perform.
+  const liveDjPerformance =
+    /\bdjs?\s+sets?\b/.test(text) ||
+    /\bdjs?\s+en\s+vivo\b/.test(text) ||
+    /\bdjs?\b[^.!?]{0,70}\b(?:tocara(?:n)?|se presentara(?:n)?|mezclara(?:n)?|actuara(?:n)?)\b/.test(text) ||
+    /\b(?:tocara(?:n)?|se presentara(?:n)?|actuara(?:n)?|presentacion en vivo)\b[^.!?]{0,70}\bdjs?\b/.test(text);
+
+  if (liveAcousticAct) {
+    signals.push('Actuación acústica en vivo');
+  }
+
+  if (onStageEnsemble) {
+    signals.push('Orquesta o banda anunciada en tarima');
+  }
+
+  if (stagePerformanceAnnounced) {
+    signals.push('Interpretación musical anunciada en escenario');
+  }
+
+  if (liveDjPerformance) {
+    signals.push('DJs o música electrónica');
+  }
 
   if (liveBandAnnounced) {
     signals.push('Banda u orquesta en vivo');
@@ -149,6 +183,8 @@ if (stagePerformanceAnnounced) {
 
   const musicalPerformanceSignalDetected = signals.some(signal =>
     signal === 'Concierto o presentación en vivo' ||
+    signal === 'Actuación acústica en vivo' ||
+    signal === 'Orquesta o banda anunciada en tarima' ||
     signal === 'DJs o música electrónica' ||
     signal === 'Músicos e instrumentos en presentación' ||
     signal === 'Banda u orquesta en vivo' ||

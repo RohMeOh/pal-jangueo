@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node --test tests/assessMusicCatalogEligibility.test.js tests/storePendingEventCandidate.test.js",
+    "test": "node --test tests/*.test.js test/*.test.js",
     "dev": "node --watch index.js",
     "start": "node index.js"
   },

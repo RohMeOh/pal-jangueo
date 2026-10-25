@@ -69,3 +69,87 @@ test('positive music signals do NOT waive another verification requirement', () 
   assert.equal(policy.eligible_for_auto_publication,false);
   assert.ok(policy.blockers.includes('venue_not_verified'));
 });
+
+// Guard against implicit musical claims and screening/concert combinations.
+// Both providers must use the same shared classification.
+const falsePositiveExamples = [
+  'Techno',
+  'Afterhours',
+  'DJ',
+  'DJ de techno y afterhours',
+  'Fiesta electrónica con luces y ambiente techno',
+  'Proyección de documental y concierto de rock en vivo',
+  'Noche de cine y música de fondo',
+  'Estreno de película seguido por un concierto en vivo'
+];
+for (const description of falsePositiveExamples) {
+  test(`unverified or mixed event stays blocked: ${description}`, () => {
+    const music = assessMusicEvidence(description);
+    assert.equal(music.has_musical_program_evidence, false, description);
+    for (const provider of ['PRticket', 'Boletera']) {
+      assert.equal(
+        decision(provider, description).eligible_for_auto_publication,
+        false,
+        provider
+      );
+    }
+  });
+}
+
+const verifiedDjExamples = [
+  'DJ set en vivo de salsa y house',
+  'La DJ se presentará en vivo con su set de música electrónica'
+];
+for (const description of verifiedDjExamples) {
+  test(`verified DJ performance remains eligible: ${description}`, () => {
+    assert.equal(
+      assessMusicEvidence(description).has_musical_program_evidence,
+      true
+    );
+    for (const provider of ['PRticket', 'Boletera']) {
+      assert.equal(
+        decision(provider, description).eligible_for_auto_publication,
+        true,
+        provider
+      );
+    }
+  });
+}
+
+test('Cine Teatro used only as a venue reference does not block a concert', () => {
+  const description = 'Gran concierto de rock en vivo en el Cine Teatro local';
+  assert.equal(assessMusicEvidence(description).non_music_event_detected, false);
+  for (const provider of ['PRticket', 'Boletera']) {
+    assert.equal(decision(provider, description).eligible_for_auto_publication, true);
+  }
+});
+
+
+test('an explicit live acoustic song performance qualifies for both providers', () => {
+  const description = `D.E.P.S. En vivo. Canciones y confesiones en acústico.
+    Dos cantautores cantan con una guitarra y dos voces en el escenario.`;
+  for (const provider of ['PRticket', 'Boletera']) {
+    assert.equal(decision(provider, description).eligible_for_auto_publication, true);
+  }
+});
+
+test('an official on-stage orchestra lineup qualifies for both providers', () => {
+  const description = 'En tarima: La Banda que Deleita, Willie Rosario y su Orquesta, La Sonora Ponceña.';
+  for (const provider of ['PRticket', 'Boletera']) {
+    assert.equal(decision(provider, description).eligible_for_auto_publication, true);
+  }
+});
+
+for (const description of [
+  'Una noche de música acústica con guitarra y canciones de fondo.',
+  'En tarima: charla sobre una banda sonora con música de fondo.',
+  'En tarima: un foro sobre una banda de música con invitados.' ,
+  'Documental sobre una orquesta en tarima: concierto filmado.',
+  'En vivo para hablar de canciones con una guitarra de decoración.'
+]) {
+  test(`ambiguous acoustic or stage context stays blocked: ${description}`, () => {
+    for (const provider of ['PRticket', 'Boletera']) {
+      assert.equal(decision(provider, description).eligible_for_auto_publication, false);
+    }
+  });
+}

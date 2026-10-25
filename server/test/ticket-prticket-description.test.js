@@ -47,3 +47,29 @@ test('unlabelled date in unrelated text is not treated as official event date', 
     <p>Sin fecha de evento confirmada.</p>`);
   assert.equal(extractDetail(html).date_evidence, null);
 });
+
+
+test('an official on-stage lineup appearing after event date can be extracted', () => {
+  const html = `<html><head>
+    <meta property="og:title" content="Día Nacional del Bailador - Coliseo Roberto Clemente">
+    </head><body><h1>Día Nacional del Bailador</h1>
+    <p>¡EL DÍA NACIONAL DEL BAILADOR!</p>
+    <p>📅 miércoles, 25 de noviembre de 2026</p>
+    <p>⏰ 8:00 PM</p><p>📍 Coliseo Roberto Clemente, San Juan</p>
+    <p>En tarima:</p><p>La Banda que Deleita</p>
+    <p>Willie Rosario y su Orquesta</p>
+    <p>Bobby Valentín y su Orquesta</p>
+    <p>La Sonora Ponceña</p><p>Precios: VIP $75</p>
+    <p>Acerca de Cookies y términos legales</p></body></html>`;
+  const detail = extractDetail(html);
+  assert.match(detail.description_evidence, /En tarima:/);
+  assert.match(detail.description_evidence, /Willie Rosario/);
+  assert.doesNotMatch(detail.description_evidence, /Precios|Cookies|VIP/);
+});
+
+test('unlabelled generic text after a date is not repurposed as musical evidence', () => {
+  const html = documentFor(`<p>📅 12 de mayo de 2028</p>
+    <p>⏰ 8:00 PM</p><p>📍 Teatro Principal</p>
+    <p>Comprar boletos. Precios: $25.</p>`);
+  assert.equal(extractDetail(html).description_evidence, null);
+});
