@@ -18,14 +18,24 @@ const args = process.argv.slice(2);
 const publish = args.includes('--publish');
 const simulate = args.includes('--simulate');
 const all = args.includes('--all');
+const slugArgs = args.filter(arg => arg.startsWith('--slug='));
+const slug = slugArgs.length === 1 ? slugArgs[0].slice(7) : null;
+const targetUrl = slug ? `https://boletos.boletera.net/e/${slug}` : null;
 
 if (
-  args.some(arg => !['--publish', '--simulate', '--all'].includes(arg)) ||
+  args.some(arg =>
+    !['--publish', '--simulate', '--all'].includes(arg) &&
+    !arg.startsWith('--slug=')
+  ) ||
+  slugArgs.length > 1 ||
+  (slugArgs.length === 1 && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) ||
+  (all && slug !== null) ||
   (publish && simulate) ||
-  ((publish || simulate) && !all)
+  ((publish || simulate) && !all && slug === null)
 ) {
   throw new Error(
-    'Uso: node scripts/auto-publish-boletera.js [--all --simulate | --all --publish]'
+    'Uso: node scripts/auto-publish-boletera.js ' +
+    '[--all | --slug=nombre] [--simulate | --publish]'
   );
 }
 
@@ -519,8 +529,13 @@ async function main() {
       AND is_test = FALSE
       AND review_status = 'pending_review'
       AND approved_event_id IS NULL
+      AND ($1::text IS NULL OR source_url = $1)
     ORDER BY source_url
-  `);
+  `, [targetUrl]);
+
+  if (slug !== null && rows.length !== 1) {
+    throw new Error('No existe un candidato pendiente único para el evento seleccionado.');
+  }
 
   let ready = 0;
   let blocked = 0;
