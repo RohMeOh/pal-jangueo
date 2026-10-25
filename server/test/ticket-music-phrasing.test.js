@@ -153,3 +153,43 @@ for (const description of [
     }
   });
 }
+
+
+test('an explicitly announced live rock tribute on stage qualifies for both providers', () => {
+  const description = `La Bóveda presenta un tributo al rock de MTV.
+    Volvemos a la tarima para seguir haciendo tributo a la música de MTV
+    y rendir homenaje a las bandas del género.`;
+  const music = assessMusicEvidence(description);
+  assert.equal(music.has_musical_program_evidence, true);
+  for (const provider of ['PRticket', 'Boletera']) {
+    assert.equal(decision(provider, description).eligible_for_auto_publication, true);
+  }
+});
+
+test('official Boletera encoded tribute is recognized and cleaned', () => {
+  const description = `La Boveda presenta: RIP MTV PT.II (Un Tributo al rock de MTV)
+    &iexcl;Hemos regresado! Despu&eacute;s de compartir una noche incre&iacute;ble,
+    volvemos a la tarima para seguir haciendo tributo a la musica de MTV.`;
+  const music = assessMusicEvidence(description);
+  assert.equal(music.has_musical_program_evidence, true);
+  assert.match(music.description, /¡Hemos regresado!/);
+  assert.match(music.description, /Después/);
+  assert.doesNotMatch(music.description, /&(?:iexcl|eacute);/);
+});
+
+for (const description of [
+  'Noche temática de tributo al rock de MTV, con música de fondo.',
+  'Volvemos a la tarima para una charla sobre un homenaje a la música de MTV.',
+  'Documental: volvemos a la tarima para hacer tributo a la música de MTV.',
+  'Volvemos a la tarima para un tributo a la música en un panel histórico.',
+  'Celebramos 20 años del álbum Abriendo Caminos. Una noche para volver a las canciones.',
+  'Batallas de rap improvisado, showcases y ceremonia del campeón.'
+]) {
+  test(`an ambiguous tribute or ceremony stays blocked: ${description}`, () => {
+    const music = assessMusicEvidence(description);
+    assert.equal(music.has_musical_program_evidence, false);
+    for (const provider of ['PRticket', 'Boletera']) {
+      assert.equal(decision(provider, description).eligible_for_auto_publication, false);
+    }
+  });
+}

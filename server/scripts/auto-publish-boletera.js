@@ -399,11 +399,9 @@ async function writeEvent(candidate, result) {
       throw new Error('Evento duplicado o fuente ya vinculada.');
     }
 
-    const description = String(result.raw.description || '')
-      .replace(/<[^>]*>/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim()
-      .slice(0, 3000) || null;
+    // Reuse the verified, HTML-decoded description; the extractor
+    // stores this as description_raw, not description.
+    const description = result.assessment.description.slice(0, 3000) || null;
 
     const inserted = await db.query(`
       INSERT INTO public.events (

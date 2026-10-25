@@ -9,7 +9,9 @@ const NAMED_ENTITIES = {
   ograve: 'ò', ugrave: 'ù', uuml: 'ü',
   Aacute: 'Á', Eacute: 'É', Iacute: 'Í',
   Oacute: 'Ó', Uacute: 'Ú', Ntilde: 'Ñ',
-  Igrave: 'Ì', Uuml: 'Ü'
+  Igrave: 'Ì', Uuml: 'Ü', iexcl: '¡', iquest: '¿',
+  middot: '·', ndash: '–', mdash: '—', rsquo: '’',
+  lsquo: '‘', ldquo: '“', rdquo: '”'
 };
 
 function decodeEntities(value) {
@@ -119,6 +121,13 @@ function assessMusicEvidence(rawDescription) {
     (text.match(/\b(?:orquestas?|bandas?)\b/g) || []).length >= 2 &&
     !/\b(?:musica de fondo|karaoke|charla|conferencia|panel)\b/.test(text);
 
+  // A live musical tribute needs an announced return to the stage
+  // AND an explicitly musical tribute. A tribute title alone is not enough.
+  const onStageMusicTribute =
+    /\b(?:volvemos|regresamos|retornamos)\s+a\s+(?:la\s+)?tarima\b/.test(text) &&
+    /\b(?:tributo|homenaje)\s+a\s+(?:la\s+)?(?:musica|banda|rock|canciones?|artistas?)\b/.test(text) &&
+    !/\b(?:charla|conferencia|panel|musica de fondo|karaoke)\b/.test(text);
+
   const namedMusicalPerformance =
     /\b(?:se presentara|se presentaran|presentacion estelar|interpretando)\b/.test(text) &&
     /\b(?:banda|orquesta|canciones?|sencillo|album|temas?|reggae|dub|rock|musica)\b/.test(text);
@@ -150,6 +159,10 @@ function assessMusicEvidence(rawDescription) {
 
   if (onStageEnsemble) {
     signals.push('Orquesta o banda anunciada en tarima');
+  }
+
+  if (onStageMusicTribute) {
+    signals.push('Tributo musical anunciado en tarima');
   }
 
   if (stagePerformanceAnnounced) {
@@ -185,6 +198,7 @@ function assessMusicEvidence(rawDescription) {
     signal === 'Concierto o presentación en vivo' ||
     signal === 'Actuación acústica en vivo' ||
     signal === 'Orquesta o banda anunciada en tarima' ||
+    signal === 'Tributo musical anunciado en tarima' ||
     signal === 'DJs o música electrónica' ||
     signal === 'Músicos e instrumentos en presentación' ||
     signal === 'Banda u orquesta en vivo' ||
