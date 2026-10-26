@@ -176,6 +176,35 @@
 .pj-empty, .pj-event-status { border: 1px solid #27313f; border-radius: 16px; background: #101720; color: #c1ccda; padding: 35px 24px; text-align: center; }
 .pj-empty h3 { color: #fff; margin-bottom: 10px; }
 
+/* Animated event loading indicator */
+.pj-event-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.pj-loading-spinner {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border: 2px solid #3d4c60;
+  border-top-color: var(--pj-blue);
+  border-radius: 50%;
+  animation: pj-loading-spin .8s linear infinite;
+}
+
+@keyframes pj-loading-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pj-loading-spinner {
+    animation: none;
+  }
+}
+
+
 .pj-favorites {
   display: flex;
   align-items: center;

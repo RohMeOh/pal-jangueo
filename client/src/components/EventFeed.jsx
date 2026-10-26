@@ -426,7 +426,12 @@ export default function EventFeed() {
             )}
           </div>
 
-          {loading && <p className="pj-event-status" role="status">Buscando eventos...</p>}
+          {loading && (
+            <p className="pj-event-status pj-event-loading" role="status">
+              <span className="pj-loading-spinner" aria-hidden="true" />
+              Buscando eventos...
+            </p>
+          )}
           {error && <p className="pj-event-status" role="alert">{error}</p>}
 
           {!loading && !error && events.length === 0 && (
