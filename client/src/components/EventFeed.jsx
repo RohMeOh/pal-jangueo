@@ -3,19 +3,20 @@ import './EventFeed.css';
 import './IconAction.css';
 import EventFilters, { REGIONS } from './EventFilters';
 import BrandLogo from './BrandLogo';
+import { t } from '../i18n';
 
 const API_BASE = (
   import.meta.env.VITE_API_URL || 'http://localhost:3001'
 ).replace(/\/$/, '');
 
-function formatDate(dateString) {
+function formatDate(dateString, language) {
   const date = new Date(dateString);
 
   if (Number.isNaN(date.getTime())) {
-    return 'Fecha por confirmar';
+    return t(language, 'Fecha por confirmar');
   }
 
-  return new Intl.DateTimeFormat('es-PR', {
+  return new Intl.DateTimeFormat(language === 'en' ? 'en-US' : 'es-PR', {
     timeZone: 'America/Puerto_Rico',
     weekday: 'long',
     day: 'numeric',
@@ -26,9 +27,9 @@ function formatDate(dateString) {
   }).format(date);
 }
 
-function formatPrice(event) {
+function formatPrice(event, language) {
   if (event.price_type === 'free') {
-    return 'Gratis';
+    return t(language, 'Gratis');
   }
 
   if (
@@ -36,14 +37,14 @@ function formatPrice(event) {
     Number(event.price_min) === 0 &&
     Number(event.price_max) > 0
   ) {
-    return 'Opciones gratis y de pago';
+    return t(language, 'Opciones gratis y de pago');
   }
 
   if (event.price_min != null) {
-    return `Desde $${Number(event.price_min).toFixed(2)}`;
+    return `${t(language, 'Desde')} $${Number(event.price_min).toFixed(2)}`;
   }
 
-  return 'Precio por confirmar';
+  return t(language, 'Precio por confirmar');
 }
 
 function safeLink(value) {
@@ -65,7 +66,7 @@ function HeartIcon() {
   );
 }
 
-function EventCard({ event }) {
+function EventCard({ event, language }) {
   const [flyerFailed, setFlyerFailed] = useState(false);
   const flyerUrl = safeLink(event.flyer_url);
 
@@ -97,7 +98,7 @@ function EventCard({ event }) {
             <img
               className="pj-event-poster-image"
               src={flyerUrl}
-              alt={`Cartel de ${event.title}`}
+              alt={`${t(language, 'Cartel de')} ${event.title}`}
               loading="lazy"
               onError={() => setFlyerFailed(true)}
             />
@@ -106,20 +107,20 @@ function EventCard({ event }) {
           <div className="pj-event-poster-fallback">
             <span className="pj-poster-symbol">♫</span>
             <span>PA'L JANGUEO</span>
-            <small>La música de aquí</small>
+            <small>{t(language, 'La música de aquí')}</small>
           </div>
         )}
       </div>
 
       <div className="pj-event-content">
         <span className="pj-event-category">
-          MÚSICA EN VIVO
+          {t(language, 'MÚSICA EN VIVO')}
         </span>
 
         <h3>{event.title}</h3>
 
         <p className="pj-event-date">
-          {formatDate(event.start_at)}
+          {formatDate(event.start_at, language)}
         </p>
 
         <p className="pj-event-venue">
@@ -128,7 +129,7 @@ function EventCard({ event }) {
         </p>
 
         <p className="pj-event-price">
-          {formatPrice(event)}
+          {formatPrice(event, language)}
         </p>
 
         <div className="pj-event-actions">
@@ -139,7 +140,7 @@ function EventCard({ event }) {
               rel="noopener noreferrer"
               className="pj-event-map"
             >
-              Ver ubicación
+              {t(language, 'Ver ubicación')}
             </a>
           )}
 
@@ -150,7 +151,7 @@ function EventCard({ event }) {
               rel="noopener noreferrer"
               className="pj-event-ticket"
             >
-              Ver boletos
+              {t(language, 'Ver boletos')}
             </a>
           )}
         </div>
@@ -159,7 +160,7 @@ function EventCard({ event }) {
   );
 }
 
-export default function EventFeed() {
+export default function EventFeed({ language, onLanguageChange }) {
   const aboutDialogRef = useRef(null);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -205,7 +206,7 @@ export default function EventFeed() {
         setEvents(data.events);
       } catch (err) {
         if (err.name !== 'AbortError') {
-          setError('No pudimos cargar los eventos. Intenta nuevamente.');
+          setError('load');
         }
       } finally {
         if (!controller.signal.aborted) {
@@ -312,13 +313,17 @@ export default function EventFeed() {
     <div className="pj-site" id="inicio">
       <header className="pj-site-header">
         <div className="pj-header-inner">
-          <a href="#inicio" className="pj-home-link" aria-label="Pa'l Jangueo, inicio">
+          <a href="#inicio" className="pj-home-link" aria-label={t(language, "Pa'l Jangueo, inicio")}>
             <BrandLogo />
           </a>
-          <nav className="pj-navigation" aria-label="Navegación principal">
-            <a href="#eventos">Explorar</a>
-            <button type="button" onClick={focusSearch}>Artistas</button>
-            <button type="button" onClick={focusSearch}>Lugares</button>
+          <div className="pj-language-toggle" role="group" aria-label={t(language, 'Idioma')}>
+            <button type="button" lang="es" aria-pressed={language === 'es'} onClick={() => onLanguageChange('es')}>ES</button>
+            <button type="button" lang="en" aria-pressed={language === 'en'} onClick={() => onLanguageChange('en')}>EN</button>
+          </div>
+          <nav className="pj-navigation" aria-label={t(language, 'Navegación principal')}>
+            <a href="#eventos">{t(language, 'Explorar')}</a>
+            <button type="button" onClick={focusSearch}>{t(language, 'Artistas')}</button>
+            <button type="button" onClick={focusSearch}>Venues</button>
             <button
               type="button"
               onClick={() => aboutDialogRef.current?.showModal()}
@@ -327,7 +332,7 @@ export default function EventFeed() {
             >
               About
             </button>
-            <a href="#mi-jangueo" className="pj-navigation-heart" aria-label="Mi Jangueo, próximamente">
+            <a href="#mi-jangueo" className="pj-navigation-heart" aria-label={t(language, 'Mi Jangueo, próximamente')}>
               <HeartIcon />
             </a>
           </nav>
@@ -337,27 +342,26 @@ export default function EventFeed() {
       <main className="pj-discovery">
         <section className="pj-hero" aria-labelledby="pj-main-heading">
           <div className="pj-hero-copy">
-            <p className="pj-eyebrow">LA ESCENA MUSICAL DE PUERTO RICO</p>
+            <p className="pj-eyebrow">{t(language, 'LA ESCENA MUSICAL DE PUERTO RICO')}</p>
             <h1 id="pj-main-heading">
-              <span>La isla suena.</span>
-              <strong>Sigue la música.</strong>
+              <span>{t(language, 'La isla suena.')}</span>
+              <strong>{t(language, 'Sigue la música.')}</strong>
             </h1>
             <p className="pj-hero-description">
-              De los escenarios más íntimos a los conciertos más grandes.
-              Descubre la música en vivo que mueve a Puerto Rico.
+              {t(language, 'De los escenarios más íntimos a los conciertos más grandes. Descubre la música en vivo que mueve a Puerto Rico.')}
             </p>
             <div className="pj-hero-actions">
               <a className="pj-button pj-button-primary" href="#eventos">
-                Explorar eventos <span aria-hidden="true">↗</span>
+                {t(language, 'Explorar eventos')} <span aria-hidden="true">↗</span>
               </a>
               <button className="pj-button" type="button" onClick={focusSearch}>
-                Descubrir artistas
+                {t(language, 'Descubrir artistas')}
               </button>
             </div>
           </div>
-          <div className="pj-hero-feature" aria-label="Todos los ritmos. Un solo archipiélago.">
+          <div className="pj-hero-feature" aria-label={t(language, 'Todos los ritmos. Un solo archipiélago.')}>
             <div className="pj-feature-top">
-              <span>EN VIVO · PR</span>
+              <span>{t(language, 'EN VIVO · PR')}</span>
               <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                 <path d="M4 9v6M8 5v14M12 2v20M16 6v12M20 9v6" />
               </svg>
@@ -368,14 +372,14 @@ export default function EventFeed() {
               ))}
             </div>
             <div className="pj-feature-copy">
-              <h2>Todos los ritmos.<span>Un solo archipiélago.</span></h2>
+              <h2>{t(language, 'Todos los ritmos.')}<span>{t(language, 'Un solo archipiélago.')}</span></h2>
               <div className="pj-feature-genres">
-                <ul className="pj-genre-list" aria-label="Géneros musicales">
+                <ul className="pj-genre-list" aria-label={t(language, 'Géneros musicales')}>
                   {['Salsa', 'Rock', 'Indie', 'Urbana', 'Jazz'].map((genre) => (
-                    <li key={genre}>{genre}</li>
+                    <li key={genre}>{t(language, genre)}</li>
                   ))}
                 </ul>
-                <p className="pj-feature-more">Y mucho más.</p>
+                <p className="pj-feature-more">{t(language, 'Y mucho más.')}</p>
               </div>
             </div>
           </div>
@@ -390,14 +394,14 @@ export default function EventFeed() {
               <circle cx="11" cy="17" r="2" fill="#0e141c" />
             </svg>
             <div className="pj-filter-heading-copy">
-              <h2 id="pj-filters-heading">Busca tu próximo jangueo</h2>
-              <p>Explora eventos a tu manera.</p>
+              <h2 id="pj-filters-heading">{t(language, 'Busca tu próximo jangueo')}</h2>
+              <p>{t(language, 'Explora eventos a tu manera.')}</p>
             </div>
           </div>
-          <EventFilters events={events} filters={filters} setFilters={setFilters} />
-          <div className="pj-region-chips" aria-label="Filtrar por región">
+          <EventFilters events={events} filters={filters} setFilters={setFilters} language={language} />
+          <div className="pj-region-chips" aria-label={t(language, 'Filtrar por región')}>
             <button type="button" className="pj-region-chip" aria-pressed={!filters.region} onClick={() => chooseRegion('')}>
-              Toda la isla
+              {t(language, 'Toda la isla')}
             </button>
             {REGIONS.map(region => (
               <button
@@ -407,7 +411,7 @@ export default function EventFeed() {
                 aria-pressed={filters.region === region}
                 onClick={() => chooseRegion(region)}
               >
-                {region}
+                {t(language, region)}
               </button>
             ))}
           </div>
@@ -416,12 +420,12 @@ export default function EventFeed() {
         <section className="pj-events" id="eventos" aria-labelledby="pj-events-heading">
           <div className="pj-section-heading">
             <div>
-              <h2 id="pj-events-heading">Explora lo que suena</h2>
-              <p>Descubre experiencias musicales por toda la isla.</p>
+              <h2 id="pj-events-heading">{t(language, 'Explora lo que suena')}</h2>
+              <p>{t(language, 'Descubre experiencias musicales por toda la isla.')}</p>
             </div>
             {!loading && !error && (
               <span className="pj-event-count">
-                {filteredEvents.length} {filteredEvents.length === 1 ? 'evento' : 'eventos'}
+                {filteredEvents.length} {t(language, filteredEvents.length === 1 ? 'evento' : 'eventos')}
               </span>
             )}
           </div>
@@ -429,28 +433,28 @@ export default function EventFeed() {
           {loading && (
             <p className="pj-event-status pj-event-loading" role="status">
               <span className="pj-loading-spinner" aria-hidden="true" />
-              Buscando eventos...
+              {t(language, 'Buscando eventos...')}
             </p>
           )}
-          {error && <p className="pj-event-status" role="alert">{error}</p>}
+          {error && <p className="pj-event-status" role="alert">{t(language, 'No pudimos cargar los eventos. Intenta nuevamente.')}</p>}
 
           {!loading && !error && events.length === 0 && (
             <div className="pj-empty">
-              <h3>Pronto habrá música por aquí.</h3>
-              <p>Estamos preparando los próximos eventos de la escena local.</p>
+              <h3>{t(language, 'Pronto habrá música por aquí.')}</h3>
+              <p>{t(language, 'Estamos preparando los próximos eventos de la escena local.')}</p>
             </div>
           )}
 
           {!loading && !error && events.length > 0 && filteredEvents.length === 0 && (
             <div className="pj-empty">
-              <h3>No encontramos eventos con esos filtros.</h3>
-              <p>Prueba otra región, fecha o precio.</p>
+              <h3>{t(language, 'No encontramos eventos con esos filtros.')}</h3>
+              <p>{t(language, 'Prueba otra región, fecha o precio.')}</p>
             </div>
           )}
 
           {!loading && !error && filteredEvents.length > 0 && (
             <div className="pj-event-grid">
-              {filteredEvents.map(event => <EventCard key={event.id} event={event} />)}
+              {filteredEvents.map(event => <EventCard key={event.id} event={event} language={language} />)}
             </div>
           )}
         </section>
@@ -461,18 +465,18 @@ export default function EventFeed() {
               <HeartIcon />
               <h2 id="pj-favorites-heading">Mi Jangueo</h2>
             </div>
-            <p>Tu espacio para guardar artistas, lugares y eventos favoritos. Todo lo que te gusta, en un mismo sitio.</p>
+            <p>{t(language, 'Tu espacio para guardar artistas, lugares y eventos favoritos. Todo lo que te gusta, en un mismo sitio.')}</p>
           </div>
-          <span className="pj-favorites-badge">Próximamente</span>
+          <span className="pj-favorites-badge">{t(language, 'Próximamente')}</span>
         </section>
       </main>
 
       <footer className="pj-site-footer">
         <div className="pj-footer-inner">
-          <a href="#inicio" className="pj-home-link" aria-label="Pa'l Jangueo, volver al inicio">
+          <a href="#inicio" className="pj-home-link" aria-label={t(language, "Pa'l Jangueo, volver al inicio")}>
             <BrandLogo footer />
           </a>
-          <p>La isla suena. Sigue la música.</p>
+          <p>{t(language, 'La isla suena. Sigue la música.')}</p>
         </div>
       </footer>
 
@@ -497,7 +501,7 @@ export default function EventFeed() {
           <button
             type="button"
             className="pj-about-close pj-icon-action"
-            aria-label="Cerrar"
+            aria-label={t(language, 'Cerrar')}
             onClick={() => aboutDialogRef.current?.close()}
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -505,18 +509,15 @@ export default function EventFeed() {
             </svg>
           </button>
           <span className="pj-about-label">PA'L JANGUEO™ <span>BETA</span></span>
-          <h2 id="pj-about-title">Sobre Pa'l Jangueo</h2>
+          <h2 id="pj-about-title">{t(language, "Sobre Pa'l Jangueo")}</h2>
           <p id="pj-about-description">
-            Pa'l Jangueo es una aplicación en desarrollo dedicada a descubrir
-            la música en vivo de Puerto Rico.
+            {t(language, "Pa'l Jangueo es una aplicación en desarrollo dedicada a descubrir la música en vivo de Puerto Rico.")}
           </p>
           <p className="pj-about-registration">
-            Esta versión beta continúa evolucionando. El registro de la marca
-            está previsto para una próxima etapa.
+            {t(language, 'Esta versión beta continúa evolucionando. El registro de la marca está previsto para una próxima etapa.')}
           </p>
           <p className="pj-about-copyright">
-            © 2026 Pa'l Jangueo. Derechos reservados sobre el contenido
-            original de la aplicación.
+            {t(language, "© 2026 Pa'l Jangueo. Derechos reservados sobre el contenido original de la aplicación.")}
           </p>
         </div>
       </dialog>

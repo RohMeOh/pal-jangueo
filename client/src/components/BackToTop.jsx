@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import './BackToTop.css';
 import './IconAction.css';
+import { t } from '../i18n';
 
 const SHOW_AFTER_PX = 420;
 
-export default function BackToTop() {
+export default function BackToTop({ language }) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -27,8 +28,8 @@ export default function BackToTop() {
       type="button"
       className="pj-back-to-top pj-icon-action"
       onClick={scrollToTop}
-      aria-label="Volver arriba"
-      title="Volver arriba"
+      aria-label={t(language, 'Volver arriba')}
+      title={t(language, 'Volver arriba')}
     >
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M12 19V5m-6 6 6-6 6 6" />

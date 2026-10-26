@@ -363,3 +363,34 @@
   font-size: 13px;
   line-height: 1.5;
 }
+
+/* Compact ES/EN control, alongside the wordmark. */
+.pj-language-toggle {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid #314054;
+  border-radius: 999px;
+  background: #101720;
+}
+.pj-language-toggle button {
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #c1ccda;
+  padding: 5px 9px;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+}
+.pj-language-toggle button[aria-pressed="true"] {
+  background: var(--pj-blue);
+  color: #05070a;
+}
+.pj-language-toggle button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}

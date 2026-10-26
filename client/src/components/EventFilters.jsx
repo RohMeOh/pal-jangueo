@@ -1,4 +1,5 @@
 import './EventFilters.css';
+import { t } from '../i18n';
 
 export const REGIONS = [
   'La Metro',
@@ -9,15 +10,15 @@ export const REGIONS = [
   'El Centro'
 ];
 
-function formatFilterDate(value) {
-  if (!value) return 'Selecciona una fecha';
+function formatFilterDate(value, language) {
+  if (!value) return t(language, 'Selecciona una fecha');
 
   const [year, month, day] = value.split('-').map(Number);
   const date = new Date(year, month - 1, day);
 
   if (Number.isNaN(date.getTime())) return value;
 
-  return new Intl.DateTimeFormat('es-PR', {
+  return new Intl.DateTimeFormat(language === 'en' ? 'en-US' : 'es-PR', {
     day: 'numeric',
     month: 'short',
     year: 'numeric'
@@ -27,7 +28,8 @@ function formatFilterDate(value) {
 export default function EventFilters({
   events,
   filters,
-  setFilters
+  setFilters,
+  language
 }) {
   const municipalities = [...new Set(
     events
@@ -81,40 +83,40 @@ export default function EventFilters({
   return (
     <div className="pj-filters">
       <div className="pj-filter pj-filter-search">
-        <label htmlFor="filter-search">Buscar</label>
+        <label htmlFor="filter-search">{t(language, 'Buscar')}</label>
         <input
           id="filter-search"
           type="search"
-          placeholder="Evento, artista o local..."
+          placeholder={t(language, 'Evento, artista o local...')}
           value={filters.search}
           onChange={e => update('search', e.target.value)}
         />
       </div>
 
       <div className="pj-filter">
-        <label htmlFor="filter-region">Región</label>
+        <label htmlFor="filter-region">{t(language, 'Región')}</label>
         <select
           id="filter-region"
           value={filters.region}
           onChange={e => update('region', e.target.value)}
         >
-          <option value="">Todas las regiones</option>
+          <option value="">{t(language, 'Todas las regiones')}</option>
           {REGIONS.map(region => (
             <option key={region} value={region}>
-              {region}
+              {t(language, region)}
             </option>
           ))}
         </select>
       </div>
 
       <div className="pj-filter">
-        <label htmlFor="filter-municipality">Municipio</label>
+        <label htmlFor="filter-municipality">{t(language, 'Municipio')}</label>
         <select
           id="filter-municipality"
           value={filters.municipality}
           onChange={e => update('municipality', e.target.value)}
         >
-          <option value="">Todos los municipios</option>
+          <option value="">{t(language, 'Todos los municipios')}</option>
           {municipalities.map(municipality => (
             <option key={municipality} value={municipality}>
               {municipality}
@@ -124,13 +126,13 @@ export default function EventFilters({
       </div>
 
       <div className="pj-filter">
-        <label htmlFor="filter-neighborhood">Barrio / Sector</label>
+        <label htmlFor="filter-neighborhood">{t(language, 'Barrio / Sector')}</label>
         <select
           id="filter-neighborhood"
           value={filters.neighborhood}
           onChange={e => update('neighborhood', e.target.value)}
         >
-          <option value="">Todos los barrios</option>
+          <option value="">{t(language, 'Todos los barrios')}</option>
           {neighborhoods.map(neighborhood => (
             <option key={neighborhood} value={neighborhood}>
               {neighborhood}
@@ -140,7 +142,7 @@ export default function EventFilters({
       </div>
 
       <div className="pj-filter">
-        <label htmlFor="filter-from">Desde</label>
+        <label htmlFor="filter-from">{t(language, 'Desde')}</label>
         <div className="pj-date-field">
           <input
             id="filter-from"
@@ -154,13 +156,13 @@ export default function EventFilters({
             className={`pj-date-hint${filters.fromDate ? ' pj-date-selected' : ''}`}
             aria-hidden="true"
           >
-            {formatFilterDate(filters.fromDate)}
+            {formatFilterDate(filters.fromDate, language)}
           </span>
         </div>
       </div>
 
       <div className="pj-filter">
-        <label htmlFor="filter-to">Hasta</label>
+        <label htmlFor="filter-to">{t(language, 'Hasta')}</label>
         <div className="pj-date-field">
           <input
             id="filter-to"
@@ -174,21 +176,21 @@ export default function EventFilters({
             className={`pj-date-hint${filters.toDate ? ' pj-date-selected' : ''}`}
             aria-hidden="true"
           >
-            {formatFilterDate(filters.toDate)}
+            {formatFilterDate(filters.toDate, language)}
           </span>
         </div>
       </div>
 
       <div className="pj-filter">
-        <label htmlFor="filter-price">Precio</label>
+        <label htmlFor="filter-price">{t(language, 'Precio')}</label>
         <select
           id="filter-price"
           value={filters.price}
           onChange={e => update('price', e.target.value)}
         >
-          <option value="">Todos los precios</option>
-          <option value="free">Con opción gratis</option>
-          <option value="paid">De pago</option>
+          <option value="">{t(language, 'Todos los precios')}</option>
+          <option value="free">{t(language, 'Con opción gratis')}</option>
+          <option value="paid">{t(language, 'De pago')}</option>
         </select>
       </div>
 
@@ -197,7 +199,7 @@ export default function EventFilters({
         type="button"
         onClick={clearFilters}
       >
-        Quitar filtros
+        {t(language, 'Quitar filtros')}
       </button>
     </div>
   );
