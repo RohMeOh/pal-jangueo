@@ -192,6 +192,34 @@ function assessMusicEvidence(rawDescription) {
     signals.push('Músicos e instrumentos en presentación');
   }
 
+
+  // Broader music-first events: freestyle, artist tours,
+  // curated electronic music and album celebrations.
+  const freestyle =
+    /\bbatallas? de rap improvisado\b/.test(text) &&
+    /\b(?:liga|ranking|participantes|publico|competencia)\b/.test(text);
+
+  const artistTour =
+    /\bcantautor(?:a)?\b/.test(text) &&
+    /\bse presenta\b/.test(text) &&
+    /\b(?:gira|musica|album)\b/.test(text);
+
+  const electronicNight =
+    /\bmusica en el centro\b/.test(text) &&
+    /\bcuraduria enfocada en la musica electronica\b/.test(text) &&
+    /\b(?:pista|club)\b/.test(text);
+
+  const albumCelebration =
+    /\b(?:conmemoramos|celebramos|aniversario)\b/.test(text) &&
+    /\b(?:disco|album)\b/.test(text) &&
+    /\btrayectoria musical\b/.test(text) &&
+    /\bvolver a las canciones\b/.test(text);
+
+  if (freestyle) signals.push('Rap improvisado en vivo');
+  if (artistTour) signals.push('Cantautor en gira');
+  if (electronicNight) signals.push('Experiencia electrónica musical');
+  if (albumCelebration) signals.push('Celebración musical de disco');
+
   const nonMusicEventDetected = nonMusicSignals.length > 0;
 
   const musicalPerformanceSignalDetected = signals.some(signal =>
@@ -204,7 +232,11 @@ function assessMusicEvidence(rawDescription) {
     signal === 'Banda u orquesta en vivo' ||
     signal === 'Presentación musical explícita' ||
     signal === 'Cartel de bandas con anuncio de actuación' ||
-    signal === 'Interpretación musical anunciada en escenario'
+    signal === 'Interpretación musical anunciada en escenario' ||
+    signal === 'Rap improvisado en vivo' ||
+    signal === 'Cantautor en gira' ||
+    signal === 'Experiencia electrónica musical' ||
+    signal === 'Celebración musical de disco'
   );
 
   const mixedEventDetected =
