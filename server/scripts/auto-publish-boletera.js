@@ -6,6 +6,9 @@ const {
 
 const { extractEventJsonLd } = require('../utils/extractEventJsonLd');
 const { normalizeBoleteraCandidate } = require('../utils/normalizeBoleteraCandidate');
+const {
+  reuseVerifiedBoleteraVenue
+} = require('../utils/reuseVerifiedBoleteraVenue');
 const { buildBoleteraReviewAnalysis } = require('../utils/buildBoleteraReviewAnalysis');
 const { assessBoleteraMusicCandidate } = require('../utils/assessBoleteraMusicCandidate');
 const { extractBoleteraFlyer } = require('../utils/extractBoleteraFlyer');
@@ -127,8 +130,9 @@ async function verifyImage(url) {
 
 async function evaluate(candidate) {
   const { raw, flyer } = await getLiveEvent(candidate.source_url);
-  const live = normalizeBoleteraCandidate(raw);
-  const currentAnalysis = buildBoleteraReviewAnalysis(raw);
+  const enriched = await reuseVerifiedBoleteraVenue(raw, pool);
+  const live = normalizeBoleteraCandidate(enriched);
+  const currentAnalysis = buildBoleteraReviewAnalysis(enriched);
   const { assessment, eligibleForReview } =
     assessBoleteraMusicCandidate(raw);
 

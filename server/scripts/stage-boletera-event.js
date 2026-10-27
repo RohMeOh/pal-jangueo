@@ -24,6 +24,9 @@ const {
 const {
   assessBoleteraMusicCandidate
 } = require('../utils/assessBoleteraMusicCandidate');
+const {
+  reuseVerifiedBoleteraVenue
+} = require('../utils/reuseVerifiedBoleteraVenue');
 
 async function main() {
   const input = process.argv[2];
@@ -72,8 +75,8 @@ async function main() {
   }
 
   const event = events[0];
-  const candidate = normalizeBoleteraCandidate(event);
-  const analysis = buildBoleteraReviewAnalysis(event);
+  let candidate = normalizeBoleteraCandidate(event);
+  let analysis = buildBoleteraReviewAnalysis(event);
 
   console.log('\n=== PA’L JANGUEO ===');
   console.log('VISTA PREVIA DE CANDIDATO REAL\n');
@@ -126,6 +129,19 @@ async function main() {
 
   // Database access only happens in explicit staging mode.
   const pool = require('../db');
+
+  try {
+    const enriched = await reuseVerifiedBoleteraVenue(event, pool);
+    candidate = normalizeBoleteraCandidate(enriched);
+    analysis = buildBoleteraReviewAnalysis(enriched);
+  } catch (error) {
+    await pool.end();
+    throw error;
+  }
+
+  console.log('Municipio para staging:', candidate.municipality);
+
+  // Hash the untouched official source, never derived location data.
   const captionText = JSON.stringify(event);
   const contentHash = buildSourceContentHash({
     captionText
@@ -188,7 +204,39 @@ async function main() {
       finalStatus = previous.review_status;
 
       if (previous.source_content_hash === contentHash) {
-        console.log('\nCandidato existente reutilizado.');
+        const previousCity = previous.analysis_result?.event?.municipality;
+
+        if (
+          previous.review_status === 'pending_review' &&
+          previous.approved_event_id == null &&
+          !previousCity &&
+          candidate.municipality
+        ) {
+          const refreshed = {
+            ...(previous.analysis_result || {}),
+            event: {
+              ...(previous.analysis_result?.event || {}),
+              municipality: candidate.municipality
+            }
+          };
+
+          const result = await client.query(`
+            UPDATE public.event_candidates
+            SET analysis_result = $2::jsonb
+            WHERE id = $1
+              AND review_status = 'pending_review'
+              AND approved_event_id IS NULL
+            RETURNING id
+          `, [candidateId, JSON.stringify(refreshed)]);
+
+          if (result.rowCount !== 1) {
+            throw new Error('No se pudo verificar el municipio.');
+          }
+
+          console.log('\nCandidato existente actualizado.');
+        } else {
+          console.log('\nCandidato existente reutilizado.');
+        }
 
       } else if (
         previous.review_status !== 'pending_review' ||

@@ -9,6 +9,9 @@ const { promisify } = require('node:util');
 const { extractEvents } = require('./discover-boletera');
 const { extractEventJsonLd } = require('../utils/extractEventJsonLd');
 const { adaptBoleteraEvent } = require('../adapters/boleteraAdapter');
+const {
+  reuseVerifiedBoleteraVenue
+} = require('../utils/reuseVerifiedBoleteraVenue');
 const { assessBoleteraMusicCandidate } = require('../utils/assessBoleteraMusicCandidate');
 
 const execFileAsync = promisify(execFile);
@@ -160,7 +163,10 @@ async function main() {
         }
 
         const raw = events[0];
-        const prepared = adaptBoleteraEvent(raw);
+        const enriched = stage
+          ? await reuseVerifiedBoleteraVenue(raw, pool)
+          : raw;
+        const prepared = adaptBoleteraEvent(enriched);
         const { assessment, eligibleForReview } =
           assessBoleteraMusicCandidate(raw);
 
