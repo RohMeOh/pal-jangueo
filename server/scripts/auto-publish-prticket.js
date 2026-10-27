@@ -22,6 +22,10 @@ const {
 } = require('../utils/normalizePrticketEvent');
 
 const {
+  extractPrticketPerformances
+} = require('../utils/extractPrticketPerformances');
+
+const {
   assessTicketPublication
 } = require('../utils/assessTicketPublication');
 
@@ -392,9 +396,19 @@ async function main() {
         problems.push('Fuente no autorizada');
       }
 
-      const detail = extractDetail(
-        await fetchHtml(card.source_url)
-      );
+      const detailHtml = await fetchHtml(card.source_url);
+      const performances = extractPrticketPerformances(detailHtml);
+
+      if (performances.length > 1) {
+        blocked++;
+        console.log('\nBLOQUEADO:', card.title);
+        console.log(
+          'Múltiples funciones: requiere publicación conjunta.'
+        );
+        continue;
+      }
+
+      const detail = extractDetail(detailHtml);
 
       const live = normalizePrticketEvent(card, detail);
       const stored = candidate.analysis_result?.event || {};
