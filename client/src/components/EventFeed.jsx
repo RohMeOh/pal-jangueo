@@ -472,7 +472,12 @@ export default function EventFeed({ language, onLanguageChange }) {
           <button type="button" className="pj-home-link" aria-label={t(language, "Pa'l Jangueo, volver al inicio")} onClick={() => openSection('home')}>
             <BrandLogo footer />
           </button>
-          <p>{t(language, 'La isla suena. Sigue la música.')}</p>
+          <div className="pj-footer-copy">
+            <p>{t(language, 'La isla suena. Sigue la música.')}</p>
+            <p className="pj-footer-copyright">
+              {t(language, "© 2026 Pa'l Jangueo. Derechos reservados sobre el contenido original de la aplicación.")}
+            </p>
+          </div>
         </div>
       </footer>
 
