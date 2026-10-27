@@ -10,19 +10,9 @@ function assessBoleteraMusicCandidate(rawEvent) {
     rawEvent?.description_raw
   );
 
-  const structuredMusicContext =
-    rawEvent?.event_type === 'MusicEvent' &&
-    assessment.classification ===
-      'contexto_musical_pendiente_de_verificar' &&
-    !assessment.signals.includes('Experiencia temática') &&
-    !assessment.signals.includes('Documental o cine');
-
-  const eligibleForReview =
-    rawEvent?.event_type === 'MusicEvent' &&
-    (
-      assessment.has_musical_program_evidence ||
-      structuredMusicContext
-    );
+  // This type is trusted only when extracted from Boletera's live JSON-LD.
+  // Its description may be incomplete or worded in unexpected ways.
+  const eligibleForReview = rawEvent?.event_type === 'MusicEvent';
 
   return {
     assessment,

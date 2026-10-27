@@ -11,8 +11,8 @@ const { assessBoleteraMusicCandidate } = require('../utils/assessBoleteraMusicCa
 const { extractBoleteraFlyer } = require('../utils/extractBoleteraFlyer');
 const { buildSourceContentHash } = require('../utils/sourceContentHash');
 const {
-  assessTicketPublication
-} = require('../utils/assessTicketPublication');
+  assessMusicCatalogEligibility
+} = require('../utils/assessMusicCatalogEligibility');
 
 const args = process.argv.slice(2);
 const publish = args.includes('--publish');
@@ -165,13 +165,8 @@ async function evaluate(candidate) {
     problems.push('Validación estructural incompleta');
   }
 
-  if (
-    !eligibleForReview ||
-    assessment.has_musical_program_evidence !== true ||
-    ['evento_no_musical', 'evento_mixto_pendiente_de_verificar']
-      .includes(assessment.classification)
-  ) {
-    problems.push('Actuación musical no corroborada');
+  if (!eligibleForReview || raw.event_type !== 'MusicEvent') {
+    problems.push('Clasificación oficial MusicEvent no verificada');
   }
 
   const date = new Date(live.start_at || '');
@@ -275,13 +270,17 @@ async function evaluate(candidate) {
     live.ticket_url === expectedTickets &&
     liveEvent.ticket_url === expectedTickets;
 
-  const { policy } = assessTicketPublication({
+  // This type was extracted from Boletera's LIVE official JSON-LD,
+  // not from a candidate record or an untrusted description.
+  // PRticket still uses its separate description-based verification.
+  const policy = assessMusicCatalogEligibility({
     event: {
       ...liveEvent,
       source_url: candidate.source_url
     },
-    description: raw.description_raw,
     verification: {
+      music_status: raw.event_type === 'MusicEvent'
+        ? 'verified_music' : 'needs_review',
       source_status: sourceConfirmed
         ? 'verified' : 'needs_review',
       venue_status: venuePlan
@@ -467,8 +466,11 @@ async function writeEvent(candidate, result) {
         venue_id: venueRecord.id,
         venue_source_confirmed: true,
         venue_independently_verified: venueRecord.verified,
-        music_classification: result.assessment.classification,
-        musical_program_verified: true,
+        music_classification: 'MusicEvent',
+        music_verification_method: 'official_boletera_json_ld',
+        description_music_assessment: result.assessment.classification,
+        musical_program_verified:
+          result.assessment.has_musical_program_evidence === true,
         flyer_url: result.verifiedFlyer
       }
     };

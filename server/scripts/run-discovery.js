@@ -188,40 +188,17 @@ async function main() {
           continue;
         }
 
-        if (
-          assessment.classification ===
-          'evento_mixto_pendiente_de_verificar'
-        ) {
-          totals.needsReview++;
-          console.log('Resultado: evento mixto pendiente de verificar');
-          console.log('Guardado automático: NO');
-          continue;
-        }
-
-        if (assessment.classification === 'evento_no_musical') {
-          totals.notEligible++;
-          console.log('Resultado: evento no musical (fuera del MVP)');
-          console.log('Guardado automático: NO');
-          continue;
-        }
-
         if (!eligibleForReview) {
           totals.needsReview++;
-          console.log('Resultado: evidencia musical insuficiente');
+          console.log('Resultado: no es MusicEvent oficial');
           console.log('Guardado automático: NO');
           continue;
         }
 
         totals.musicEvidence++;
 
-        console.log(
-          'Base de evidencia:',
-          assessment.has_musical_program_evidence
-            ? 'Actuación musical descrita'
-            : 'MusicEvent + contexto musical (sin actuación confirmada)'
-        );
-
-        console.log('Resultado: candidato con indicios musicales');
+        console.log('Base de evidencia: MusicEvent oficial de Boletera');
+        console.log('Resultado: candidato musical oficial');
         console.log('Música local confirmada: NO');
         console.log('Publicación autorizada: NO');
 
@@ -264,7 +241,7 @@ async function main() {
   }
 
   console.log('\n=== RESUMEN ===');
-  console.log('Con indicios musicales:', totals.musicEvidence);
+  console.log('MusicEvent oficiales elegibles para staging:', totals.musicEvidence);
   console.log('Necesitan otra revisión:', totals.needsReview);
   console.log('No elegibles:', totals.notEligible);
   console.log('Ya aprobados:', totals.skippedPublished);
