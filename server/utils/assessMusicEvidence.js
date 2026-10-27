@@ -60,6 +60,12 @@ function assessMusicEvidence(rawDescription) {
   // A theater venue name alone does not count.
   const nonMusicRules = [
     {
+      // Comedy with background or incidental live music is not
+      // a music-first event. Do not reject musical improvisation alone.
+      name: 'Comedia o stand-up',
+      pattern: /\b(?:stand[\s-]*up(?:\s+comedy)?|(?:show|espectaculo|noche|funcion)\s+de\s+comedia|comedia\s+(?:improvisada|en\s+vivo)|improvisacion\s+comica)\b/
+    },
+    {
       name: 'Evento teatral',
       pattern: /\b(pieza teatral|obra de teatro|obra teatral|gira teatral|montaje teatral|funcion teatral|produccion teatral|festival de teatro)\b/
     },
