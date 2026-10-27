@@ -139,11 +139,11 @@
 .pj-feature-copy h2 span { display: block; color: var(--pj-red); }
 .pj-feature-copy p { margin-top: 12px; color: #c2cbd8; font-size: 13px; }
 
-.pj-filters-section { padding: 30px 0 34px; }
+.pj-filters-section { padding: 30px 0 24px; }
 .pj-filter-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
 .pj-filter-heading svg { stroke: var(--pj-blue); flex: 0 0 auto; }
 .pj-filter-heading h2 { font-size: 21px; font-weight: 900; }
-.pj-region-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; }
+.pj-region-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 24px; }
 .pj-region-chip { border: 1px solid #2e435a; border-radius: 999px; background: #101925; color: #c1ccda; padding: 7px 14px; font-size: 12px; font-weight: 800; }
 .pj-region-chip:hover { border-color: var(--pj-blue); }
 .pj-region-chip[aria-pressed="true"] { color: #000104; background: var(--pj-blue); border-color: var(--pj-blue); }

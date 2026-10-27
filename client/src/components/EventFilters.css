@@ -91,6 +91,7 @@
 .pj-clear-filters {
   grid-column: 1 / -1;
   justify-self: center;
+  margin-top: 6px;
   height: 47px;
   width: min(200px, 100%);
   padding: 10px;
@@ -104,6 +105,10 @@
 .pj-clear-filters:hover { border-color: #13c5ff; }
 @media (max-width: 900px) { .pj-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }  }
 @media (max-width: 530px) { .pj-filters { grid-template-columns: minmax(0, 1fr); gap: 13px; padding: 15px; } .pj-filter-search { grid-column: 1; } }
+
+@media (max-width: 530px) {
+  .pj-clear-filters { margin-top: 2px; }
+}
 
 /* Prevent iOS Safari from zooming the page when a filter is focused.
    Keep the original compact desktop typography. */
