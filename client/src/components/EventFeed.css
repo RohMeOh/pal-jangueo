@@ -220,7 +220,7 @@
   .pj-header-inner { flex-wrap: wrap; padding-top: 15px; padding-bottom: 10px; gap: 5px; }
   .pj-brand { font-size: clamp(15px, 5vw, 23px); }
   .pj-brand-footer { font-size: 18px; }
-  .pj-navigation { width: 100%; justify-content: space-between; gap: 10px; }
+  .pj-navigation { width: 100%; justify-content: flex-start; gap: clamp(20px, 5vw, 28px); }
   .pj-navigation a, .pj-navigation button { padding: 9px 0; font-size: 12px; }
   .pj-discovery { padding-top: 28px; padding-bottom: 40px; }
   .pj-hero { gap: 24px; }
@@ -283,7 +283,6 @@
   z-index: 1;
 }
 @media (max-width: 620px) {
-  .pj-navigation { gap: 6px; }
   .pj-about-dialog-content { padding: 25px 22px 26px; }
 }
 
