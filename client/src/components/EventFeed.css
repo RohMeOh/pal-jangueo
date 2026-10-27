@@ -131,10 +131,23 @@
   overflow: hidden;
 }
 .pj-feature-top { display: flex; justify-content: space-between; align-items: center; color: var(--pj-blue); font-size: 12px; font-weight: 900; letter-spacing: .11em; }
-.pj-feature-top svg { width: 24px; height: 24px; stroke: var(--pj-red); }
-.pj-waveform { display: flex; gap: 7px; align-items: center; justify-content: center; min-height: 112px; margin: 20px 0; }
-.pj-waveform span { width: 8px; height: var(--bar-height); flex: 0 1 8px; background: var(--pj-blue); border-radius: 6px; opacity: 1; }
-.pj-waveform span:nth-child(4n + 1) { background: var(--pj-red); opacity: 1; }
+.pj-feature-top svg { width: 24px; height: 24px; stroke: #fff; }
+
+.pj-waveform {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 112px;
+  margin: 20px 0;
+}
+
+.pj-waveform img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+}
 .pj-feature-copy h2 { color: #fff; font-weight: 900; font-size: clamp(24px, 2.65vw, 34px); line-height: 1.2; }
 .pj-feature-copy h2 span { display: block; color: var(--pj-red); }
 .pj-feature-copy p { margin-top: 12px; color: #c2cbd8; font-size: 13px; }
@@ -248,8 +261,7 @@
   .pj-hero h1 { margin: 20px 0 16px; font-size: clamp(36px, 10vw, 52px); }
   .pj-hero-description { font-size: 15px; }
   .pj-hero-feature { min-height: 260px; padding: 19px; }
-  .pj-waveform { gap: 5px; }
-  .pj-waveform span { width: 6px; }
+  .pj-waveform { margin: 14px 0; }
   .pj-search-page > .pj-filters-section { padding-top: 12px; }
   .pj-section-heading { align-items: flex-start; }
   .pj-event-grid { grid-template-columns: 1fr; }
@@ -390,4 +402,68 @@
   .pj-search-page > .pj-filters-section {
     padding-top: 16px;
   }
+}
+
+
+/* Arte aprobado sobre el acabado original de Pa'l Jangueo. */
+.pj-hero-feature.pj-hero-feature-approved {
+  display: block;
+  position: relative;
+  min-height: 0;
+  padding: 0;
+  aspect-ratio: 1408 / 955;
+  border: 1px solid #28465e;
+  border-radius: 20px;
+  background:
+    radial-gradient(
+      circle at 75% 18%,
+      #0b3754 0,
+      transparent 55%
+    ),
+    #0c1927;
+  overflow: hidden;
+}
+
+.pj-approved-hero-image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Texto bilingüe sobre el arte aprobado. */
+.pj-hero-feature.pj-hero-feature-approved {
+  container-type: inline-size;
+}
+
+.pj-approved-art-eyebrow {
+  position: absolute;
+  top: 8.7%;
+  left: 7.7%;
+  z-index: 1;
+  color: #13c5ff;
+  font-size: clamp(8px, 2.4cqw, 15px);
+  font-weight: 900;
+  letter-spacing: .08em;
+  line-height: 1.15;
+}
+
+.pj-approved-art-copy {
+  position: absolute;
+  left: 7.8%;
+  right: 4%;
+  bottom: 8%;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: .6cqw;
+  color: #fff;
+  font-size: clamp(15px, 6.45cqw, 38px);
+  font-weight: 900;
+  letter-spacing: -.025em;
+  line-height: 1.12;
+}
+
+.pj-approved-art-copy strong {
+  color: #ff1744;
+  font: inherit;
 }

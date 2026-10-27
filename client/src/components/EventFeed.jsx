@@ -1,3 +1,4 @@
+import ApprovedHeroArt from './ApprovedHeroArt';
 import { useEffect, useRef, useState } from 'react';
 import './EventFeed.css';
 import './IconAction.css';
@@ -55,8 +56,6 @@ function safeLink(value) {
     return null;
   }
 }
-
-const WAVE_HEIGHTS = [14, 32, 19, 50, 70, 43, 25, 59, 77, 47, 21, 35, 66, 40, 18, 49, 73, 35, 23, 51, 30];
 
 function getActiveSectionFromHash() {
   return ['#buscar', '#eventos', '#filtros'].includes(window.location.hash)
@@ -370,22 +369,12 @@ export default function EventFeed({ language, onLanguageChange }) {
               </button>
             </div>
           </div>
-          <div className="pj-hero-feature" aria-label={t(language, 'Todos los ritmos. Un solo archipiélago.')}>
-            <div className="pj-feature-top">
-              <span>{t(language, 'EN VIVO · PR')}</span>
-              <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-                <path d="M4 9v6M8 5v14M12 2v20M16 6v12M20 9v6" />
-              </svg>
-            </div>
-            <div className="pj-waveform" aria-hidden="true">
-              {WAVE_HEIGHTS.map((height, i) => (
-                <span key={i} style={{ '--bar-height': `${height}px` }} />
-              ))}
-            </div>
-            <div className="pj-feature-copy">
-              <h2>{t(language, 'Todos los ritmos.')}<span>{t(language, 'Un solo archipiélago.')}</span></h2>
-
-            </div>
+          <div
+            className="pj-hero-feature pj-hero-feature-approved"
+            role="img"
+            aria-label={t(language, 'Todos los ritmos. Un solo archipiélago.')}
+          >
+            <ApprovedHeroArt language={language} />
           </div>
         </section>
         )}

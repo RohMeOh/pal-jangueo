@@ -1,7 +1,7 @@
 /* Placement only: BackToTop and About share IconAction.css. */
 .pj-back-to-top {
   position: fixed;
-  right: calc(60px + env(safe-area-inset-right, 0px));
+  right: calc(48px + env(safe-area-inset-right, 0px));
   bottom: calc(50px + env(safe-area-inset-bottom, 0px));
   z-index: 100;
 }
