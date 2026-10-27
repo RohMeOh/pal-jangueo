@@ -109,6 +109,13 @@ function assessMusicEvidence(rawDescription) {
   const liveBandAnnounced =
     /\b(?:banda|orquesta|grupo musical)\s+en\s+vivo\b/.test(text);
 
+  // A music-centered evening explicitly offered with the performer's
+  // own band is performance evidence, not background music.
+  const bandLedMusicEvening =
+    /\b(?:nos\s+(?:regala|ofrece|presenta)|(?:ofrece|presenta))\s+una\s+noche\s+llena\s+de\s+musica\b/.test(text) &&
+    /\bcon\s+su\s+banda\b/.test(text) &&
+    !/\b(?:musica de fondo|banda sonora|charla|conferencia|panel|karaoke|grabaciones?)\b/.test(text);
+
   // Acoustic acts may announce live songs, performers and instruments
   // without the exact wording "concierto" or "musica en vivo".
   const liveAcousticAct =
@@ -190,6 +197,9 @@ function assessMusicEvidence(rawDescription) {
   if (liveBandAnnounced) {
     signals.push('Banda u orquesta en vivo');
   }
+  if (bandLedMusicEvening) {
+    signals.push('Noche musical con banda anunciada');
+  }
   if (namedMusicalPerformance) {
     signals.push('Presentación musical explícita');
   }
@@ -244,6 +254,7 @@ function assessMusicEvidence(rawDescription) {
     signal === 'DJs o música electrónica' ||
     signal === 'Músicos e instrumentos en presentación' ||
     signal === 'Banda u orquesta en vivo' ||
+    signal === 'Noche musical con banda anunciada' ||
     signal === 'Presentación musical explícita' ||
     signal === 'Cartel de bandas con anuncio de actuación' ||
     signal === 'Interpretación musical anunciada en escenario' ||
