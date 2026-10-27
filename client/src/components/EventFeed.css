@@ -151,7 +151,6 @@
 .pj-events { border-top: 1px solid #263140; padding-top: 38px; }
 .pj-section-heading { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 25px; }
 .pj-section-heading h2 { font-size: clamp(25px, 3vw, 32px); font-weight: 900; letter-spacing: -.02em; }
-.pj-section-heading p { color: var(--pj-muted); margin-top: 6px; font-size: 14px; }
 .pj-event-count { flex: 0 0 auto; border: 1px solid #314054; border-radius: 40px; padding: 6px 12px; color: var(--pj-blue); font-size: 12px; font-weight: 800; }
 .pj-event-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 275px), 1fr)); gap: 22px; }
 .pj-event-card { display: flex; flex-direction: column; min-width: 0; border: 1px solid var(--pj-border); background: var(--pj-surface); border-radius: 18px; overflow: hidden; transition: border-color .2s, transform .2s; }
@@ -299,12 +298,6 @@
 /* Pa’l Jangueo: refined genre footer and filter heading */
 .pj-filter-heading { align-items: center; gap: 12px; }
 .pj-filter-heading-copy { min-width: 0; }
-.pj-filter-heading-copy p {
-  margin-top: 5px;
-  color: #aebbcB;
-  font-size: 13px;
-  line-height: 1.5;
-}
 
 /* Compact ES/EN control, alongside the wordmark. */
 .pj-language-toggle {

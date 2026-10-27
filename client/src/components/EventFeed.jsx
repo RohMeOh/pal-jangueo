@@ -402,7 +402,6 @@ export default function EventFeed({ language, onLanguageChange }) {
             </svg>
             <div className="pj-filter-heading-copy">
               <h2 id="pj-filters-heading">{t(language, 'Busca tu próximo jangueo')}</h2>
-              <p>{t(language, 'Explora eventos a tu manera.')}</p>
             </div>
           </div>
           <EventFilters events={events} filters={filters} setFilters={setFilters} language={language} />
@@ -428,7 +427,6 @@ export default function EventFeed({ language, onLanguageChange }) {
           <div className="pj-section-heading">
             <div>
               <h2 id="pj-events-heading">{t(language, 'Explora lo que suena')}</h2>
-              <p>{t(language, 'Descubre experiencias musicales por toda la isla.')}</p>
             </div>
             {!loading && !error && (
               <span className="pj-event-count">
