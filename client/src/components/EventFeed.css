@@ -379,3 +379,15 @@
 #pj-events-heading {
   text-transform: uppercase;
 }
+
+
+/* Compact desktop search spacing */
+@media (min-width: 621px) {
+  .pj-discovery:has(> .pj-search-page) {
+    padding-top: 24px;
+  }
+
+  .pj-search-page > .pj-filters-section {
+    padding-top: 16px;
+  }
+}
