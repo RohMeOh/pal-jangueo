@@ -396,9 +396,9 @@ export default function EventFeed({ language, onLanguageChange }) {
           <div className="pj-filter-heading">
             <svg width="22" height="22" viewBox="0 0 24 24" strokeWidth="1.8" fill="none" strokeLinecap="round" aria-hidden="true">
               <path d="M4 7h16M4 12h16M4 17h16" />
-              <circle cx="9" cy="7" r="2" fill="#0e141c" />
-              <circle cx="16" cy="12" r="2" fill="#0e141c" />
-              <circle cx="11" cy="17" r="2" fill="#0e141c" />
+              <circle cx="9" cy="7" r="2" fill="#090f19" />
+              <circle cx="16" cy="12" r="2" fill="#090f19" />
+              <circle cx="11" cy="17" r="2" fill="#090f19" />
             </svg>
             <div className="pj-filter-heading-copy">
               <h2 id="pj-filters-heading">{t(language, 'Busca tu próximo jangueo')}</h2>

@@ -6,10 +6,10 @@
   width: 46px;
   height: 46px;
   padding: 0;
-  border: 1px solid #2fb6ff;
+  border: 1px solid #13c5ff;
   border-radius: 50%;
-  background: rgba(17, 23, 32, .96);
-  color: #2fb6ff;
+  background: rgba(9, 15, 25, .96);
+  color: #13c5ff;
   box-shadow: 0 6px 24px rgba(0, 0, 0, .5);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -40,15 +40,15 @@
 
 @media (hover: hover) and (pointer: fine) {
   .pj-icon-action:hover {
-    background: #2fb6ff;
-    color: #05070a;
-    box-shadow: 0 7px 25px rgba(47, 182, 255, .25);
+    background: #13c5ff;
+    color: #000104;
+    box-shadow: 0 7px 25px rgba(19, 197, 255, .25);
   }
 }
 
 .pj-icon-action:active {
-  background: #2fb6ff;
-  color: #05070a;
+  background: #13c5ff;
+  color: #000104;
   transform: scale(.92);
 }
 

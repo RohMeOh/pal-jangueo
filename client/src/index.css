@@ -1,7 +1,7 @@
 :root {
   font-family: 'Nunito Sans', 'Segoe UI', system-ui, sans-serif;
   color: #f8fafc;
-  background: #05070a;
+  background: #000104;
   color-scheme: dark;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -17,7 +17,7 @@ button, input, select { font: inherit; }
 button { cursor: pointer; }
 a { color: inherit; }
 button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
-  outline: 2px solid #2fb6ff;
+  outline: 2px solid #13c5ff;
   outline-offset: 3px;
 }
 #root { min-height: 100vh; }

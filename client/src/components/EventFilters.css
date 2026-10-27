@@ -5,15 +5,15 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
   padding: 20px;
-  background: #0e141c;
-  border: 1px solid #27313f;
+  background: #090f19;
+  border: 1px solid #263b4d;
   border-radius: 18px;
   text-align: left;
   align-items: end;
 }
 .pj-filter { display: flex; flex-direction: column; min-width: 0; gap: 8px; }
 .pj-filter-search { grid-column: span 2; }
-.pj-filter label { color: #bfcbd8; font-weight: 800; font-size: 12px; }
+.pj-filter label { color: #d4dce5; font-weight: 800; font-size: 12px; }
 .pj-filter input:not([type="date"]), .pj-filter select {
   display: block;
   width: 100%;
@@ -21,16 +21,16 @@
   max-width: 100%;
   height: 47px;
   padding: 11px 12px;
-  background: #111720;
+  background: #0d1520;
   color: #f8fafc;
-  border: 1px solid #303d50;
+  border: 1px solid #2e435a;
   border-radius: 9px;
   font-size: 13px;
   color-scheme: dark;
 }
-.pj-filter input::placeholder { color: #91a1b4; }
+.pj-filter input::placeholder { color: #a3b4c6; }
 .pj-filter select { text-overflow: ellipsis; }
-.pj-filter input:focus-visible, .pj-filter select:focus-visible { outline: 2px solid #2fb6ff; outline-offset: 1px; }
+.pj-filter input:focus-visible, .pj-filter select:focus-visible { outline: 2px solid #13c5ff; outline-offset: 1px; }
 .pj-date-field {
   position: relative;
   width: 100%;
@@ -38,8 +38,8 @@
   max-width: 100%;
   height: 47px;
   overflow: hidden;
-  background: #111720;
-  border: 1px solid #303d50;
+  background: #0d1520;
+  border: 1px solid #2e435a;
   border-radius: 9px;
 }
 /* Invisible native picker remains clickable; visible text avoids iPhone overflow */
@@ -69,7 +69,7 @@
   white-space: nowrap;
   text-overflow: ellipsis;
   pointer-events: none;
-  color: #91a1b4;
+  color: #a3b4c6;
   font-size: 13px;
 }
 .pj-date-selected { color: #f8fafc; }
@@ -81,12 +81,12 @@
   width: 16px;
   height: 16px;
   transform: translateY(-50%);
-  border: 2px solid #2fb6ff;
+  border: 2px solid #13c5ff;
   border-radius: 3px;
-  box-shadow: inset 0 4px 0 #2fb6ff;
+  box-shadow: inset 0 4px 0 #13c5ff;
   pointer-events: none;
 }
-.pj-date-field:focus-within { outline: 2px solid #2fb6ff; outline-offset: 1px; }
+.pj-date-field:focus-within { outline: 2px solid #13c5ff; outline-offset: 1px; }
 .pj-date-field input[type="date"]:focus { outline: none; }
 .pj-clear-filters {
   grid-column: 1 / -1;
@@ -94,14 +94,14 @@
   height: 47px;
   width: min(200px, 100%);
   padding: 10px;
-  border: 1px solid #394d65;
+  border: 1px solid #355775;
   border-radius: 9px;
-  background: #151c26;
-  color: #2fb6ff;
+  background: #111d2b;
+  color: #13c5ff;
   font-size: 13px;
   font-weight: 800;
 }
-.pj-clear-filters:hover { border-color: #2fb6ff; }
+.pj-clear-filters:hover { border-color: #13c5ff; }
 @media (max-width: 900px) { .pj-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }  }
 @media (max-width: 530px) { .pj-filters { grid-template-columns: minmax(0, 1fr); gap: 13px; padding: 15px; } .pj-filter-search { grid-column: 1; } }
 
