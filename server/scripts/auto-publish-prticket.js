@@ -6,9 +6,12 @@ const {
 const PRTICKET_FRONT_URL =
   'https://boletos.prticket.com/events/es/frontpage';
 const {
-  planTicketVenue,
-  ensureTicketVenue
+  planTicketVenue
 } = require('../utils/ticketVenueRegistry');
+
+const {
+  requireVerifiedPrticketVenue
+} = require('../utils/requireVerifiedPrticketVenue');
 
 const {
   LIST_URL, fetchHtml, extractCards, extractDetail
@@ -141,8 +144,8 @@ async function publishCandidate(candidate, live, venuePlan, flyer, description, 
       throw new Error('El candidato cambió o su evidencia no coincide.');
     }
 
-    const venueRecord = await ensureTicketVenue(
-      db, venuePlan
+    const venueRecord = await requireVerifiedPrticketVenue(
+      db, venuePlan, { lock: true }
     );
 
     await db.query(`
@@ -435,6 +438,17 @@ async function main() {
         problems.push('Venue inválido: ' + error.message);
       }
 
+      let venueVerified = false;
+
+      if (venuePlan) {
+        try {
+          await requireVerifiedPrticketVenue(pool, venuePlan);
+          venueVerified = true;
+        } catch (error) {
+          problems.push('Venue no certificado: ' + error.message);
+        }
+      }
+
       const duplicates = await pool.query(`
         SELECT e.id
         FROM public.events e
@@ -487,7 +501,7 @@ async function main() {
         description,
         verification: {
           source_status: sourceConfirmed ? 'verified' : 'needs_review',
-          venue_status: venuePlan ? 'verified' : 'needs_review',
+          venue_status: venueVerified ? 'verified' : 'needs_review',
           duplicate_status: !duplicates.rowCount && !linked.rowCount
             ? 'clear' : 'needs_review',
           conflict_status: problems.length === 0
