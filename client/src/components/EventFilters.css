@@ -89,9 +89,10 @@
 .pj-date-field:focus-within { outline: 2px solid #2fb6ff; outline-offset: 1px; }
 .pj-date-field input[type="date"]:focus { outline: none; }
 .pj-clear-filters {
-  grid-column: -2 / -1;
+  grid-column: 1 / -1;
+  justify-self: center;
   height: 47px;
-  width: 100%;
+  width: min(200px, 100%);
   padding: 10px;
   border: 1px solid #394d65;
   border-radius: 9px;
@@ -101,8 +102,8 @@
   font-weight: 800;
 }
 .pj-clear-filters:hover { border-color: #2fb6ff; }
-@media (max-width: 900px) { .pj-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } .pj-clear-filters { grid-column: 2; } }
-@media (max-width: 530px) { .pj-filters { grid-template-columns: minmax(0, 1fr); gap: 13px; padding: 15px; } .pj-filter-search, .pj-clear-filters { grid-column: 1; } }
+@media (max-width: 900px) { .pj-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }  }
+@media (max-width: 530px) { .pj-filters { grid-template-columns: minmax(0, 1fr); gap: 13px; padding: 15px; } .pj-filter-search { grid-column: 1; } }
 
 /* Prevent iOS Safari from zooming the page when a filter is focused.
    Keep the original compact desktop typography. */

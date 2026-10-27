@@ -2,6 +2,10 @@
 // remain exactly as provided by the database, including all accents and ñ.
 const english = {
   "Explorar": "Explore",
+  "Bienvenido": "Welcome",
+  "Buscar eventos": "Find Events",
+  "BIENVENIDO A PA'L JANGUEO": "WELCOME TO PA'L JANGUEO",
+  "Pa’l Jangueo reúne eventos musicales de Puerto Rico en un solo lugar. Encuentra tu próximo jangueo por fecha, región, municipio o precio y llega directo a la boletera oficial.": "Pa’l Jangueo brings Puerto Rico’s music events together in one place. Find your next show by date, region, municipality, or price, then go straight to the official ticketing page.",
   "Artistas": "Artists",
   "Venues": "Venues",
   "About": "About",
@@ -65,8 +69,7 @@ const english = {
   "Tu espacio para guardar artistas, lugares y eventos favoritos. Todo lo que te gusta, en un mismo sitio.": "Your Space to Save Favorite Artists, Venues, and Events. Everything You Love in One Place.",
   "Próximamente": "Coming Soon",
   "Sobre Pa'l Jangueo": "About Pa'l Jangueo",
-  "Pa'l Jangueo es una aplicación en desarrollo dedicada a descubrir la música en vivo de Puerto Rico.": "Pa'l Jangueo is an application in development dedicated to discovering Puerto Rico's live music scene.",
-  "Esta versión beta continúa evolucionando. El registro de la marca está previsto para una próxima etapa.": "This beta version continues to evolve. Trademark registration is planned for a future stage.",
+  "Pa'l Jangueo es una aplicación en desarrollo. Esta versión beta continúa evolucionando. El registro de la marca está previsto para una próxima etapa.": "Pa'l Jangueo is an app under development. This beta version continues to evolve. Trademark registration is planned for a future stage.",
   "© 2026 Pa'l Jangueo. Derechos reservados sobre el contenido original de la aplicación.": "© 2026 Pa'l Jangueo. All Rights Reserved for the Application's Original Content.",
   "Volver arriba": "Back to Top",
   "Cerrar": "Close",

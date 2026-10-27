@@ -30,7 +30,7 @@
   gap: 20px;
   min-height: 90px;
 }
-.pj-home-link { flex: 0 0 auto; display: inline-flex; align-items: center; text-decoration: none; }
+.pj-home-link { flex: 0 0 auto; display: inline-flex; align-items: center; text-decoration: none; border: 0; padding: 0; background: none; color: inherit; cursor: pointer; }
 .pj-brand {
   display: inline-flex;
   align-items: center;
@@ -63,9 +63,10 @@
   text-decoration: none;
 }
 .pj-navigation a:hover, .pj-navigation button:hover { color: var(--pj-blue); }
-.pj-navigation a:first-child { color: #fff; }
-.pj-navigation .pj-navigation-heart { color: var(--pj-red); }
-.pj-navigation-heart svg { display: block; width: 21px; height: 21px; }
+.pj-navigation .pj-nav-link[aria-current="page"] {
+  color: var(--pj-white);
+  box-shadow: inset 0 -2px 0 var(--pj-blue);
+}
 
 .pj-discovery { padding-top: 56px; padding-bottom: 70px; }
 .pj-hero {
@@ -142,7 +143,7 @@
 .pj-filter-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
 .pj-filter-heading svg { stroke: var(--pj-blue); flex: 0 0 auto; }
 .pj-filter-heading h2 { font-size: 21px; font-weight: 900; }
-.pj-region-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.pj-region-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; }
 .pj-region-chip { border: 1px solid #303d50; border-radius: 999px; background: #151b25; color: #c1ccda; padding: 7px 14px; font-size: 12px; font-weight: 800; }
 .pj-region-chip:hover { border-color: var(--pj-blue); }
 .pj-region-chip[aria-pressed="true"] { color: #05070a; background: var(--pj-blue); border-color: var(--pj-blue); }
@@ -205,22 +206,6 @@
 }
 
 
-.pj-favorites {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  margin-top: 55px;
-  padding: 25px 28px;
-  border: 1px solid #294158;
-  border-radius: 18px;
-  background: linear-gradient(120deg, #101923, #131d2b);
-}
-.pj-favorites-title { display: flex; gap: 11px; align-items: center; }
-.pj-favorites-title svg { stroke: var(--pj-red); width: 22px; height: 22px; }
-.pj-favorites-title h2 { color: var(--pj-white); font-size: 23px; font-weight: 900; }
-.pj-favorites p { max-width: 650px; margin-top: 7px; color: #c1ccda; font-size: 14px; }
-.pj-favorites-badge { border: 1px solid #36506b; color: var(--pj-blue); border-radius: 20px; padding: 7px 12px; font-size: 12px; font-weight: 800; white-space: nowrap; }
 .pj-site-footer { border-top: 1px solid #263140; background: #0d1117; }
 .pj-footer-inner { display: flex; justify-content: space-between; align-items: center; gap: 20px; min-height: 95px; }
 .pj-footer-inner p { color: #aebbcB; font-size: 13px; }
@@ -247,7 +232,6 @@
   .pj-filters-section { padding-top: 24px; }
   .pj-section-heading { align-items: flex-start; }
   .pj-event-grid { grid-template-columns: 1fr; }
-  .pj-favorites { flex-direction: column; align-items: flex-start; padding: 21px; }
   .pj-footer-inner { align-items: flex-start; flex-direction: column; justify-content: center; padding-top: 22px; padding-bottom: 22px; }
 }
 
@@ -304,7 +288,6 @@
 }
 
 /* Clear distinction between beta notice and original-content copyright. */
-.pj-about-dialog .pj-about-registration { margin-top: 12px; }
 .pj-about-dialog .pj-about-copyright {
   margin-top: 19px;
   padding-top: 15px;
@@ -315,46 +298,6 @@
 }
 
 /* Pa’l Jangueo: refined genre footer and filter heading */
-.pj-feature-genres {
-  border-top: 1px solid #34475d;
-  margin-top: 19px;
-  padding-top: 15px;
-}
-.pj-genre-list {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 9px 10px;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-.pj-genre-list li {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  color: #c5d2e1;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: .075em;
-  line-height: 1.6;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-.pj-genre-list li:not(:last-child)::after {
-  content: '';
-  width: 4px;
-  height: 4px;
-  flex: 0 0 4px;
-  background: #ff3d53;
-  border-radius: 50%;
-}
-.pj-feature-genres .pj-feature-more {
-  margin: 10px 0 0;
-  color: #aebbcB;
-  font-size: 13px;
-  line-height: 1.5;
-}
 .pj-filter-heading { align-items: center; gap: 12px; }
 .pj-filter-heading-copy { min-width: 0; }
 .pj-filter-heading-copy p {
@@ -393,4 +336,32 @@
 .pj-language-toggle button:focus-visible {
   outline: 2px solid #fff;
   outline-offset: 2px;
+}
+
+
+/* Bienvenido: balanced vertical spacing */
+.pj-site:has(> .pj-discovery > .pj-hero) {
+  display: flex;
+  flex-direction: column;
+}
+
+.pj-site:has(> .pj-discovery > .pj-hero) > .pj-discovery {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  width: 100%;
+  padding-top: 32px;
+  padding-bottom: 32px;
+}
+
+.pj-site:has(> .pj-discovery > .pj-hero) .pj-hero {
+  width: 100%;
+  padding: 0;
+}
+
+
+/* Uppercase discovery section headings */
+#pj-filters-heading,
+#pj-events-heading {
+  text-transform: uppercase;
 }
