@@ -1,5 +1,10 @@
 // Pa'l Jangueo - Prepare Boletera events for review
 
+
+const {
+  resolveBoleteraVenueMunicipality
+} = require('../utils/resolveBoleteraVenueMunicipality');
+
 function normalizeBoleteraCandidate(event, now = new Date()) {
   if (event?.event_type !== 'MusicEvent') {
     throw new Error('El registro no es MusicEvent.');
@@ -68,7 +73,7 @@ function normalizeBoleteraCandidate(event, now = new Date()) {
 
     venue: event.venue?.name || null,
     venue_address: event.venue?.street_address || null,
-    municipality: event.venue?.municipality || null,
+    municipality: resolveBoleteraVenueMunicipality(event),
 
     ticket_url: event.ticket_url || null,
     price_type: priceType,

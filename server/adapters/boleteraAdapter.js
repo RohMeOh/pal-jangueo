@@ -66,6 +66,11 @@ function getPriceText(offers) {
     : `$${min} - $${max}`;
 }
 
+
+const {
+  resolveBoleteraVenueMunicipality
+} = require('../utils/resolveBoleteraVenueMunicipality');
+
 function adaptBoleteraEvent(rawEvent) {
   if (rawEvent?.event_type !== 'MusicEvent') {
     throw new Error('La fuente no identifica un MusicEvent.');
@@ -95,7 +100,7 @@ function adaptBoleteraEvent(rawEvent) {
       is_music_event: true,
       artists: [],
       venue: rawEvent.venue?.name,
-      municipality: rawEvent.venue?.municipality,
+      municipality: resolveBoleteraVenueMunicipality(rawEvent),
       date_text: dateText,
       time_text: timeText,
       price_text: getPriceText(rawEvent.offers)
