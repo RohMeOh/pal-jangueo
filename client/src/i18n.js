@@ -66,7 +66,7 @@ const english = {
   "Mi Jangueo": "Mi Jangueo",
   "Tu espacio para guardar artistas, lugares y eventos favoritos. Todo lo que te gusta, en un mismo sitio.": "Your Space to Save Favorite Artists, Venues, and Events. Everything You Love in One Place.",
   "Próximamente": "Coming Soon",
-  "Sobre Pa'l Jangueo": "About Pa'l Jangueo",
+  "Sobre el app": "About this app",
   "Pa'l Jangueo es una aplicación en desarrollo. Esta versión beta continúa evolucionando. El registro de la marca está previsto para una próxima etapa.": "Pa'l Jangueo is an app under development. This beta version continues to evolve. Trademark registration is planned for a future stage.",
   "© 2026 Pa'l Jangueo. Derechos reservados sobre el contenido original de la aplicación.": "© 2026 Pa'l Jangueo. All Rights Reserved for the Application's Original Content.",
   "Volver arriba": "Back to Top",

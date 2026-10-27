@@ -510,7 +510,7 @@ export default function EventFeed({ language, onLanguageChange }) {
             </svg>
           </button>
           <span className="pj-about-label">PA'L JANGUEO™ <span>BETA</span></span>
-          <h2 id="pj-about-title">{t(language, "Sobre Pa'l Jangueo")}</h2>
+          <h2 id="pj-about-title">{t(language, "Sobre el app")}</h2>
           <p id="pj-about-description">
             {t(language, "Pa'l Jangueo es una aplicación en desarrollo. Esta versión beta continúa evolucionando. El registro de la marca está previsto para una próxima etapa.")}
           </p>
