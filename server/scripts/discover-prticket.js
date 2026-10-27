@@ -203,18 +203,32 @@ function extractDetail(html) {
     /\ben tarima\s*:\s*(.{40,1800}?)(?=\bprecios?\s*:|\bacerca de\b|©|$)/i
   )?.[0]?.trim() || '';
 
+  // Some PRticket DJ lineups appear after the price.
+  // Capture only this tightly bounded official announcement,
+  // not arbitrary text from the footer.
+  const djStageEvidence = afterDate.match(
+    /\b(?:two|2)\s+djs?\.\s*(?:two|2)\s+music\s+styles\b/i
+  )?.[0] || '';
+
   const extractedDescription = [bodyDescription, stageLineup]
     .filter(Boolean)
     .join(' ')
     .slice(0, 1800);
 
+  const preferredDescription =
+    findMeta(html, 'og:description') ||
+    findMeta(html, 'description') ||
+    (extractedDescription.length >= 40 ? extractedDescription : null);
+
+  const descriptionEvidence = [
+    preferredDescription,
+    djStageEvidence
+  ].filter(Boolean).join(' ').slice(0, 1800) || null;
+
   return {
     page_title: pageTitle,
     poster_url: safeHttps(findMeta(html, 'og:image')),
-    description_evidence:
-      findMeta(html, 'og:description') ||
-      findMeta(html, 'description') ||
-      (extractedDescription.length >= 40 ? extractedDescription : null),
+    description_evidence: descriptionEvidence,
     date_evidence: date,
     time_evidence: time
   };

@@ -153,7 +153,15 @@ function assessMusicEvidence(rawDescription) {
 
   // An actual DJ set is a performance. A genre, party name, or the
   // letters "DJ" by themselves do not prove anyone will perform.
+  // An official multi-stage DJ programme needs all three
+  // corroborating facts; merely mentioning "DJ" is insufficient.
+  const stagedDjShow =
+    /\btwo\s+stages?\b/.test(text) &&
+    /\btwo\s+music\s+styles\b/.test(text) &&
+    /\btwo\s+djs?\b/.test(text);
+
   const liveDjPerformance =
+    stagedDjShow ||
     /\bdjs?\s+sets?\b/.test(text) ||
     /\bdjs?\s+en\s+vivo\b/.test(text) ||
     /\bdjs?\b[^.!?]{0,70}\b(?:tocara(?:n)?|se presentara(?:n)?|mezclara(?:n)?|actuara(?:n)?)\b/.test(text) ||
