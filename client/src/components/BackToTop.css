@@ -1,14 +1,14 @@
 /* Placement only: BackToTop and About share IconAction.css. */
 .pj-back-to-top {
   position: fixed;
-  right: calc(30px + env(safe-area-inset-right, 0px));
-  bottom: calc(38px + env(safe-area-inset-bottom, 0px));
+  right: calc(60px + env(safe-area-inset-right, 0px));
+  bottom: calc(50px + env(safe-area-inset-bottom, 0px));
   z-index: 100;
 }
 
 @media (max-width: 620px) {
   .pj-back-to-top {
-    right: calc(20px + env(safe-area-inset-right, 0px));
-    bottom: calc(32px + env(safe-area-inset-bottom, 0px));
+    right: calc(40px + env(safe-area-inset-right, 0px));
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
   }
 }
