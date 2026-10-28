@@ -64,6 +64,26 @@ export default function EventFilters({
 
       if (field === 'municipality') {
         next.neighborhood = '';
+
+        // Al volver a Todos los municipios, limpiar también Región.
+        if (!value) {
+          next.region = '';
+        }
+
+        // Completar automáticamente la región si no hay una seleccionada.
+        if (value && !previous.region) {
+          const matchingRegions = [...new Set(
+            events
+              .filter(event => event.municipality === value)
+              .map(event => event.region)
+              .filter(region => REGIONS.includes(region))
+          )];
+
+          // Solo autoseleccionar cuando la asociación sea inequívoca.
+          if (matchingRegions.length === 1) {
+            next.region = matchingRegions[0];
+          }
+        }
       }
 
       return next;
