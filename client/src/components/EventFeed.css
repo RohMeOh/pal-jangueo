@@ -593,7 +593,7 @@
   .pj-navigation {
     width: 100%;
     justify-content: center;
-    gap: clamp(9px, 3vw, 20px);
+    gap: clamp(15px, 4.8vw, 24px);
   }
 
   .pj-navigation button {
