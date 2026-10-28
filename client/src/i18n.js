@@ -31,6 +31,7 @@ const english = {
   "Y mucho más.": "And Much More.",
   "Busca tu próximo jangueo": "Find Your Next Jangueo",
   "Buscar": "Search",
+  "Filtros": "Filters",
   "Evento, artista o local...": "Event, artist, or venue...",
   "Región": "Region",
   "Todas las regiones": "All Regions",

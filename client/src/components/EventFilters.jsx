@@ -29,7 +29,9 @@ export default function EventFilters({
   events,
   filters,
   setFilters,
-  language
+  language,
+  expanded = false,
+  onToggleExpanded
 }) {
   const municipalities = [...new Set(
     events
@@ -68,6 +70,15 @@ export default function EventFilters({
     });
   }
 
+  const activeCount = [
+    'region',
+    'municipality',
+    'neighborhood',
+    'fromDate',
+    'toDate',
+    'price'
+  ].filter(field => Boolean(filters[field])).length;
+
   function clearFilters() {
     setFilters({
       search: '',
@@ -93,7 +104,44 @@ export default function EventFilters({
         />
       </div>
 
-      <div className="pj-filter">
+      <button
+        type="button"
+        className="pj-mobile-filter-toggle"
+        aria-expanded={expanded}
+        aria-controls="pj-advanced-filters"
+        onClick={onToggleExpanded}
+      >
+        <svg viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" strokeWidth="2"
+          strokeLinecap="round" strokeLinejoin="round"
+          aria-hidden="true">
+          <path d="M4 7h16M7 12h10M10 17h4" />
+        </svg>
+        <span>{t(language, 'Filtros')}</span>
+        {activeCount > 0 && (
+          <span className="pj-mobile-filter-count">
+            {activeCount}
+          </span>
+        )}
+        <svg
+          className={`pj-mobile-filter-chevron${expanded ? ' is-open' : ''}`}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
+
+      <div
+        id="pj-advanced-filters"
+        className={`pj-advanced-filters${expanded ? ' is-open' : ''}`}
+      >
+        <div className="pj-filter">
         <label htmlFor="filter-region">{t(language, 'Región')}</label>
         <select
           id="filter-region"
@@ -201,6 +249,7 @@ export default function EventFilters({
       >
         {t(language, 'Quitar filtros')}
       </button>
+      </div>
     </div>
   );
 }

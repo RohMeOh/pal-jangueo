@@ -184,6 +184,7 @@ export default function EventFeed({ language, onLanguageChange }) {
     toDate: '',
     price: ''
   });
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   // Mostrar el aviso beta una sola vez por carga de la aplicación.
   // El botón About puede volver a abrirlo después de cerrarlo.
@@ -419,8 +420,17 @@ export default function EventFeed({ language, onLanguageChange }) {
           </h1>
         </div>
         <section className="pj-filters-section" id="filtros" aria-labelledby="pj-filters-heading">
-          <EventFilters events={events} filters={filters} setFilters={setFilters} language={language} />
-          <div className="pj-region-chips" aria-label={t(language, 'Filtrar por región')}>
+          <EventFilters
+            events={events}
+            filters={filters}
+            setFilters={setFilters}
+            language={language}
+            expanded={mobileFiltersOpen}
+            onToggleExpanded={() =>
+              setMobileFiltersOpen(previous => !previous)
+            }
+          />
+          <div className={`pj-region-chips${mobileFiltersOpen ? " pj-mobile-filters-open" : ""}`} aria-label={t(language, 'Filtrar por región')}>
             <button type="button" className="pj-region-chip" aria-pressed={!filters.region} onClick={() => chooseRegion('')}>
               {t(language, 'Toda la isla')}
             </button>

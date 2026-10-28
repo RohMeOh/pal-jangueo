@@ -125,3 +125,107 @@
   text-transform: uppercase;
   letter-spacing: .04em;
 }
+
+
+/* Mobile collapsible filters preview */
+
+/* Desktop: mantener distribución original de cuatro columnas. */
+.pj-mobile-filter-toggle {
+  display: none;
+}
+
+.pj-advanced-filters {
+  display: contents;
+}
+
+@media (max-width: 620px) {
+  .pj-filters {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    padding: 15px;
+  }
+
+  .pj-filter-search {
+    grid-column: 1;
+  }
+
+  .pj-mobile-filter-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 45px;
+    padding: 10px 14px;
+    border: 1px solid #355775;
+    border-radius: 9px;
+    background: #111d2b;
+    color: #13c5ff;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    cursor: pointer;
+  }
+
+  .pj-mobile-filter-toggle:hover {
+    border-color: #13c5ff;
+  }
+
+  .pj-mobile-filter-toggle:focus-visible {
+    outline: 2px solid #13c5ff;
+    outline-offset: 2px;
+  }
+
+  .pj-mobile-filter-toggle svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+
+  .pj-mobile-filter-toggle .pj-mobile-filter-chevron {
+    margin-left: 2px;
+    transition: transform .2s ease;
+  }
+
+  .pj-mobile-filter-chevron.is-open {
+    transform: rotate(180deg);
+  }
+
+  .pj-mobile-filter-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 21px;
+    height: 21px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: #13c5ff;
+    color: #000104;
+    font-size: 11px;
+    letter-spacing: 0;
+  }
+
+  .pj-advanced-filters {
+    display: none;
+  }
+
+  .pj-advanced-filters.is-open {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 13px;
+    min-width: 0;
+    padding-top: 6px;
+  }
+
+  .pj-advanced-filters .pj-clear-filters {
+    grid-column: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pj-mobile-filter-toggle .pj-mobile-filter-chevron {
+    transition: none;
+  }
+}
