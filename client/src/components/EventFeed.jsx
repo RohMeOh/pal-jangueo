@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import './EventFeed.css';
 import './IconAction.css';
 import EventFilters, { REGIONS } from './EventFilters';
+import CalendarView from './CalendarView';
 import BrandLogo from './BrandLogo';
 import { t } from '../i18n';
 
@@ -58,6 +59,7 @@ function safeLink(value) {
 }
 
 function getActiveSectionFromHash() {
+  if (window.location.hash === '#calendario') return 'calendar';
   return ['#buscar', '#eventos', '#filtros'].includes(window.location.hash)
     ? 'search'
     : 'home';
@@ -304,7 +306,12 @@ export default function EventFeed({ language, onLanguageChange }) {
   });
 
   function openSection(nextSection) {
-    const hash = nextSection === 'search' ? '#buscar' : '#bienvenidos';
+    const hashes = {
+      home: '#bienvenidos',
+      search: '#buscar',
+      calendar: '#calendario'
+    };
+    const hash = hashes[nextSection] || hashes.home;
     if (window.location.hash !== hash) {
       window.history.pushState(null, '', hash);
     }
@@ -341,6 +348,14 @@ export default function EventFeed({ language, onLanguageChange }) {
             </button>
             <button
               type="button"
+              className="pj-nav-link"
+              aria-current={section === 'calendar' ? 'page' : undefined}
+              onClick={() => openSection('calendar')}
+            >
+              {t(language, 'Calendario')}
+            </button>
+            <button
+              type="button"
               onClick={() => aboutDialogRef.current?.showModal()}
               aria-haspopup="dialog"
               aria-controls="pj-about-dialog"
@@ -355,7 +370,7 @@ export default function EventFeed({ language, onLanguageChange }) {
         {section === 'home' && (
         <section className="pj-hero" id="bienvenido" aria-labelledby="pj-main-heading">
           <div className="pj-hero-copy">
-            <p className="pj-eyebrow">{t(language, "BIENVENIDO A PA'L JANGUEO")}</p>
+            <p className="pj-eyebrow">{t(language, "BIENVENIDO A PA’L JANGUEO")}</p>
             <h1 id="pj-main-heading">
               <span>{t(language, 'La isla suena.')}</span>
               <strong>{t(language, 'Sigue la música.')}</strong>
@@ -366,6 +381,20 @@ export default function EventFeed({ language, onLanguageChange }) {
             <div className="pj-hero-actions">
               <button className="pj-button pj-button-primary" type="button" onClick={() => openSection('search')}>
                 {t(language, 'Explorar eventos')} <span aria-hidden="true">↗</span>
+              </button>
+              <button
+                className="pj-button pj-button-calendar"
+                type="button"
+                onClick={() => openSection('calendar')}
+              >
+                <svg viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="1.8"
+                  strokeLinecap="round" strokeLinejoin="round"
+                  aria-hidden="true">
+                  <rect x="3" y="5" width="18" height="16" rx="2" />
+                  <path d="M7 3v4M17 3v4M3 10h18" />
+                </svg>
+                {t(language, 'Calendario')}
               </button>
             </div>
           </div>
@@ -381,18 +410,15 @@ export default function EventFeed({ language, onLanguageChange }) {
 
         {section === 'search' && (
           <div className="pj-search-page" id="buscar">
+        <div className="pj-calendar-intro pj-search-intro">
+          <p className="pj-calendar-eyebrow pj-eyebrow">
+            {t(language, 'MÚSICA EN VIVO')}
+          </p>
+          <h1 id="pj-filters-heading">
+            {t(language, 'Busca tu próximo jangueo')}
+          </h1>
+        </div>
         <section className="pj-filters-section" id="filtros" aria-labelledby="pj-filters-heading">
-          <div className="pj-filter-heading">
-            <svg width="22" height="22" viewBox="0 0 24 24" strokeWidth="1.8" fill="none" strokeLinecap="round" aria-hidden="true">
-              <path d="M4 7h16M4 12h16M4 17h16" />
-              <circle cx="9" cy="7" r="2" fill="#090f19" />
-              <circle cx="16" cy="12" r="2" fill="#090f19" />
-              <circle cx="11" cy="17" r="2" fill="#090f19" />
-            </svg>
-            <div className="pj-filter-heading-copy">
-              <h2 id="pj-filters-heading">{t(language, 'Busca tu próximo jangueo')}</h2>
-            </div>
-          </div>
           <EventFilters events={events} filters={filters} setFilters={setFilters} language={language} />
           <div className="pj-region-chips" aria-label={t(language, 'Filtrar por región')}>
             <button type="button" className="pj-region-chip" aria-pressed={!filters.region} onClick={() => chooseRegion('')}>
@@ -453,6 +479,15 @@ export default function EventFeed({ language, onLanguageChange }) {
           )}
         </section>
           </div>
+        )}
+        {section === 'calendar' && (
+          <CalendarView
+            events={events}
+            loading={loading}
+            error={error}
+            language={language}
+            EventComponent={EventCard}
+          />
         )}
       </main>
 

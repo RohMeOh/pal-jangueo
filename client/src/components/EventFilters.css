@@ -118,3 +118,10 @@
     font-size: 16px;
   }
 }
+
+
+/* Uppercase clear filters button */
+.pj-clear-filters {
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}

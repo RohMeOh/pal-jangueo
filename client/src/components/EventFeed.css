@@ -161,7 +161,7 @@
 .pj-region-chip:hover { border-color: var(--pj-blue); }
 .pj-region-chip[aria-pressed="true"] { color: #000104; background: var(--pj-blue); border-color: var(--pj-blue); }
 
-.pj-events { border-top: 1px solid #253548; padding-top: 38px; }
+.pj-events { border-top: 0; padding-top: 32px; }
 .pj-section-heading { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 25px; }
 .pj-section-heading h2 { font-size: clamp(25px, 3vw, 32px); font-weight: 900; letter-spacing: -.02em; }
 .pj-event-count { flex: 0 0 auto; border: 1px solid #2b4b63; border-radius: 40px; padding: 6px 12px; color: var(--pj-blue); font-size: 12px; font-weight: 800; }
@@ -182,8 +182,8 @@
 .pj-event-price { color: #f8fafc; font-weight: 900; font-size: 14px; }
 .pj-event-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; width: 100%; margin-top: auto; padding-top: 8px; }
 .pj-event-actions a { display: inline-flex; justify-content: center; align-items: center; padding: 10px 12px; border-radius: 8px; font-size: 13px; font-weight: 800; text-decoration: none; }
-.pj-event-map { color: var(--pj-white); border: 1px solid #35566e; background: #101823; }
-.pj-event-map:hover { border-color: var(--pj-blue); }
+.pj-event-map { color: var(--pj-bg); border: 1px solid var(--pj-red); background: var(--pj-red); }
+.pj-event-map:hover { border-color: var(--pj-red); background: #ec1240; }
 .pj-event-ticket { background: var(--pj-red); color: var(--pj-bg); border: 1px solid var(--pj-red); }
 .pj-event-ticket:hover { background: #ec1240; }
 .pj-empty, .pj-event-status { border: 1px solid #263b4d; border-radius: 16px; background: #0b1420; color: #c1ccda; padding: 35px 24px; text-align: center; }
@@ -387,9 +387,8 @@
 
 
 /* Uppercase discovery section headings */
-#pj-filters-heading,
 #pj-events-heading {
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 
@@ -466,4 +465,123 @@
 .pj-approved-art-copy strong {
   color: #ff1744;
   font: inherit;
+}
+
+
+/* Calendar navigation and side-by-side homepage actions */
+.pj-hero-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: min(100%, 440px);
+  gap: 10px;
+}
+
+.pj-hero-actions .pj-button {
+  min-width: 0;
+  white-space: nowrap;
+  padding-inline: 10px;
+  cursor: pointer;
+}
+
+.pj-button-calendar {
+  border-color: var(--pj-red);
+  background: var(--pj-red);
+  color: var(--pj-bg);
+}
+
+.pj-button-calendar:hover {
+  background: #ec1240;
+  border-color: var(--pj-red);
+}
+
+.pj-button-calendar svg {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+}
+
+.pj-hero-actions .pj-button:focus-visible {
+  outline: 2px solid var(--pj-blue);
+  outline-offset: 3px;
+}
+
+@media (max-width: 620px) {
+  .pj-navigation {
+    justify-content: space-between;
+    gap: 9px;
+  }
+
+  .pj-navigation button {
+    white-space: nowrap;
+    font-size: clamp(11px, 3vw, 12px);
+  }
+
+  .pj-hero-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .pj-hero-actions .pj-button {
+    min-height: 44px;
+    padding: 9px 6px;
+    gap: 5px;
+    font-size: clamp(11px, 3.3vw, 13px);
+  }
+
+  .pj-button-calendar svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+
+/* Unified event results headings */
+.pj-events .pj-section-heading h2 {
+  border-left: 3px solid var(--pj-red);
+  padding-left: 13px;
+}
+
+
+/* Unified Search and Calendar layout */
+
+/* Buscar adopta exactamente el ancho del Calendario. */
+.pj-search-page {
+  width: 100%;
+  max-width: 960px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Ambos encabezados comparten el mismo estilo. */
+.pj-search-intro #pj-filters-heading {
+  text-transform: none;
+}
+
+/* El espacio bajo el título coincide con Calendario. */
+.pj-search-page > .pj-filters-section {
+  padding-top: 0;
+}
+
+/* Alinear verticalmente ambas páginas en desktop. */
+@media (min-width: 621px) {
+  .pj-discovery:has(> .pj-search-page) {
+    padding-top: 56px;
+  }
+}
+
+/* Mantener la alineación y proporciones en móvil. */
+@media (max-width: 620px) {
+  .pj-discovery:has(> .pj-search-page) {
+    padding-top: 28px;
+  }
+
+  .pj-search-page {
+    max-width: 100%;
+  }
+
+  .pj-search-page > .pj-filters-section {
+    padding-top: 0;
+  }
 }
