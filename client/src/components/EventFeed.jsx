@@ -139,7 +139,7 @@ function EventCard({ event, language }) {
               rel="noopener noreferrer"
               className="pj-event-map"
             >
-              {t(language, 'Ver ubicación')}
+              {t(language, 'Ver ubicación')} <span aria-hidden="true">↗</span>
             </a>
           )}
 
@@ -150,7 +150,7 @@ function EventCard({ event, language }) {
               rel="noopener noreferrer"
               className="pj-event-ticket"
             >
-              {t(language, 'Ver boletos')}
+              {t(language, 'Ver boletos')} <span aria-hidden="true">↗</span>
             </a>
           )}
         </div>
