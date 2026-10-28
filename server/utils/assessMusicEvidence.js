@@ -67,7 +67,7 @@ function assessMusicEvidence(rawDescription) {
     },
     {
       name: 'Evento teatral',
-      pattern: /\b(pieza teatral|obra de teatro|obra teatral|gira teatral|montaje teatral|funcion teatral|produccion teatral|festival de teatro)\b/
+      pattern: /\b(pieza teatral|obra de teatro|obra teatral|gira teatral|montaje teatral|funcion teatral|produccion teatral|festival de teatro|tragicomedia)\b/
     },
     {
       name: 'Evento deportivo',

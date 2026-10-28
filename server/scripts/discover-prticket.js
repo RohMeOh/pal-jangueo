@@ -210,7 +210,46 @@ function extractDetail(html) {
     /\b(?:two|2)\s+djs?\.\s*(?:two|2)\s+music\s+styles\b/i
   )?.[0] || '';
 
-  const extractedDescription = [bodyDescription, stageLineup]
+  // Some PRticket pages have a description but no complete
+  // date/year marker. Recover only the event-body text between
+  // its purchase heading and a recognizable event/footer boundary.
+  // This does NOT infer missing dates or authorize publication.
+  const actionMatches = [
+    ...text.matchAll(/\b(?:Comprar|Coming Soon)\b/gi)
+  ];
+  const lastAction = actionMatches.at(-1);
+  const actionEnd = lastAction
+    ? lastAction.index + lastAction[0].length
+    : -1;
+
+  const fallbackTitlePosition =
+    !date && !bodyDescription && eventTitle && actionEnd >= 0
+      ? text.toLocaleLowerCase('es').indexOf(
+          eventTitle.toLocaleLowerCase('es'),
+          actionEnd
+        )
+      : -1;
+
+  const fallbackTail = fallbackTitlePosition >= 0
+    ? text.slice(fallbackTitlePosition + eventTitle.length)
+    : '';
+
+  const fallbackBoundary = fallbackTail.match(
+    /(?:🗓|📅|⏰|\bprecios?\s*:|\bacerca de\b|©)/i
+  );
+
+  const fallbackDescription =
+    fallbackBoundary && fallbackBoundary.index >= 0
+      ? fallbackTail
+          .slice(0, fallbackBoundary.index)
+          .trim()
+          .slice(0, 1800)
+      : '';
+
+  const extractedDescription = [
+    bodyDescription || fallbackDescription,
+    stageLineup
+  ]
     .filter(Boolean)
     .join(' ')
     .slice(0, 1800);
