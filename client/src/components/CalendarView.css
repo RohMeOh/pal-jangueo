@@ -672,3 +672,17 @@
     padding: 0 8px;
   }
 }
+
+
+/* Unified results spacing v1 */
+
+/* Calendario: panel mensual hacia fecha seleccionada */
+.pj-calendar-page > .pj-calendar-results {
+  margin-top: 24px;
+}
+
+@media (max-width: 620px) {
+  .pj-calendar-page > .pj-calendar-results {
+    margin-top: 20px;
+  }
+}

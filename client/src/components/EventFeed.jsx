@@ -1,8 +1,9 @@
 import ApprovedHeroArt from './ApprovedHeroArt';
 import { useEffect, useRef, useState } from 'react';
 import './EventFeed.css';
+import EventFilters from './EventFilters';
 import './IconAction.css';
-import EventFilters, { REGIONS } from './EventFilters';
+
 import CalendarView from './CalendarView';
 import BrandLogo from './BrandLogo';
 import { t } from '../i18n';
@@ -320,15 +321,6 @@ export default function EventFeed({ language, onLanguageChange }) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function chooseRegion(region) {
-    setFilters(previous => ({
-      ...previous,
-      region: previous.region === region ? '' : region,
-      municipality: '',
-      neighborhood: ''
-    }));
-  }
-
   return (
     <div className="pj-site" id="inicio">
       <header className="pj-site-header">
@@ -430,22 +422,6 @@ export default function EventFeed({ language, onLanguageChange }) {
               setMobileFiltersOpen(previous => !previous)
             }
           />
-          <div className={`pj-region-chips${mobileFiltersOpen ? " pj-mobile-filters-open" : ""}`} aria-label={t(language, 'Filtrar por región')}>
-            <button type="button" className="pj-region-chip" aria-pressed={!filters.region} onClick={() => chooseRegion('')}>
-              {t(language, 'Toda la isla')}
-            </button>
-            {REGIONS.map(region => (
-              <button
-                type="button"
-                key={region}
-                className="pj-region-chip"
-                aria-pressed={filters.region === region}
-                onClick={() => chooseRegion(region)}
-              >
-                {t(language, region)}
-              </button>
-            ))}
-          </div>
         </section>
 
         <section className="pj-events" id="eventos" aria-labelledby="pj-events-heading">
