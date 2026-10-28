@@ -637,3 +637,8 @@
     padding-top: 20px;
   }
 }
+
+/* Consistent spacing for event action arrows */
+.pj-event-actions a {
+  gap: 8px;
+}
