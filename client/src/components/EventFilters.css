@@ -184,12 +184,12 @@
     flex-shrink: 0;
   }
 
-  .pj-mobile-filter-toggle .pj-mobile-filter-chevron {
-    margin-left: 2px;
+  .pj-mobile-filter-toggle .pj-filter-triangle-icon {
     transition: transform .2s ease;
+    transform-origin: center;
   }
 
-  .pj-mobile-filter-chevron.is-open {
+  .pj-mobile-filter-toggle .pj-filter-triangle-icon.is-open {
     transform: rotate(180deg);
   }
 
@@ -225,7 +225,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pj-mobile-filter-toggle .pj-mobile-filter-chevron {
+  .pj-mobile-filter-toggle .pj-filter-triangle-icon {
     transition: none;
   }
 }

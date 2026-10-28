@@ -247,7 +247,9 @@ export default function EventFilters({
         aria-controls="pj-advanced-filters"
         onClick={onToggleExpanded}
       >
-        <svg viewBox="0 0 24 24" fill="none"
+        <svg
+          className={`pj-filter-triangle-icon${expanded ? ' is-open' : ''}`}
+          viewBox="0 0 24 24" fill="none"
           stroke="currentColor" strokeWidth="2"
           strokeLinecap="round" strokeLinejoin="round"
           aria-hidden="true">
@@ -259,18 +261,6 @@ export default function EventFilters({
             {activeCount}
           </span>
         )}
-        <svg
-          className={`pj-mobile-filter-chevron${expanded ? ' is-open' : ''}`}
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <path d="m6 9 6 6 6-6" />
-        </svg>
       </button>
 
       <div
