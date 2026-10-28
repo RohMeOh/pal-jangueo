@@ -365,7 +365,7 @@ export default function EventFeed({ language, onLanguageChange }) {
             </p>
             <div className="pj-hero-actions">
               <button className="pj-button pj-button-primary" type="button" onClick={() => openSection('search')}>
-                {t(language, 'Buscar eventos')} <span aria-hidden="true">↗</span>
+                {t(language, 'Explorar eventos')} <span aria-hidden="true">↗</span>
               </button>
             </div>
           </div>
