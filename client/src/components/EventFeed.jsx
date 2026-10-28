@@ -1,7 +1,8 @@
 import ApprovedHeroArt from './ApprovedHeroArt';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import './EventFeed.css';
 import EventFilters from './EventFilters';
+import { createEventSearch } from '../utils/eventSearch';
 import './IconAction.css';
 
 import CalendarView from './CalendarView';
@@ -105,9 +106,7 @@ function EventCard({ event, language }) {
           </>
         ) : (
           <div className="pj-event-poster-fallback">
-            <span className="pj-poster-symbol">♫</span>
-            <span>PA'L JANGUEO</span>
-            <small>{t(language, 'La música de aquí')}</small>
+            <BrandLogo />
           </div>
         )}
       </div>
@@ -250,21 +249,12 @@ export default function EventFeed({ language, onLanguageChange }) {
     return `${part('year')}-${part('month')}-${part('day')}`;
   }
 
-  const filteredEvents = events.filter(event => {
-    const searchText = [
-      event.title,
-      event.venue_name,
-      event.municipality,
-      event.neighborhood
-    ].filter(Boolean).join(' ').toLocaleLowerCase('es');
+  const eventSearch = useMemo(
+    () => createEventSearch(events),
+    [events]
+  );
 
-    if (
-      filters.search &&
-      !searchText.includes(
-        filters.search.trim().toLocaleLowerCase('es')
-      )
-    ) return false;
-
+  const filteredEvents = eventSearch.find(filters.search).filter(event => {
     if (filters.region && event.region !== filters.region) {
       return false;
     }
@@ -416,6 +406,7 @@ export default function EventFeed({ language, onLanguageChange }) {
             events={events}
             filters={filters}
             setFilters={setFilters}
+            getSuggestions={eventSearch.suggest}
             language={language}
             expanded={mobileFiltersOpen}
             onToggleExpanded={() =>

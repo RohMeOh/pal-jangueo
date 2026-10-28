@@ -1,3 +1,4 @@
+import { useEffect, useId, useRef, useState } from 'react';
 import './EventFilters.css';
 import { t } from '../i18n';
 
@@ -30,9 +31,43 @@ export default function EventFilters({
   filters,
   setFilters,
   language,
+  getSuggestions,
   expanded = false,
   onToggleExpanded
 }) {
+  const searchRef = useRef(null);
+  const listId = useId();
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
+
+  const suggestions = getSuggestions(filters.search);
+  const suggestionsVisible = suggestionsOpen && suggestions.length > 0;
+
+  useEffect(() => {
+    function closeOutside(event) {
+      if (!searchRef.current?.contains(event.target)) {
+        setSuggestionsOpen(false);
+      }
+    }
+
+    document.addEventListener('pointerdown', closeOutside);
+    document.addEventListener('focusin', closeOutside);
+
+    return () => {
+      document.removeEventListener('pointerdown', closeOutside);
+      document.removeEventListener('focusin', closeOutside);
+    };
+  }, []);
+
+  function chooseSuggestion(suggestion) {
+    setFilters(previous => ({
+      ...previous,
+      search: suggestion.label
+    }));
+    setSuggestionsOpen(false);
+    setActiveIndex(-1);
+  }
+
   const municipalities = [...new Set(
     events
       .filter(event =>
@@ -113,15 +148,96 @@ export default function EventFilters({
 
   return (
     <div className="pj-filters">
-      <div className="pj-filter pj-filter-search">
+      <div className="pj-filter pj-filter-search pj-search-suggest-wrap" ref={searchRef}>
         <label htmlFor="filter-search">{t(language, 'Buscar')}</label>
         <input
           id="filter-search"
           type="search"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded={suggestionsVisible}
+          aria-controls={suggestionsVisible ? listId : undefined}
+          aria-activedescendant={
+            suggestionsVisible && activeIndex >= 0
+              ? `${listId}-option-${activeIndex}`
+              : undefined
+          }
           placeholder={t(language, 'Evento, artista o local...')}
           value={filters.search}
-          onChange={e => update('search', e.target.value)}
+          onFocus={() => setSuggestionsOpen(true)}
+          onChange={e => {
+            update('search', e.target.value);
+            setSuggestionsOpen(true);
+            setActiveIndex(-1);
+          }}
+          onKeyDown={e => {
+            if (e.key === 'Escape') {
+              setSuggestionsOpen(false);
+              setActiveIndex(-1);
+            } else if (e.key === 'ArrowDown' && suggestions.length) {
+              e.preventDefault();
+              setSuggestionsOpen(true);
+              setActiveIndex(index => (index + 1) % suggestions.length);
+            } else if (e.key === 'ArrowUp' && suggestions.length) {
+              e.preventDefault();
+              setSuggestionsOpen(true);
+              setActiveIndex(index =>
+                index <= 0 ? suggestions.length - 1 : index - 1
+              );
+            } else if (
+              e.key === 'Enter' &&
+              suggestionsVisible &&
+              activeIndex >= 0
+            ) {
+              e.preventDefault();
+              chooseSuggestion(suggestions[activeIndex]);
+            }
+          }}
         />
+
+        {suggestionsVisible && (
+          <div
+            id={listId}
+            className="pj-search-suggestions"
+            role="listbox"
+            aria-label={
+              language === 'en'
+                ? 'Search suggestions'
+                : 'Sugerencias de búsqueda'
+            }
+          >
+            <p className="pj-suggestions-heading">
+              {language === 'en'
+                ? 'SUGGESTIONS'
+                : 'SUGERENCIAS'}
+            </p>
+            {suggestions.map((suggestion, index) => (
+              <button
+                key={`${suggestion.kind}:${suggestion.label}`}
+                id={`${listId}-option-${index}`}
+                type="button"
+                role="option"
+                aria-selected={activeIndex === index}
+                className="pj-search-suggestion"
+                onMouseDown={event => event.preventDefault()}
+                onClick={() => chooseSuggestion(suggestion)}
+              >
+                <span className="pj-suggestion-name">
+                  {suggestion.label}
+                </span>
+                <span className="pj-suggestion-kind">
+                  {{
+                    title: language === 'en' ? 'Event' : 'Evento',
+                    venue: language === 'en' ? 'Venue' : 'Local',
+                    municipality: language === 'en' ? 'Municipality' : 'Municipio',
+                    neighborhood: language === 'en' ? 'Neighborhood' : 'Barrio / Sector',
+                    region: language === 'en' ? 'Region' : 'Región'
+                  }[suggestion.kind]}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <button

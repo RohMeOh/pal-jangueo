@@ -166,9 +166,21 @@
 .pj-event-poster { display: grid; place-items: center; position: relative; width: 100%; aspect-ratio: 4 / 5; overflow: hidden; background: #0c1927; }
 .pj-event-poster img.pj-event-poster-backdrop { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(1.12); filter: blur(18px) brightness(.50) saturate(1.12); pointer-events: none; }
 .pj-event-poster img.pj-event-poster-image { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: contain; }
-.pj-event-poster-fallback { position: relative; z-index: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; width: 100%; height: 100%; padding: 26px; text-align: center; background: radial-gradient(circle at 50% 32%, #103e5d, transparent 68%), linear-gradient(145deg, #111e2c, #070c13); color: var(--pj-white); font-weight: 900; letter-spacing: .08em; }
-.pj-event-poster-fallback .pj-poster-symbol { color: var(--pj-blue); font-size: 68px; line-height: 1; }
-.pj-event-poster-fallback small { color: var(--pj-red); font-size: 12px; letter-spacing: 0; }
+.pj-event-poster-fallback {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 18px;
+  background: #000;
+}
+
+.pj-event-poster-fallback .pj-brand {
+  font-size: clamp(14px, 4.2vw, 20px);
+  max-width: 100%;
+}
 .pj-event-content { display: flex; flex-direction: column; align-items: flex-start; flex: 1; gap: 10px; padding: 22px; }
 .pj-event-category { color: var(--pj-blue); font-size: 11px; font-weight: 900; letter-spacing: .13em; }
 .pj-event-content h3 { color: #fff; margin: 0; font-size: 21px; font-weight: 900; line-height: 1.3; overflow-wrap: anywhere; }
