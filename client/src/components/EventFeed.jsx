@@ -519,6 +519,7 @@ export default function EventFeed({ language, onLanguageChange }) {
             </button>
             <button
               type="button"
+              className="pj-nav-link"
               onClick={() => aboutDialogRef.current?.showModal()}
               aria-haspopup="dialog"
               aria-controls="pj-about-dialog"
@@ -663,8 +664,8 @@ export default function EventFeed({ language, onLanguageChange }) {
               <h1 id="pj-my-jangueo-heading">Mi Jangueo</h1>
               <p className="pj-my-jangueo-subtitle">
                 {language === 'en'
-                  ? 'Your favorite events, all here'
-                  : 'Tus eventos favoritos, todos aquí'}
+                  ? 'Your favorite events, all here.'
+                  : 'Tus eventos favoritos, todos aquí.'}
               </p>
             </div>
 

@@ -14,23 +14,40 @@
 .pj-filter { display: flex; flex-direction: column; min-width: 0; gap: 8px; }
 .pj-filter-search { grid-column: span 2; }
 .pj-filter label { color: #d4dce5; font-weight: 800; font-size: 12px; }
-.pj-filter input:not([type="date"]), .pj-filter select {
+/* Shared form controls: Buscar and Mi Jangueo */
+.pj-site .pj-filter input:not([type="date"]),
+.pj-site .pj-filter select,
+.pj-site .pj-my-jangueo-controls .pj-favorite-search,
+.pj-site .pj-my-jangueo-controls select {
   display: block;
   width: 100%;
   min-width: 0;
   max-width: 100%;
   height: 47px;
   padding: 11px 12px;
-  background: #0d1520;
+  background-color: #0d1520;
   color: #f8fafc;
   border: 1px solid #2e435a;
   border-radius: 9px;
+  font-family: inherit;
   font-size: 13px;
   color-scheme: dark;
 }
-.pj-filter input::placeholder { color: #a3b4c6; }
-.pj-filter select { text-overflow: ellipsis; }
-.pj-filter input:focus-visible, .pj-filter select:focus-visible { outline: 2px solid #13c5ff; outline-offset: 1px; }
+.pj-filter input::placeholder,
+.pj-my-jangueo-controls .pj-favorite-search::placeholder {
+  color: #a3b4c6;
+}
+.pj-filter select,
+.pj-my-jangueo-controls select {
+  text-overflow: ellipsis;
+}
+.pj-filter input:focus-visible,
+.pj-filter select:focus-visible,
+.pj-my-jangueo-controls .pj-favorite-search:focus-visible,
+.pj-my-jangueo-controls select:focus-visible {
+  outline: 2px solid #13c5ff;
+  outline-offset: 1px;
+}
 .pj-date-field {
   position: relative;
   width: 100%;
@@ -113,8 +130,10 @@
 /* Prevent iOS Safari from zooming the page when a filter is focused.
    Keep the original compact desktop typography. */
 @media (pointer: coarse) {
-  .pj-filter input:not([type="date"]),
-  .pj-filter select {
+  .pj-site .pj-filter input:not([type="date"]),
+  .pj-site .pj-filter select,
+  .pj-site .pj-my-jangueo-controls .pj-favorite-search,
+  .pj-site .pj-my-jangueo-controls select {
     font-size: 16px;
   }
 }
