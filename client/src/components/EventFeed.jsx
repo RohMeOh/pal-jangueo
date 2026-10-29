@@ -559,6 +559,13 @@ export default function EventFeed({ language, onLanguageChange }) {
                 </svg>
                 {t(language, 'Calendario')}
               </button>
+              <button
+                className="pj-button pj-button-primary pj-button-my-jangueo"
+                type="button"
+                onClick={() => openSection('favorites')}
+              >
+                Mi Jangueo <span aria-hidden="true">↗</span>
+              </button>
             </div>
           </div>
           <div

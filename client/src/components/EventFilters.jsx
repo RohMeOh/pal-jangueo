@@ -32,6 +32,7 @@ export default function EventFilters({
   setFilters,
   language,
   getSuggestions,
+  resultCount = null,
   expanded = false,
   onToggleExpanded
 }) {
@@ -148,8 +149,23 @@ export default function EventFilters({
 
   return (
     <div className="pj-filters">
+      <div className="pj-filters-topbar">
+        <span className="pj-filters-topbar-title">
+          {t(language, 'Filtros')}
+        </span>
+
+        {resultCount !== null && (
+          <span className="pj-event-count" role="status">
+            {resultCount}{' '}
+            {t(language, resultCount === 1 ? 'evento' : 'eventos')}
+          </span>
+        )}
+      </div>
+
       <div className="pj-filter pj-filter-search pj-search-suggest-wrap" ref={searchRef}>
-        <label htmlFor="filter-search">{t(language, 'Buscar')}</label>
+        <label htmlFor="filter-search">
+          {language === 'en' ? 'Search by:' : 'Buscar por:'}
+        </label>
         <input
           id="filter-search"
           type="search"

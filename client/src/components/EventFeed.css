@@ -1077,3 +1077,61 @@
     grid-row: 3;
   }
 }
+
+/* Consistent dropdown arrows across Buscar and Mi Jangueo */
+.pj-site .pj-filter select,
+.pj-site .pj-my-jangueo-controls select {
+  appearance: none;
+  -webkit-appearance: none;
+
+  padding-right: 42px;
+
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23d4dce5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 16px 16px;
+}
+
+
+/* Consistent filter labels across Buscar and Mi Jangueo */
+.pj-site .pj-filter label,
+.pj-site .pj-my-jangueo-controls label {
+  font-size: 12px;
+  font-weight: 800;
+  color: #d4dce5;
+  line-height: 1.4;
+}
+
+
+/* Unified header-to-content spacing across main tabs */
+
+/* Desktop */
+@media (min-width: 621px) {
+  .pj-discovery:has(> .pj-search-page),
+  .pj-discovery:has(> .pj-calendar-page),
+  .pj-discovery:has(> .pj-my-jangueo) {
+    padding-top: 56px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 620px) {
+  .pj-discovery:has(> .pj-search-page),
+  .pj-discovery:has(> .pj-calendar-page),
+  .pj-discovery:has(> .pj-my-jangueo) {
+    padding-top: 28px;
+  }
+}
+
+/* Remove the extra spacing specific to Mi Jangueo */
+.pj-search-page.pj-my-jangueo {
+  padding-top: 0;
+}
+
+
+/* Bienvenido: third action centered on its own row */
+.pj-hero-actions .pj-button-my-jangueo {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+

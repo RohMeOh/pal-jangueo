@@ -298,3 +298,33 @@
     max-height: 45vh;
   }
 }
+
+
+/* Buscar: contador dentro de la caja de filtros */
+.pj-filters-topbar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.pj-filters-topbar-title {
+  color: #f8fafc;
+  font-size: 13px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.pj-filters-topbar .pj-event-count {
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+@media (max-width: 620px) {
+  .pj-filters-topbar {
+    gap: 8px;
+  }
+}
