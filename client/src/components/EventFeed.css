@@ -112,6 +112,24 @@
   line-height: 1.09;
 }
 .pj-hero h1 strong { font: inherit; color: var(--pj-blue); }
+
+/* Bilingual hero: identical typography and two lines */
+.pj-site .pj-hero h1 {
+  font-size: clamp(29px, 4.4vw, 56px);
+}
+
+.pj-site .pj-hero h1 > span,
+.pj-site .pj-hero h1 > strong {
+  white-space: nowrap;
+}
+
+/* Prevent overflow on very narrow phones */
+@media (max-width: 360px) {
+  .pj-site .pj-hero h1 {
+    font-size: clamp(23px, 7vw, 27px);
+  }
+}
+
 .pj-hero-description { max-width: 550px; color: #c2cbd8; font-size: 17px; line-height: 1.75; }
 .pj-hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 30px; }
 .pj-button {
@@ -283,11 +301,19 @@
   text-align: right;
 }
 .pj-footer-inner .pj-footer-copyright {
-  max-width: 420px;
+  max-width: none;
   color: #a5b9cc;
   font-size: 11px;
   line-height: 1.5;
 }
+
+/* Single-line copyright on desktop */
+@media (min-width: 1000px) {
+  .pj-footer-inner .pj-footer-copyright {
+    white-space: nowrap;
+  }
+}
+
 @media (max-width: 620px) {
   .pj-footer-copy {
     align-items: flex-start;
