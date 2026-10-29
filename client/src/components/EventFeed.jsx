@@ -223,6 +223,7 @@ export default function EventFeed({ language, onLanguageChange }) {
   }, []);
   const [favorites, setFavorites] = useState(readFavorites);
   const [favoriteFilter, setFavoriteFilter] = useState('upcoming');
+  const [favoriteSearch, setFavoriteSearch] = useState('');
   const [events, setEvents] = useState([]);
 
   function toggleFavorite(event) {
@@ -282,8 +283,18 @@ export default function EventFeed({ language, onLanguageChange }) {
 
     const thisMonth = monthKey(Date.now());
 
+    const query = favoriteSearch.trim().toLocaleLowerCase('es');
+
     return saved
       .filter(isUpcoming)
+      .filter(event => !query || [
+        event.title,
+        event.venue_name,
+        event.municipality,
+        event.description
+      ].some(value =>
+        String(value || '').toLocaleLowerCase('es').includes(query)
+      ))
       .filter(event => {
         if (favoriteFilter === 'month') {
           return monthKey(event.start_at) === thisMonth;
@@ -305,7 +316,7 @@ export default function EventFeed({ language, onLanguageChange }) {
       .sort((a, b) =>
         new Date(a.start_at) - new Date(b.start_at)
       );
-  }, [events, favorites, favoriteFilter]);
+  }, [events, favorites, favoriteFilter, favoriteSearch]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filters, setFilters] = useState({
@@ -622,8 +633,8 @@ export default function EventFeed({ language, onLanguageChange }) {
               <h1 id="pj-my-jangueo-heading">Mi Jangueo</h1>
               <p className="pj-my-jangueo-subtitle">
                 {language === 'en'
-                  ? 'Your favorite events, saved on this device.'
-                  : 'Tus eventos favoritos, guardados en este dispositivo.'}
+                  ? 'Your favorite events, all here'
+                  : 'Tus eventos favoritos, todos aquí'}
               </p>
             </div>
 
@@ -632,6 +643,20 @@ export default function EventFeed({ language, onLanguageChange }) {
               <label htmlFor="pj-favorite-filter">
                 {language === 'en' ? 'Show' : 'Mostrar'}
               </label>
+
+              <input
+                id="pj-favorite-search"
+                className="pj-favorite-search pj-filter-search-input"
+                type="search"
+                value={favoriteSearch}
+                onChange={event => setFavoriteSearch(event.target.value)}
+                placeholder={language === 'en'
+                  ? 'Search favorites...'
+                  : 'Buscar favoritos...'}
+                aria-label={language === 'en'
+                  ? 'Search favorite events'
+                  : 'Buscar eventos favoritos'}
+              />
 
               <select
                 id="pj-favorite-filter"
@@ -654,7 +679,7 @@ export default function EventFeed({ language, onLanguageChange }) {
                 </option>
               </select>
 
-              <span>
+              <span className="pj-event-count">
                 {favoriteEvents.length}{' '}
                 {t(language,
                   favoriteEvents.length === 1 ? 'evento' : 'eventos')}
@@ -687,16 +712,32 @@ export default function EventFeed({ language, onLanguageChange }) {
                   {language === 'en'
                     ? 'Save events with the heart icon or choose another filter.'
                     : Object.keys(favorites).length === 0
-                      ? 'Explora los eventos y toca el corazón para guardar tus favoritos.'
+                      ? 'Explora los eventos y dale al corazón para guardar en tus favoritos.'
                       : 'No hay eventos que coincidan con este filtro.'}
                 </p>
+                <div className="pj-hero-actions pj-my-jangueo-actions">
                 <button
                   type="button"
-                  className="pj-my-jangueo-explore"
+                  className="pj-button pj-button-primary"
                   onClick={() => openSection('search')}
                 >
-                  {t(language, 'Explorar eventos')} ↗
+                  {t(language, 'Explorar eventos')} <span aria-hidden="true">↗</span>
                 </button>
+                <button
+                  type="button"
+                  className="pj-button pj-button-calendar"
+                  onClick={() => openSection('calendar')}
+                >
+                  <svg viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" strokeWidth="1.8"
+                    strokeLinecap="round" strokeLinejoin="round"
+                    aria-hidden="true">
+                    <rect x="3" y="5" width="18" height="16" rx="2" />
+                    <path d="M7 3v4M17 3v4M3 10h18" />
+                  </svg>
+                  {t(language, 'Calendario')}
+                </button>
+                </div>
               </div>
             )}
           </section>
