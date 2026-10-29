@@ -6,7 +6,10 @@ const path = require('node:path');
 const { execFile } = require('node:child_process');
 const { promisify } = require('node:util');
 
-const { extractEvents } = require('./discover-boletera');
+const {
+  mergeCatalog,
+  compareDates
+} = require('../utils/boleteraCatalog');
 const { extractEventJsonLd } = require('../utils/extractEventJsonLd');
 const { adaptBoleteraEvent } = require('../adapters/boleteraAdapter');
 const {
@@ -120,7 +123,33 @@ async function main() {
   console.log('Modo:', stage ? 'GUARDAR PARA REVISIÓN' : 'VISTA PREVIA');
 
   const homepage = await fetchPage(BASE_URL);
-  const discovered = extractEvents(homepage);
+
+  const apiResponse = await fetch(
+    'https://boletera.net/api/events',
+    {
+      signal: AbortSignal.timeout(20000),
+      redirect: 'error',
+      headers: { Accept: 'application/json' }
+    }
+  );
+
+  if (
+    !apiResponse.ok ||
+    new URL(apiResponse.url).hostname !== 'boletera.net'
+  ) {
+    throw new Error('No se pudo verificar la API de Boletera.');
+  }
+
+  const catalog = mergeCatalog(
+    homepage,
+    await apiResponse.json()
+  );
+
+  const discovered = catalog.events;
+
+  console.log('Portada:', catalog.homepageCount);
+  console.log('Enlaces en API:', catalog.apiCount);
+  console.log('Adicionales de API:', catalog.outsideHomepage);
 
   const selected = scanAll
     ? discovered
@@ -131,6 +160,8 @@ async function main() {
 
   const totals = {
     musicEvidence: 0,
+    multiplePerformances: 0,
+    dateConflicts: 0,
     needsReview: 0,
     notEligible: 0,
     skippedPublished: 0,
@@ -163,6 +194,31 @@ async function main() {
         }
 
         const raw = events[0];
+
+        const dateStatus = compareDates(
+          raw.start_date,
+          item
+        );
+
+        if (dateStatus === 'multiple_dates') {
+          totals.multiplePerformances++;
+          console.log('Resultado: evento con varias funciones');
+          console.log('Fechas API:', item.api_dates);
+          console.log('Publicación automática: BLOQUEADA');
+          continue;
+        }
+
+        if (!['match', 'not_in_api', 'not_provided']
+          .includes(dateStatus)) {
+          totals.dateConflicts++;
+          console.log('Resultado: conflicto de fechas');
+          console.log('Fecha oficial:', raw.start_date);
+          console.log('Fechas API:', item.api_dates);
+          console.log('Motivo:', dateStatus);
+          console.log('Publicación automática: BLOQUEADA');
+          continue;
+        }
+
         const enriched = stage
           ? await reuseVerifiedBoleteraVenue(raw, pool)
           : raw;
@@ -248,6 +304,8 @@ async function main() {
 
   console.log('\n=== RESUMEN ===');
   console.log('MusicEvent oficiales elegibles para staging:', totals.musicEvidence);
+  console.log('Eventos con varias funciones:', totals.multiplePerformances);
+  console.log('Conflictos de fecha:', totals.dateConflicts);
   console.log('Necesitan otra revisión:', totals.needsReview);
   console.log('No elegibles:', totals.notEligible);
   console.log('Ya aprobados:', totals.skippedPublished);
