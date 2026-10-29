@@ -588,6 +588,7 @@ export default function EventFeed({ language, onLanguageChange }) {
             setFilters={setFilters}
             getSuggestions={eventSearch.suggest}
             language={language}
+            resultCount={!loading && !error ? filteredEvents.length : null}
             expanded={mobileFiltersOpen}
             onToggleExpanded={() =>
               setMobileFiltersOpen(previous => !previous)
@@ -600,11 +601,6 @@ export default function EventFeed({ language, onLanguageChange }) {
             <div>
               <h2 id="pj-events-heading">{t(language, 'Explora lo que suena')}</h2>
             </div>
-            {!loading && !error && (
-              <span className="pj-event-count">
-                {filteredEvents.length} {t(language, filteredEvents.length === 1 ? 'evento' : 'eventos')}
-              </span>
-            )}
           </div>
 
           {loading && (
@@ -668,7 +664,7 @@ export default function EventFeed({ language, onLanguageChange }) {
             {Object.keys(favorites).length > 0 && (
             <div className="pj-my-jangueo-controls">
               <label htmlFor="pj-favorite-filter">
-                {language === 'en' ? 'Sort by' : 'Ordenar por'}
+                {language === 'en' ? 'Sort by:' : 'Ordenar por:'}
               </label>
 
               <input
@@ -678,8 +674,8 @@ export default function EventFeed({ language, onLanguageChange }) {
                 value={favoriteSearch}
                 onChange={event => setFavoriteSearch(event.target.value)}
                 placeholder={language === 'en'
-                  ? 'Search favorites...'
-                  : 'Buscar favoritos...'}
+                  ? 'Event, artist or venue...'
+                  : 'Evento, artista o local...'}
                 aria-label={language === 'en'
                   ? 'Search favorite events'
                   : 'Buscar eventos favoritos'}
@@ -696,17 +692,17 @@ export default function EventFeed({ language, onLanguageChange }) {
                   {language === 'en' ? 'Soonest first' : 'Próximos primero'}
                 </option>
                 <option value="farthest">
-                  {language === 'en' ? 'Farthest first' : 'Más lejos primero'}
+                  {language === 'en' ? 'Latest dates first' : 'Fechas más lejanas'}
                 </option>
                 <option value="az">A–Z</option>
                 <option value="za">Z–A</option>
                 <option value="newest">
                   {language === 'en'
-                    ? 'Recently added' : 'Añadidos recientemente'}
+                    ? 'Recently saved' : 'Guardados recientemente'}
                 </option>
                 <option value="oldest">
                   {language === 'en'
-                    ? 'Oldest saved' : 'Más antiguos guardados'}
+                    ? 'Oldest saved' : 'Guardados hace más tiempo'}
                 </option>
               </select>
 
