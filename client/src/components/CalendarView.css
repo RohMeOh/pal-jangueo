@@ -686,3 +686,10 @@
     margin-top: 20px;
   }
 }
+
+/* Match calendar date heading with event results heading */
+.pj-calendar-results h2 {
+  font-size: clamp(25px, 3vw, 32px);
+  font-weight: 900;
+  letter-spacing: -.02em;
+}

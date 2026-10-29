@@ -79,7 +79,9 @@ export default function CalendarView({
   loading,
   error,
   language,
-  EventComponent
+  EventComponent,
+  favorites = {},
+  onToggleFavorite = () => {}
 }) {
   const today = puertoRicoDay(new Date());
 
@@ -299,6 +301,10 @@ export default function CalendarView({
                 key={event.id}
                 event={event}
                 language={language}
+                isFavorite={Object.prototype.hasOwnProperty.call(
+                  favorites, String(event.id)
+                )}
+                onToggleFavorite={onToggleFavorite}
               />
             ))}
           </div>

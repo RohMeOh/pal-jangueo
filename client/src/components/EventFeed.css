@@ -949,3 +949,131 @@
     padding: 34px 20px;
   }
 }
+
+
+
+/* Mi Jangueo: reuse the exact Welcome button layout */
+.pj-my-jangueo .pj-empty .pj-my-jangueo-actions {
+  margin: 24px auto 0;
+}
+
+.pj-my-jangueo .pj-empty .pj-my-jangueo-actions .pj-button {
+  margin: 0;
+  width: 100%;
+}
+
+
+/* Mi Jangueo: same event counter as Buscar */
+.pj-my-jangueo-controls .pj-event-count {
+  margin-left: auto;
+  color: var(--pj-blue);
+  border: 1px solid #2b4b63;
+  border-radius: 40px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* Mi Jangueo: match Buscar search input */
+.pj-my-jangueo-controls .pj-favorite-search {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  height: 47px;
+  min-height: 47px;
+  padding: 11px 12px;
+  background: #0d1520;
+  color: #f8fafc;
+  border: 1px solid #2e435a;
+  border-radius: 9px;
+  font-size: 13px;
+  font-family: inherit;
+  color-scheme: dark;
+  outline: none;
+}
+
+.pj-my-jangueo-controls .pj-favorite-search::placeholder {
+  color: #a3b4c6;
+}
+
+.pj-my-jangueo-controls .pj-favorite-search:focus-visible {
+  outline: 2px solid #13c5ff;
+  outline-offset: 1px;
+}
+
+@media (pointer: coarse) {
+  .pj-my-jangueo-controls .pj-favorite-search {
+    font-size: 16px;
+  }
+}
+
+/* Mi Jangueo: search, filter and event count in one row */
+.pj-my-jangueo-controls {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(170px, 230px) auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.pj-my-jangueo-controls label {
+  grid-column: 1;
+  grid-row: 1;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.pj-my-jangueo-controls .pj-favorite-search {
+  grid-column: 2;
+  grid-row: 1;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+
+.pj-my-jangueo-controls select {
+  grid-column: 3;
+  grid-row: 1;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  margin: 0;
+}
+
+.pj-my-jangueo-controls .pj-event-count {
+  grid-column: 4;
+  grid-row: 1;
+  justify-self: end;
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* Mobile: preserve usability without horizontal overflow */
+@media (max-width: 620px) {
+  .pj-my-jangueo-controls {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .pj-my-jangueo-controls label {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .pj-my-jangueo-controls .pj-favorite-search {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .pj-my-jangueo-controls select {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .pj-my-jangueo-controls .pj-event-count {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+}
