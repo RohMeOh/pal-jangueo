@@ -815,3 +815,15 @@
   height: 38px;
   margin: 0;
 }
+
+/* Mi Jangueo: symmetric margins for favorite heart */
+.pj-event-content {
+  position: relative;
+}
+
+.pj-event-title-row .pj-favorite-heart {
+  position: absolute;
+  top: 20px;
+  right: 0;
+  margin: 0;
+}
