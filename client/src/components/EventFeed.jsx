@@ -61,6 +61,17 @@ function safeLink(value) {
 }
 
 const FAVORITES_KEY = 'pj-favorite-events-v1';
+const FAVORITE_DATES_KEY = 'pj-favorite-dates-v1';
+
+function readFavoriteDates() {
+  try {
+    return JSON.parse(
+      window.localStorage.getItem(FAVORITE_DATES_KEY) || '{}'
+    ) || {};
+  } catch {
+    return {};
+  }
+}
 
 function readFavorites() {
   try {
@@ -224,6 +235,7 @@ export default function EventFeed({ language, onLanguageChange }) {
   const [favorites, setFavorites] = useState(readFavorites);
   const [favoriteFilter, setFavoriteFilter] = useState('upcoming');
   const [favoriteSearch, setFavoriteSearch] = useState('');
+  const [favoriteDates, setFavoriteDates] = useState(readFavoriteDates);
   const [events, setEvents] = useState([]);
 
   function toggleFavorite(event) {
@@ -236,6 +248,23 @@ export default function EventFeed({ language, onLanguageChange }) {
       } else {
         next[id] = event;
       }
+
+      setFavoriteDates(previousDates => {
+        const dates = { ...previousDates };
+        if (Object.prototype.hasOwnProperty.call(next, id)) {
+          dates[id] = dates[id] || Date.now();
+        } else {
+          delete dates[id];
+        }
+        try {
+          window.localStorage.setItem(
+            FAVORITE_DATES_KEY, JSON.stringify(dates)
+          );
+        } catch (error) {
+          console.warn('Error guardando fecha del favorito', error);
+        }
+        return dates;
+      });
 
       try {
         window.localStorage.setItem(
@@ -251,8 +280,13 @@ export default function EventFeed({ language, onLanguageChange }) {
 
   useEffect(() => {
     const syncFavorites = event => {
-      if (event.key === FAVORITES_KEY || event.key === null) {
+      if (
+        event.key === FAVORITES_KEY ||
+        event.key === FAVORITE_DATES_KEY ||
+        event.key === null
+      ) {
         setFavorites(readFavorites());
+        setFavoriteDates(readFavoriteDates());
       }
     };
 
@@ -265,27 +299,13 @@ export default function EventFeed({ language, onLanguageChange }) {
       events.map(event => [String(event.id), event])
     );
 
-    const saved = Object.entries(favorites)
-      .map(([id, snapshot]) => current.get(id) || snapshot);
-
-    const monthKey = value => {
-      const parts = new Intl.DateTimeFormat('en-US', {
-        timeZone: 'America/Puerto_Rico',
-        year: 'numeric',
-        month: '2-digit'
-      }).formatToParts(new Date(value));
-
-      const get = type =>
-        parts.find(part => part.type === type)?.value;
-
-      return `${get('year')}-${get('month')}`;
-    };
-
-    const thisMonth = monthKey(Date.now());
-
     const query = favoriteSearch.trim().toLocaleLowerCase('es');
 
-    return saved
+    const saved = Object.entries(favorites)
+      .map(([id, snapshot]) => ({
+        ...(current.get(id) || snapshot),
+        savedAt: Number(favoriteDates[id]) || 0
+      }))
       .filter(isUpcoming)
       .filter(event => !query || [
         event.title,
@@ -294,29 +314,36 @@ export default function EventFeed({ language, onLanguageChange }) {
         event.description
       ].some(value =>
         String(value || '').toLocaleLowerCase('es').includes(query)
-      ))
-      .filter(event => {
-        if (favoriteFilter === 'month') {
-          return monthKey(event.start_at) === thisMonth;
-        }
+      ));
 
-        if (favoriteFilter === 'free') {
-          return event.price_type === 'free' ||
-            (event.price_type === 'paid' &&
-              event.price_min != null &&
-              Number(event.price_min) === 0);
-        }
+    const dateDiff = (a, b) =>
+      new Date(a.start_at).getTime() -
+      new Date(b.start_at).getTime();
 
-        if (favoriteFilter === 'paid') {
-          return event.price_type === 'paid';
-        }
-
-        return true;
-      })
-      .sort((a, b) =>
-        new Date(a.start_at) - new Date(b.start_at)
+    const nameDiff = (a, b) =>
+      String(a.title || '').localeCompare(
+        String(b.title || ''), 'es',
+        { sensitivity: 'base', numeric: true }
       );
-  }, [events, favorites, favoriteFilter, favoriteSearch]);
+
+    return saved.sort((a, b) => {
+      switch (favoriteFilter) {
+        case 'farthest':
+          return -dateDiff(a, b);
+        case 'az':
+          return nameDiff(a, b) || dateDiff(a, b);
+        case 'za':
+          return -nameDiff(a, b) || dateDiff(a, b);
+        case 'newest':
+          return b.savedAt - a.savedAt || dateDiff(a, b);
+        case 'oldest':
+          return a.savedAt - b.savedAt || dateDiff(a, b);
+        default:
+          return dateDiff(a, b);
+      }
+    });
+  }, [events, favorites, favoriteDates, favoriteFilter, favoriteSearch]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filters, setFilters] = useState({
@@ -641,7 +668,7 @@ export default function EventFeed({ language, onLanguageChange }) {
             {Object.keys(favorites).length > 0 && (
             <div className="pj-my-jangueo-controls">
               <label htmlFor="pj-favorite-filter">
-                {language === 'en' ? 'Show' : 'Mostrar'}
+                {language === 'en' ? 'Sort by' : 'Ordenar por'}
               </label>
 
               <input
@@ -666,16 +693,20 @@ export default function EventFeed({ language, onLanguageChange }) {
                 }
               >
                 <option value="upcoming">
-                  {language === 'en' ? 'Upcoming first' : 'Próximos primero'}
+                  {language === 'en' ? 'Soonest first' : 'Próximos primero'}
                 </option>
-                <option value="month">
-                  {language === 'en' ? 'This month' : 'Este mes'}
+                <option value="farthest">
+                  {language === 'en' ? 'Farthest first' : 'Más lejos primero'}
                 </option>
-                <option value="free">
-                  {language === 'en' ? 'Free options' : 'Con opción gratis'}
+                <option value="az">A–Z</option>
+                <option value="za">Z–A</option>
+                <option value="newest">
+                  {language === 'en'
+                    ? 'Recently added' : 'Añadidos recientemente'}
                 </option>
-                <option value="paid">
-                  {language === 'en' ? 'Paid' : 'De pago'}
+                <option value="oldest">
+                  {language === 'en'
+                    ? 'Oldest saved' : 'Más antiguos guardados'}
                 </option>
               </select>
 
