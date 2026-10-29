@@ -796,3 +796,22 @@
   align-self: start;
   flex-shrink: 0;
 }
+
+/* Align favorite heart with the MÚSICA EN VIVO label */
+.pj-event-content {
+  position: relative;
+}
+
+.pj-event-title-row {
+  display: block;
+  padding-right: 48px;
+}
+
+.pj-event-title-row .pj-favorite-heart {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  width: 38px;
+  height: 38px;
+  margin: 0;
+}
