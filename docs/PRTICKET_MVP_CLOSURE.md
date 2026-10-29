@@ -18,6 +18,9 @@ future events or undisclosed provider endpoints.
 
 ## Publication results
 
+Catalog snapshot before editorial closure:
+
+
 - 35 current catalog entries inspected.
 - 10 distinct music-event source URLs published.
 - 11 upcoming published and visible performances.
@@ -80,6 +83,32 @@ Reevaluate any entry if reliable new musical evidence emerges.
 - New catalog entries require continued discovery,
   validation, and publication checks.
 
+## Editorial closure — October 29, 2026
+
+Final Supabase review statuses:
+
+- 11 approved candidates.
+- 15 rejected candidates with recorded editorial reasons.
+- 0 pending-review candidates.
+
+Rejected candidates retain their original evidence and
+editorial review history.
+
+The 11 published musical performances were not modified.
+
+## Future source updates
+
+Changed evidence from previously rejected sources can create
+a new pending-review candidate.
+
+Unchanged sources are not staged again.
+Existing approved events are not automatically duplicated.
+Human review and publication safeguards remain required.
+
 ## Database changes
 
-This audit performed no database modifications.
+The initial catalog audits were read-only.
+
+The final editorial closure updated the review status,
+review notes, review timestamp, and editorial evidence of
+15 candidates. No published event was modified or deleted.

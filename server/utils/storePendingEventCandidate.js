@@ -82,6 +82,25 @@ function validateCandidate(input) {
   }
 }
 
+function existingCandidateDecision(rows, newHash) {
+  if (!rows.length) return 'INSERT';
+
+  if (rows.some(row =>
+    row.source_content_hash === newHash
+  )) {
+    return 'YA_EXISTE';
+  }
+
+  const canReopen = rows.every(row =>
+    ['rejected', 'needs_more_info'].includes(row.review_status) &&
+    row.approved_event_id == null
+  );
+
+  return canReopen
+    ? 'INSERT'
+    : 'FUENTE_CAMBIO_REQUIERE_REVISION';
+}
+
 async function storePendingEventCandidate(input) {
   validateCandidate(input);
 
@@ -103,7 +122,8 @@ async function storePendingEventCandidate(input) {
     );
 
     const existing = await client.query(`
-      SELECT id, source_content_hash
+      SELECT id, source_content_hash,
+             review_status, approved_event_id
       FROM public.event_candidates
       WHERE source_name = $1
         AND source_url = $2
@@ -112,18 +132,19 @@ async function storePendingEventCandidate(input) {
       FOR UPDATE
     `, [sourceName, sourceUrl]);
 
-    if (existing.rows.length) {
-      const unchanged = existing.rows.some(row =>
-        row.source_content_hash === sourceContentHash
-      );
+    const decision = existingCandidateDecision(
+      existing.rows, sourceContentHash
+    );
 
+    if (decision !== 'INSERT') {
       await client.query('COMMIT');
       transaction = false;
-
-      return unchanged
-        ? 'YA_EXISTE'
-        : 'FUENTE_CAMBIO_REQUIERE_REVISION';
+      return decision;
     }
+
+    // A changed source previously rejected or needing information
+    // creates a NEW pending candidate, preserving review history.
+    // No automatic approval or publication is performed.
 
     const event = analysis.event;
     const startAt = event.normalized.start_at;
@@ -199,5 +220,6 @@ async function storePendingEventCandidate(input) {
 
 module.exports = {
   validateCandidate,
-  storePendingEventCandidate
+  storePendingEventCandidate,
+  existingCandidateDecision
 };
