@@ -827,3 +827,125 @@
   right: 0;
   margin: 0;
 }
+
+/* Favorite heart: symmetric 24px margins */
+.pj-event-title-row .pj-favorite-heart {
+  right: 24px;
+}
+
+
+/* =========================================
+   MI JANGUEO - refined layout
+   ========================================= */
+
+.pj-discovery:has(.pj-my-jangueo) {
+  padding-top: 0;
+}
+
+.pj-my-jangueo {
+  width: 100%;
+  max-width: 960px;
+  margin-inline: auto;
+  padding-top: 40px;
+  padding-bottom: 60px;
+}
+
+.pj-my-jangueo .pj-calendar-intro {
+  margin-bottom: 24px;
+}
+
+.pj-my-jangueo-subtitle {
+  margin-top: 10px;
+  max-width: 560px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--pj-muted);
+}
+
+.pj-my-jangueo-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 70px;
+  margin: 0 0 26px;
+  padding: 12px 18px;
+  background: #090f19;
+  border: 1px solid var(--pj-border);
+  border-radius: 12px;
+}
+
+.pj-my-jangueo-controls select {
+  max-width: 260px;
+  min-width: 0;
+  min-height: 44px;
+  font-size: 14px;
+}
+
+.pj-my-jangueo .pj-empty {
+  width: 100%;
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 44px 28px;
+  background: #090f19;
+  border: 1px solid var(--pj-border);
+  border-radius: 16px;
+  text-align: center;
+}
+
+.pj-my-jangueo .pj-empty h3 {
+  font-size: clamp(19px, 2.5vw, 24px);
+  line-height: 1.35;
+  font-weight: 900;
+  margin-bottom: 12px;
+}
+
+.pj-my-jangueo .pj-empty p {
+  max-width: 410px;
+  margin: 0 auto;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--pj-muted);
+}
+
+.pj-my-jangueo-explore {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  margin-top: 24px;
+  padding: 12px 22px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 900;
+  transition: background .2s ease;
+}
+
+.pj-my-jangueo-explore:hover {
+  background: #ec1240;
+}
+
+@media (max-width: 620px) {
+  .pj-my-jangueo {
+    padding-top: 28px;
+    padding-bottom: 40px;
+  }
+
+  .pj-my-jangueo-controls {
+    flex-wrap: wrap;
+    padding: 14px;
+    gap: 10px;
+  }
+
+  .pj-my-jangueo-controls select {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+
+  .pj-my-jangueo-controls > span {
+    margin-left: 0;
+  }
+
+  .pj-my-jangueo .pj-empty {
+    padding: 34px 20px;
+  }
+}

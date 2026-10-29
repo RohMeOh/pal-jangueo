@@ -60,14 +60,37 @@ function safeLink(value) {
   }
 }
 
+const FAVORITES_KEY = 'pj-favorite-events-v1';
+
+function readFavorites() {
+  try {
+    const data = JSON.parse(
+      window.localStorage.getItem(FAVORITES_KEY) || '{}'
+    );
+    return data && typeof data === 'object' && !Array.isArray(data)
+      ? data : {};
+  } catch {
+    return {};
+  }
+}
+
+function isUpcoming(event) {
+  const date = new Date(event.start_at).getTime();
+  return Number.isFinite(date) && date >= Date.now();
+}
+
 function getActiveSectionFromHash() {
   if (window.location.hash === '#calendario') return 'calendar';
+  if (window.location.hash === '#mi-jangueo') return 'favorites';
   return ['#buscar', '#eventos', '#filtros'].includes(window.location.hash)
     ? 'search'
     : 'home';
 }
 
-function EventCard({ event, language }) {
+function EventCard({
+  event, language, isFavorite = false,
+  onToggleFavorite = () => {}
+}) {
   const [flyerFailed, setFlyerFailed] = useState(false);
   const flyerUrl = safeLink(event.flyer_url);
 
@@ -116,7 +139,33 @@ function EventCard({ event, language }) {
           {t(language, 'MÚSICA EN VIVO')}
         </span>
 
-        <h3>{event.title}</h3>
+        <div className="pj-event-title-row">
+          <h3>{event.title}</h3>
+          <button
+            type="button"
+            className={`pj-favorite-heart${isFavorite ? ' is-favorite' : ''}`}
+            aria-pressed={isFavorite}
+            aria-label={language === 'en'
+              ? (isFavorite ? 'Remove from Mi Jangueo' : 'Save to Mi Jangueo')
+              : (isFavorite ? 'Quitar de Mi Jangueo' : 'Guardar en Mi Jangueo')}
+            title={language === 'en'
+              ? (isFavorite ? 'Remove favorite' : 'Save favorite')
+              : (isFavorite ? 'Quitar favorito' : 'Guardar favorito')}
+            onClick={() => onToggleFavorite(event)}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              fill={isFavorite ? 'currentColor' : 'none'}
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" />
+            </svg>
+          </button>
+        </div>
 
         <p className="pj-event-date">
           {formatDate(event.start_at, language)}
@@ -172,7 +221,91 @@ export default function EventFeed({ language, onLanguageChange }) {
       window.removeEventListener('hashchange', syncSection);
     };
   }, []);
+  const [favorites, setFavorites] = useState(readFavorites);
+  const [favoriteFilter, setFavoriteFilter] = useState('upcoming');
   const [events, setEvents] = useState([]);
+
+  function toggleFavorite(event) {
+    setFavorites(previous => {
+      const next = { ...previous };
+      const id = String(event.id);
+
+      if (Object.prototype.hasOwnProperty.call(next, id)) {
+        delete next[id];
+      } else {
+        next[id] = event;
+      }
+
+      try {
+        window.localStorage.setItem(
+          FAVORITES_KEY, JSON.stringify(next)
+        );
+      } catch (error) {
+        console.warn('No se pudieron guardar los favoritos', error);
+      }
+
+      return next;
+    });
+  }
+
+  useEffect(() => {
+    const syncFavorites = event => {
+      if (event.key === FAVORITES_KEY || event.key === null) {
+        setFavorites(readFavorites());
+      }
+    };
+
+    window.addEventListener('storage', syncFavorites);
+    return () => window.removeEventListener('storage', syncFavorites);
+  }, []);
+
+  const favoriteEvents = useMemo(() => {
+    const current = new Map(
+      events.map(event => [String(event.id), event])
+    );
+
+    const saved = Object.entries(favorites)
+      .map(([id, snapshot]) => current.get(id) || snapshot);
+
+    const monthKey = value => {
+      const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'America/Puerto_Rico',
+        year: 'numeric',
+        month: '2-digit'
+      }).formatToParts(new Date(value));
+
+      const get = type =>
+        parts.find(part => part.type === type)?.value;
+
+      return `${get('year')}-${get('month')}`;
+    };
+
+    const thisMonth = monthKey(Date.now());
+
+    return saved
+      .filter(isUpcoming)
+      .filter(event => {
+        if (favoriteFilter === 'month') {
+          return monthKey(event.start_at) === thisMonth;
+        }
+
+        if (favoriteFilter === 'free') {
+          return event.price_type === 'free' ||
+            (event.price_type === 'paid' &&
+              event.price_min != null &&
+              Number(event.price_min) === 0);
+        }
+
+        if (favoriteFilter === 'paid') {
+          return event.price_type === 'paid';
+        }
+
+        return true;
+      })
+      .sort((a, b) =>
+        new Date(a.start_at) - new Date(b.start_at)
+      );
+  }, [events, favorites, favoriteFilter]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filters, setFilters] = useState({
@@ -301,7 +434,8 @@ export default function EventFeed({ language, onLanguageChange }) {
     const hashes = {
       home: '#bienvenidos',
       search: '#buscar',
-      calendar: '#calendario'
+      calendar: '#calendario',
+      favorites: '#mi-jangueo'
     };
     const hash = hashes[nextSection] || hashes.home;
     if (window.location.hash !== hash) {
@@ -336,6 +470,14 @@ export default function EventFeed({ language, onLanguageChange }) {
               onClick={() => openSection('calendar')}
             >
               {t(language, 'Calendario')}
+            </button>
+            <button
+              type="button"
+              className="pj-nav-link"
+              aria-current={section === 'favorites' ? 'page' : undefined}
+              onClick={() => openSection('favorites')}
+            >
+              Mi Jangueo
             </button>
             <button
               type="button"
@@ -451,11 +593,113 @@ export default function EventFeed({ language, onLanguageChange }) {
 
           {!loading && !error && filteredEvents.length > 0 && (
             <div className="pj-event-grid">
-              {filteredEvents.map(event => <EventCard key={event.id} event={event} language={language} />)}
+              {filteredEvents.map(event => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  language={language}
+                  isFavorite={Object.prototype.hasOwnProperty.call(
+                    favorites, String(event.id)
+                  )}
+                  onToggleFavorite={toggleFavorite}
+                />
+              ))}
             </div>
           )}
         </section>
           </div>
+        )}
+        {section === 'favorites' && (
+          <section
+            className="pj-search-page pj-my-jangueo"
+            id="mi-jangueo"
+            aria-labelledby="pj-my-jangueo-heading"
+          >
+            <div className="pj-calendar-intro pj-search-intro">
+              <p className="pj-calendar-eyebrow pj-eyebrow">
+                {t(language, 'MÚSICA EN VIVO')}
+              </p>
+              <h1 id="pj-my-jangueo-heading">Mi Jangueo</h1>
+              <p className="pj-my-jangueo-subtitle">
+                {language === 'en'
+                  ? 'Your favorite events, saved on this device.'
+                  : 'Tus eventos favoritos, guardados en este dispositivo.'}
+              </p>
+            </div>
+
+            {Object.keys(favorites).length > 0 && (
+            <div className="pj-my-jangueo-controls">
+              <label htmlFor="pj-favorite-filter">
+                {language === 'en' ? 'Show' : 'Mostrar'}
+              </label>
+
+              <select
+                id="pj-favorite-filter"
+                value={favoriteFilter}
+                onChange={event =>
+                  setFavoriteFilter(event.target.value)
+                }
+              >
+                <option value="upcoming">
+                  {language === 'en' ? 'Upcoming first' : 'Próximos primero'}
+                </option>
+                <option value="month">
+                  {language === 'en' ? 'This month' : 'Este mes'}
+                </option>
+                <option value="free">
+                  {language === 'en' ? 'Free options' : 'Con opción gratis'}
+                </option>
+                <option value="paid">
+                  {language === 'en' ? 'Paid' : 'De pago'}
+                </option>
+              </select>
+
+              <span>
+                {favoriteEvents.length}{' '}
+                {t(language,
+                  favoriteEvents.length === 1 ? 'evento' : 'eventos')}
+              </span>
+            </div>
+            )}
+
+            {favoriteEvents.length > 0 ? (
+              <div className="pj-event-grid">
+                {favoriteEvents.map(event => (
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    language={language}
+                    isFavorite={true}
+                    onToggleFavorite={toggleFavorite}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="pj-empty">
+                <h3>
+                  {language === 'en'
+                    ? 'No upcoming favorites found.'
+                    : Object.keys(favorites).length === 0
+                      ? 'Tu próximo jangueo empieza aquí.'
+                      : 'No hay favoritos próximos para mostrar.'}
+                </h3>
+                <p>
+                  {language === 'en'
+                    ? 'Save events with the heart icon or choose another filter.'
+                    : Object.keys(favorites).length === 0
+                      ? 'Explora los eventos y toca el corazón para guardar tus favoritos.'
+                      : 'No hay eventos que coincidan con este filtro.'}
+                </p>
+                <button
+                  type="button"
+                  className="pj-my-jangueo-explore"
+                  onClick={() => openSection('search')}
+                >
+                  {t(language, 'Explorar eventos')} ↗
+                </button>
+              </div>
+            )}
+          </section>
         )}
         {section === 'calendar' && (
           <CalendarView
@@ -464,6 +708,8 @@ export default function EventFeed({ language, onLanguageChange }) {
             error={error}
             language={language}
             EventComponent={EventCard}
+            favorites={favorites}
+            onToggleFavorite={toggleFavorite}
           />
         )}
       </main>
