@@ -14,12 +14,12 @@ function App() {
 
   useEffect(() => {
     document.documentElement.lang = language === 'en' ? 'en' : 'es-PR';
-    document.title = `Pa'l Jangueo | ${t(language, 'La isla suena. Sigue la música.')}`;
+    document.title = `Pa'l Jangueo | ${t(language, 'Todos los eventos. Una sola app.')}`;
     const description = document.querySelector('meta[name="description"]');
     if (description) {
       description.setAttribute('content', language === 'en'
-        ? "Pa'l Jangueo: discover Puerto Rico's live music scene. The island has its own sound. Follow the music."
-        : "Pa'l Jangueo: descubre la escena musical en vivo de Puerto Rico. La isla suena. Sigue la música.");
+        ? "Pa'l Jangueo: discover Puerto Rico's live music scene. All events. One app."
+        : "Pa'l Jangueo: descubre la escena musical en vivo de Puerto Rico. Todos los eventos. Una sola app.");
     }
     try {
       window.localStorage.setItem('pj-language', language);

@@ -536,8 +536,8 @@ export default function EventFeed({ language, onLanguageChange }) {
           <div className="pj-hero-copy">
             <p className="pj-eyebrow">{t(language, "BIENVENIDO A PA’L JANGUEO")}</p>
             <h1 id="pj-main-heading">
-              <span>{t(language, 'La isla suena.')}</span>
-              <strong>{t(language, 'Sigue la música.')}</strong>
+              <span>{t(language, 'Todos los eventos.')}</span>
+              <strong>{t(language, 'Una sola app.')}</strong>
             </h1>
             <p className="pj-hero-description">
               {t(language, 'Pa’l Jangueo reúne eventos musicales de Puerto Rico en un solo lugar. Encuentra tu próximo jangueo por fecha, región, municipio o precio y llega directo a la boletera oficial.')}
@@ -737,18 +737,22 @@ export default function EventFeed({ language, onLanguageChange }) {
             ) : (
               <div className="pj-empty">
                 <h3>
-                  {language === 'en'
-                    ? 'No upcoming favorites found.'
-                    : Object.keys(favorites).length === 0
-                      ? 'Tu próximo jangueo empieza aquí.'
-                      : 'No hay favoritos próximos para mostrar.'}
+                  {Object.keys(favorites).length === 0
+                    ? (language === 'en'
+                      ? 'Your next jangueo starts here.'
+                      : 'Tu próximo jangueo empieza aquí.')
+                    : (language === 'en'
+                      ? 'No upcoming favorites to show.'
+                      : 'No hay favoritos próximos para mostrar.')}
                 </h3>
                 <p>
-                  {language === 'en'
-                    ? 'Save events with the heart icon or choose another filter.'
-                    : Object.keys(favorites).length === 0
-                      ? 'Explora los eventos y dale al corazón para guardar en tus favoritos.'
-                      : 'No hay eventos que coincidan con este filtro.'}
+                  {Object.keys(favorites).length === 0
+                    ? (language === 'en'
+                      ? 'Explore events and tap the heart to save your favorites.'
+                      : 'Explora los eventos y toca el corazón para guardar tus favoritos.')
+                    : (language === 'en'
+                      ? 'Try another search or save more events.'
+                      : 'Prueba otra búsqueda o guarda más eventos.')}
                 </p>
                 <div className="pj-hero-actions pj-my-jangueo-actions">
                 <button
@@ -796,7 +800,7 @@ export default function EventFeed({ language, onLanguageChange }) {
             <BrandLogo footer />
           </button>
           <div className="pj-footer-copy">
-            <p>{t(language, 'La isla suena. Sigue la música.')}</p>
+            <p>{t(language, 'Todos los eventos. Una sola app.')}</p>
             <p className="pj-footer-copyright">
               {t(language, "© 2026 Pa'l Jangueo. Derechos reservados sobre el contenido original de la aplicación.")}
             </p>
