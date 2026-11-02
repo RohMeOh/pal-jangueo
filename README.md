@@ -1,80 +1,97 @@
-# Pa'l Jangueo
+<div align="center">
 
-**Discover Puerto Rico's live music scene.**
+# Pa’l Jangueo
 
-Pa'l Jangueo is a full-stack web application that brings together live music events from Puerto Rican ticketing platforms. Its goal is to make local music easier to discover while helping artists and venues reach their audiences.
+**Discover Puerto Rico’s live music scene. All events. One app.**
 
-## Project Status
+An independent, Spanish-first live music discovery platform built for Puerto Rico.
 
-**MVP / Technical Demonstration — October 2026**
+[Explore the live MVP](https://pal-jangueo.vercel.app) · [Frontend documentation](./client/README.md) · [Technical audit](./docs/PRTICKET_MVP_CLOSURE.md)
 
-The current MVP supports event discovery from Boletera and PRticket. Events must pass validation checks before appearing in the public catalog.
+**ACTIVE DEVELOPMENT** · **BETA / MVP** · **TRADEMARK REGISTRATION PLANNED**
 
-Additional features are planned for future development.
+</div>
 
-## Features
+> [!IMPORTANT]
+> **Development and name notice:** Pa’l Jangueo is an evolving software project, not a finished commercial product. The **Pa’l Jangueo** name is intended for future trademark registration; **it is not presented here as a registered trademark**. This notice does not claim that a trademark application has been filed or that registration has been granted.
 
-- Live music event listings from Boletera and PRticket
-- Search by event, artist, venue, or location
-- Region, municipality, and neighborhood filters
-- Date range and ticket price filters
-- Event posters with fallback artwork
-- Links to official ticketing pages
-- Map links for event locations
-- Responsive interface designed for desktop and mobile
-- Automated event discovery and controlled publication
+## About the project
 
-## Tech Stack
+Pa’l Jangueo brings music event information from Puerto Rican ticketing sources into a single, easy-to-explore experience. It aims to make local shows easier to find while helping audiences discover artists, venues, and music happening across the archipelago.
 
-**Frontend:** React, Vite, JavaScript, CSS
+The project began as a **Holberton School final project in October 2026**. Its MVP is available as a technical demonstration, and development continues beyond that milestone. Features, sources, coverage, and the user interface may change as the project evolves.
 
-**Backend:** Node.js, Express
+## Current MVP features
 
-**Database:** PostgreSQL (Supabase)
+- **Live music event discovery** using Boletera and PRticket as initial sources.
+- **Search and filters** for events, artists, venues, dates, regions, municipalities, neighborhoods, and price.
+- **Spanish-first, bilingual interface** with an English language toggle.
+- **Mi Jangueo favorites** saved locally in the browser without requiring an account.
+- **Event calendar** for browsing shows by date.
+- **Event cards** with official ticket links, location links, and flyer fallbacks.
+- **Responsive design** for mobile and desktop.
+- **Event ingestion and validation** to help prevent outdated, duplicate, unsupported, or insufficiently verified listings.
 
-**Automation:** GitHub Actions
+> **Coverage note:** The application displays the events its current sources and validation workflows have successfully processed. The MVP does **not** guarantee a complete, real-time catalog of every live music event in Puerto Rico.
 
-## Project Structure
+## AI-assisted event processing
+
+The backend includes **Google Gemini API integration** to analyze event flyers and accompanying text. The processing workflow can extract structured event details and record supporting evidence, missing fields, and conflicting information.
+
+AI output is **not treated as automatically verified**. Additional normalization, source checks, eligibility rules, and review or publication safeguards apply before information becomes publicly visible. The system supports automation while retaining controls for uncertain or unverified content.
+
+## Technology stack
+
+| Layer | Technology |
+| --- | --- |
+| Frontend | React, Vite, JavaScript, CSS |
+| Backend | Node.js, Express |
+| Database | PostgreSQL through Supabase |
+| AI processing | Google Gemini (`@google/genai`) |
+| Discovery and automation | Node.js scripts, GitHub Actions |
+| Testing and quality checks | Node.js test runner, Vite build, Oxlint |
+
+## Repository structure
 
 ```text
 pal-jangueo/
-├── client/       React frontend
-├── server/       Express API and event processing
-├── database/     Database schema and migrations
-└── .github/      Automated discovery workflows
+├── .github/workflows/   # Scheduled discovery and evaluation workflows
+├── client/              # React application and bilingual UI
+├── database/            # Database resources and schema
+├── docs/                # Project notes and source audits
+└── server/              # Express API, ingestion, AI analysis and validation
 ```
 
-## Local Development
+## Local setup
 
-Requirements: Node.js 24, npm, and access to a PostgreSQL database configured with the project schema.
+**Prerequisites:** Node.js 24, npm, and a PostgreSQL database configured with the project schema. Backend functionality that uses Gemini also requires a valid API key.
 
-### Backend
+### 1. Backend
 
 ```bash
 cd server
 npm ci
 ```
 
-Create `server/.env` with the required configuration:
+Create `server/.env` with the appropriate development configuration:
 
-```env
+```dotenv
 DATABASE_URL=your_postgresql_connection_string
 SUPABASE_CA_PATH=certs/supabase-ca.crt
 CLIENT_ORIGINS=http://localhost:5173
 PORT=3001
+GEMINI_API_KEY=your_key_if_using_ai_features
 ```
 
-Provide the corresponding database CA certificate at the configured path.
-
-Start the backend:
+Provide the database CA certificate at the configured path when required by your connection. **Never commit `.env`, API keys, or private certificates.**
 
 ```bash
 npm run dev
 ```
 
-### Frontend
+### 2. Frontend
 
-Open another terminal:
+In another terminal:
 
 ```bash
 cd client
@@ -83,51 +100,47 @@ npm ci
 
 Create `client/.env.local`:
 
-```env
+```dotenv
 VITE_API_URL=http://localhost:3001
 ```
-
-Start the frontend:
 
 ```bash
 npm run dev
 ```
 
-## API
+The Vite development server normally serves the client at `http://localhost:5173`.
 
-- `GET /api/events` — Returns published, upcoming events at verified venues.
-- `GET /api/health` — Backend health check.
-- `GET /api/db-health` — Database connection check.
+## API endpoints
 
-## Validation
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /api/events` | Lists published upcoming events at verified venues. |
+| `GET /api/health` | Checks the backend service. |
+| `GET /api/db-health` | Checks the database connection. |
 
-Run backend tests:
+## Checks
 
 ```bash
+# Backend tests
 cd server
 npm test
-```
 
-Build the frontend:
-
-```bash
-cd client
+# Frontend production build and lint
+cd ../client
 npm run build
+npm run lint
 ```
 
-Event publication verifies official sources, event dates, music evidence, venues, and potential duplicates. Candidates that do not meet publication requirements remain pending review.
+## Development roadmap
 
-## Roadmap
+Work under consideration includes broader source coverage, richer artist and venue discovery, further personalization, accessibility improvements, and continued refinement of event validation. These items are **development goals**, not promises of availability in the current beta.
 
-- Expanded ticketing source coverage
-- Artist and venue profile pages
-- Mi Jangueo favorites and personalized recommendations
-- Additional discovery and accessibility improvements
+## Project independence and trademark notice
 
-## Disclaimer
+Pa’l Jangueo is an **independent project in active development**. Ticket purchases take place on the original provider’s website; listed event details and availability may change at the source. The application is not an official ticketing platform for the providers it references.
 
-Pa'l Jangueo is an independent educational project. Ticket purchases take place through the original ticketing providers. Event information and availability may change at the source.
+**Trademark status:** Registration of the **Pa’l Jangueo** name is **planned for a later stage and has not been represented as completed**. No `®` designation or claim of an approved registration is made here. The name and product may evolve during development.
 
 ## Author
 
-Developed by [RohMeOh](https://github.com/RohMeOh) as a Holberton School final project.
+Created by **[Romeo González (RohMeOh)](https://github.com/RohMeOh)** as a Holberton School final project and continued as an independent software project.
