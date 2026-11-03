@@ -4,12 +4,23 @@ on:
   workflow_dispatch:
     inputs:
       stage_candidates:
-        description: 'Save candidates for review without publishing'
+        description: 'Save candidates; publication requires each provider checkbox'
         required: false
         type: boolean
         default: false
       publish_boletera:
         description: 'Publish verified Boletera events in this manual run'
+        required: false
+        type: boolean
+        default: false
+
+      publish_prticket:
+        description: 'Publish verified PRticket events in this manual run'
+        required: false
+        type: boolean
+        default: false
+      publish_ticketcenter:
+        description: 'Publish verified Ticket Center events in this manual run'
         required: false
         type: boolean
         default: false
@@ -120,7 +131,7 @@ jobs:
 
       - name: Publish verified PRticket events
         id: prticket_publication
-        if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true) }}
+        if: ${{ steps.prticket_stage.outcome == 'success' && ((github.event_name == 'schedule' && vars.PRTICKET_AUTO_PUBLISH == 'true') || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true && inputs.publish_prticket == true)) }}
         continue-on-error: true
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
@@ -143,7 +154,7 @@ jobs:
       - name: Publish verified Ticket Center events
         id: ticketcenter_publication
         continue-on-error: true
-        if: ${{ steps.ticketcenter_stage.outcome == 'success' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true)) }}
+        if: ${{ steps.ticketcenter_stage.outcome == 'success' && ((github.event_name == 'schedule' && vars.TICKETCENTER_AUTO_PUBLISH == 'true') || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true && inputs.publish_ticketcenter == true)) }}
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SUPABASE_CA_PATH: ${{ runner.temp }}/supabase-ca.crt
@@ -154,7 +165,7 @@ jobs:
         continue-on-error: true
         run: node scripts/discover-all.js
 
-      - name: Stage candidates for manual review
+      - name: Stage Boletera candidates
         id: boletera_stage
         continue-on-error: true
         if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true) }}
@@ -187,7 +198,7 @@ jobs:
       - name: Publish verified Boletera events
         id: boletera_publication
         continue-on-error: true
-        if: ${{ (github.event_name == 'schedule' && vars.BOLETERA_AUTO_PUBLISH == 'true') || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true && inputs.publish_boletera == true) }}
+        if: ${{ steps.boletera_stage.outcome == 'success' && ((github.event_name == 'schedule' && vars.BOLETERA_AUTO_PUBLISH == 'true') || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true && inputs.publish_boletera == true)) }}
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SUPABASE_CA_PATH: ${{ runner.temp }}/supabase-ca.crt
