@@ -266,7 +266,10 @@ async function main() {
       if (
         previous.source_content_hash === contentHash &&
         !(
-          resolvedPerformances &&
+          (
+            resolvedPerformances ||
+            previous.analysis_result?.event?.venue !== candidate.venue
+          ) &&
           previous.review_status === 'pending_review' &&
           previous.approved_event_id == null
         )

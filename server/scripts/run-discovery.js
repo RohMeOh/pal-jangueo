@@ -195,7 +195,7 @@ async function main() {
 
         const raw = events[0];
 
-        const dateStatus = compareDates(
+        let dateStatus = compareDates(
           raw.start_date,
           item
         );
@@ -244,6 +244,24 @@ async function main() {
             console.log('Supabase:', outcome);
           }
           continue;
+        }
+
+        if (dateStatus === 'conflict') {
+          try {
+            const {
+              reconcileBoleteraDate
+            } = require('../utils/reconcileBoleteraDate');
+            const resolution = reconcileBoleteraDate(
+              raw,
+              await fetchPage(raw.ticket_url),
+              item
+            );
+            console.log('Fecha conciliada:', resolution.selected_start_at);
+            console.log('Discrepancia API conservada:', resolution.api_dates);
+            dateStatus = 'match';
+          } catch (error) {
+            console.log('Conflicto sin resolver:', error.message);
+          }
         }
 
         if (!['match', 'not_in_api', 'not_provided']

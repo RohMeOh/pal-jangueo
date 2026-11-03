@@ -226,6 +226,20 @@ async function evaluate(candidate, evidence) {
     problems.push('Ubicación del venue: ' + error.message);
   }
 
+  let venueVerified = false;
+  if (venuePlan) {
+    const verified = await pool.query(`
+      SELECT id FROM public.venues
+      WHERE LOWER(TRIM(name)) = LOWER(TRIM($1))
+        AND LOWER(TRIM(municipality)) = LOWER(TRIM($2))
+        AND location_verification_status = 'verified'
+    `, [venuePlan.name, venuePlan.municipality]);
+    venueVerified = verified.rowCount === 1;
+  }
+  if (!venueVerified) {
+    problems.push('Venue ausente, ambiguo o sin verificar');
+  }
+
   const sources = await pool.query(`
     SELECT id FROM public.sources WHERE name = 'Boletera'
   `);
@@ -291,7 +305,7 @@ async function evaluate(candidate, evidence) {
         ? 'verified_music' : 'needs_review',
       source_status: sourceConfirmed
         ? 'verified' : 'needs_review',
-      venue_status: venuePlan
+      venue_status: venueVerified
         ? 'verified' : 'needs_review',
       duplicate_status:
         duplicates.rows.length === 0 &&
@@ -327,6 +341,7 @@ async function evaluateBatch(candidate) {
   const item = api.find(item => item.event_url === candidate.source_url);
   const originalRaw = fetched.raw;
   let performances = [originalRaw];
+  let dateReconciliation = null;
 
   if (item?.api_dates?.length > 1) {
     performances = resolveBoleteraPerformances(originalRaw, item);
@@ -336,7 +351,19 @@ async function evaluateBatch(candidate) {
     const date = new Date(originalRaw.start_date || '');
     if (!Number.isFinite(+date) ||
         date.toISOString() !== item.api_dates[0]) {
-      throw new Error('Conflicto entre fecha oficial y API.');
+      const ticketsResponse = await fetch(originalRaw.ticket_url, {
+        redirect: 'error',
+        signal: AbortSignal.timeout(20000)
+      });
+      if (!ticketsResponse.ok) {
+        throw new Error('No se pudo verificar la fecha de compra.');
+      }
+      dateReconciliation = require('../utils/reconcileBoleteraDate')
+        .reconcileBoleteraDate(
+          originalRaw,
+          await ticketsResponse.text(),
+          item
+        );
     }
   }
 
@@ -386,7 +413,8 @@ async function evaluateBatch(candidate) {
   return {
     results,
     problems: results.flatMap(r => r.problems),
-    liveHash: results[0].liveHash
+    liveHash: results[0].liveHash,
+    dateReconciliation
   };
 }
 
@@ -454,7 +482,7 @@ async function writeEvent(candidate, batch) {
         AND LOWER(TRIM(name)) = LOWER(TRIM($2))
         AND LOWER(TRIM(municipality)) =
             LOWER(TRIM($3))
-        AND location_verification_status <> 'conflict'
+        AND location_verification_status = 'verified'
       FOR SHARE
     `, [
       venueRecord.id,
@@ -561,6 +589,7 @@ async function writeEvent(candidate, batch) {
         performance_verification: batch.results.length > 1
           ? 'official_api_dates_and_ticket_labels'
           : 'official_json_ld_and_api',
+        date_reconciliation: batch.dateReconciliation,
         events: insertedEvents
       }
     };

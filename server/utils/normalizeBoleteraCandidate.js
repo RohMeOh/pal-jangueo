@@ -29,6 +29,13 @@ function normalizeBoleteraCandidate(event, now = new Date()) {
     : [];
 
   const prices = offers
+    .filter(offer => {
+      const name = String(offer.name || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim();
+      return !/^(?:test|prueba)(?:$|[\s:_-])/i.test(name);
+    })
     .filter(offer =>
       typeof offer.price === 'number' &&
       Number.isFinite(offer.price) &&

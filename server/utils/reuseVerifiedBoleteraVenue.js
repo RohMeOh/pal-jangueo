@@ -32,6 +32,32 @@ async function reuseVerifiedBoleteraVenue(raw, db) {
     return raw;
   }
 
+  // Explicit alias corroborated by both official Boletera pages.
+  if (
+    raw.venue.name === 'Teatro Paradise' &&
+    raw.venue.municipality === 'San Juan' &&
+    raw.venue.street_address === 'Avenida Juan Ponce de León' &&
+    raw.venue.postal_code === '00925'
+  ) {
+    const { rows: aliases } = await db.query(`
+      SELECT id, name FROM public.venues
+      WHERE id = $1
+        AND name = 'Cine-Teatro Paradise'
+        AND municipality = 'San Juan'
+        AND region = 'La Metro'
+        AND location_verification_status = 'verified'
+    `, ['965affa8-f220-4a65-9c5a-a29efe397c45']);
+
+    if (aliases.length !== 1) {
+      throw new Error('El venue verificado de Paradise cambió.');
+    }
+
+    return {
+      ...raw,
+      venue: { ...raw.venue, name: aliases[0].name }
+    };
+  }
+
   // Official location information always takes precedence.
   if (resolveBoleteraVenueMunicipality(raw)) {
     return raw;
