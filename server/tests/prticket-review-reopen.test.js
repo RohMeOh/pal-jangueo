@@ -38,9 +38,34 @@ test('Identical rejected evidence is not restaged', () => {
   );
 });
 
-test('Pending candidate is not duplicated after source changes', () => {
+test('Changed pending evidence updates the existing candidate', () => {
   assert.equal(
     existingCandidateDecision([record('pending_review')], 'new'),
+    'UPDATE_PENDING'
+  );
+});
+
+test('Identical pending evidence needs no update', () => {
+  assert.equal(
+    existingCandidateDecision([record('pending_review')], 'old'),
+    'YA_EXISTE'
+  );
+});
+
+test('Pending candidate linked to an event cannot refresh', () => {
+  assert.equal(
+    existingCandidateDecision(
+      [record('pending_review', 'old', 'event-id')], 'new'
+    ),
+    'FUENTE_CAMBIO_REQUIERE_REVISION'
+  );
+});
+
+test('Ambiguous changed candidates cannot refresh', () => {
+  assert.equal(
+    existingCandidateDecision([
+      record('pending_review'), record('pending_review')
+    ], 'new'),
     'FUENTE_CAMBIO_REQUIERE_REVISION'
   );
 });

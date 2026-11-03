@@ -216,6 +216,7 @@ async function main() {
       complete: 0,
       incomplete: 0,
       saved: 0,
+      updated: 0,
       existing: 0,
       blocked: 0,
       changed: 0,
@@ -264,6 +265,8 @@ async function main() {
 
         if (result.startsWith('GUARDADO')) {
           summary.saved++;
+        } else if (result.startsWith('ACTUALIZADO ')) {
+          summary.updated++;
         } else if (result === 'YA_EXISTE') {
           summary.existing++;
         } else if (result === 'FUENTE_CAMBIO_REQUIERE_REVISION') {
@@ -285,6 +288,7 @@ async function main() {
     console.log('Datos estructurados:', summary.complete);
     console.log('Datos incompletos:', summary.incomplete);
     console.log('Candidatos nuevos:', summary.saved);
+    console.log('Candidatos actualizados:', summary.updated);
     console.log('Candidatos existentes:', summary.existing);
     console.log('Fuentes con cambios:', summary.changed);
     console.log('Bloqueados:', summary.blocked);

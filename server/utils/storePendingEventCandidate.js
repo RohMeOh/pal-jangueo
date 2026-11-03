@@ -91,6 +91,14 @@ function existingCandidateDecision(rows, newHash) {
     return 'YA_EXISTE';
   }
 
+  if (
+    rows.length === 1 &&
+    rows[0].review_status === 'pending_review' &&
+    rows[0].approved_event_id == null
+  ) {
+    return 'UPDATE_PENDING';
+  }
+
   // One real candidate per source. Preserve existing review decisions.
   // Changed evidence requires review instead of a second INSERT.
   return 'FUENTE_CAMBIO_REQUIERE_REVISION';
@@ -117,8 +125,8 @@ async function storePendingEventCandidate(input) {
     );
 
     const existing = await client.query(`
-      SELECT id, source_content_hash,
-             review_status, approved_event_id
+      SELECT id, source_content_hash, caption_text, flyer_url,
+             analysis_result, review_status, approved_event_id
       FROM public.event_candidates
       WHERE source_name = $1
         AND source_url = $2
@@ -131,14 +139,26 @@ async function storePendingEventCandidate(input) {
       existing.rows, sourceContentHash
     );
 
-    if (decision !== 'INSERT') {
+    if (!['INSERT', 'UPDATE_PENDING'].includes(decision)) {
       await client.query('COMMIT');
       transaction = false;
       return decision;
     }
 
-    // Only sources without an existing real candidate reach this INSERT.
-    // No automatic approval or publication is performed.
+    // A published source must never be refreshed as a pending candidate.
+    const linked = await client.query(`
+      SELECT event_id FROM public.event_sources
+      WHERE source_url = $1
+      LIMIT 1
+    `, [sourceUrl]);
+
+    if (linked.rowCount) {
+      await client.query('COMMIT');
+      transaction = false;
+      return 'FUENTE_VINCULADA_REQUIERE_REVISION';
+    }
+
+    // Check duplicates before either inserting or refreshing evidence.
 
     const event = analysis.event;
     const startAt = event.normalized.start_at;
@@ -175,6 +195,56 @@ async function storePendingEventCandidate(input) {
       await client.query('COMMIT');
       transaction = false;
       return 'POSIBLE_DUPLICADO_OTRA_FUENTE';
+    }
+
+    if (decision === 'UPDATE_PENDING') {
+      const previous = existing.rows[0];
+      const oldAnalysis = previous.analysis_result || {};
+      const history = oldAnalysis.source_refresh_history || [];
+      if (!Array.isArray(history)) {
+        throw new Error('Historial de evidencia inválido.');
+      }
+
+      const { source_refresh_history, ...snapshot } = oldAnalysis;
+      const refreshedAnalysis = {
+        ...analysis,
+        source_refresh_history: [
+          ...history,
+          {
+            refreshed_at: new Date().toISOString(),
+            caption_text: previous.caption_text,
+            source_content_hash: previous.source_content_hash,
+            flyer_url: previous.flyer_url,
+            analysis_result: snapshot
+          }
+        ]
+      };
+
+      const updated = await client.query(`
+        UPDATE public.event_candidates
+        SET flyer_url = $2,
+            caption_text = $3,
+            analysis_result = $4::jsonb,
+            source_content_hash = $5
+        WHERE id = $1
+          AND source_name = $6 AND source_url = $7
+          AND is_test = FALSE
+          AND review_status = 'pending_review'
+          AND approved_event_id IS NULL
+        RETURNING id
+      `, [
+        previous.id, flyerUrl, captionText,
+        JSON.stringify(refreshedAnalysis), sourceContentHash,
+        sourceName, sourceUrl
+      ]);
+
+      if (updated.rowCount !== 1) {
+        throw new Error('El candidato cambió durante la actualización.');
+      }
+
+      await client.query('COMMIT');
+      transaction = false;
+      return 'ACTUALIZADO ' + updated.rows[0].id;
     }
 
     const result = await client.query(`
