@@ -73,33 +73,20 @@ function discoverLinks(html) {
   return [...links];
 }
 
+const {
+  extractCocaColaShowings
+} = require('../utils/extractCocaColaShowings');
+
 function extractDetails(html, url) {
   const page = html
     .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' ')
     .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, ' ');
+  const heading = page.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i);
+  const title = heading ? cleanText(heading[1]) : null;
 
-  const text = cleanText(page);
-
-  const heading = page.match(
-    /<h1\b[^>]*>([\s\S]*?)<\/h1>/i
-  );
-
-  const dateMatch = text.match(
-    /\b(?:Showings|Date)\s+([A-Za-z]{3,9})\s+(\d{1,2})\s*,\s*(\d{4})(?=\s|\||$)/i
-  );
-
-  const timeMatch = text.match(
-    /\bEvent Starts\s+(\d{1,2}:\d{2}\s*[AP]M)\b/i
-  );
-
-  return {
-    title: heading ? cleanText(heading[1]) : null,
-    date: dateMatch
-      ? `${dateMatch[1]} ${dateMatch[2]}, ${dateMatch[3]}`
-      : null,
-    time: timeMatch ? timeMatch[1] : null,
-    url
-  };
+  return extractCocaColaShowings(html).map(showing => ({
+    title, ...showing, url
+  }));
 }
 
 async function main() {
@@ -123,8 +110,12 @@ async function main() {
 
     try {
       const html = await fetchPage(url);
-      const details = extractDetails(html, url);
+      const performances = extractDetails(html, url);
+      if (!performances.length) {
+        throw new Error('Funciones con fecha y hora no confirmadas: ' + url);
+      }
 
+      for (const details of performances) {
       const result = adaptVenueEvent(details);
 
       processed++;
@@ -145,6 +136,7 @@ async function main() {
       );
       console.log('Música local confirmada: NO');
       console.log('Publicación autorizada: NO');
+      }
 
     } catch (error) {
       errors++;
