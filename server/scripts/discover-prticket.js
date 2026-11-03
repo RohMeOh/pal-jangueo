@@ -180,9 +180,22 @@ function extractDetail(html) {
     ? text.slice(0, descriptionEnd)
     : '';
 
-  const titlePosition = eventTitle
+  const bodyActions = [
+    ...beforeDate.matchAll(/\b(?:Comprar|Coming Soon)\b/gi)
+  ];
+  const bodyAction = bodyActions.at(-1);
+  const bodyStart = bodyAction
+    ? bodyAction.index + bodyAction[0].length
+    : 0;
+
+  const matchedTitlePosition = eventTitle
     ? beforeDate.toLocaleLowerCase('es')
         .lastIndexOf(eventTitle.toLocaleLowerCase('es'))
+    : -1;
+
+  // A title in metadata or cookie text is not an event-body heading.
+  const titlePosition = matchedTitlePosition >= bodyStart
+    ? matchedTitlePosition
     : -1;
 
   const bodyDescription = titlePosition >= 0

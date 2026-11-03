@@ -25,6 +25,8 @@ const {
   assessMusicEvidence
 } = require('../utils/assessMusicEvidence');
 
+const fs = require('node:fs');
+
 const args = process.argv.slice(2);
 const save = args.includes('--stage');
 const scanAll = args.includes('--all');
@@ -216,8 +218,11 @@ async function main() {
       saved: 0,
       existing: 0,
       blocked: 0,
+      changed: 0,
       errors: 0
     };
+
+    const changedSources = [];
 
     for (const card of selected) {
       try {
@@ -261,6 +266,9 @@ async function main() {
           summary.saved++;
         } else if (result === 'YA_EXISTE') {
           summary.existing++;
+        } else if (result === 'FUENTE_CAMBIO_REQUIERE_REVISION') {
+          summary.changed++;
+          changedSources.push(card.source_url);
         } else {
           summary.blocked++;
         }
@@ -278,10 +286,52 @@ async function main() {
     console.log('Datos incompletos:', summary.incomplete);
     console.log('Candidatos nuevos:', summary.saved);
     console.log('Candidatos existentes:', summary.existing);
+    console.log('Fuentes con cambios:', summary.changed);
     console.log('Bloqueados:', summary.blocked);
     console.log('Errores:', summary.errors);
     console.log('Aprobaciones automáticas: 0');
     console.log('Publicaciones automáticas: 0');
+
+    if (changedSources.length) {
+      console.warn(
+        'Fuentes con cambios que requieren conciliación:',
+        changedSources.length
+      );
+      for (const url of changedSources) console.warn(url);
+
+      if (process.env.GITHUB_ACTIONS === 'true') {
+        console.warn(
+          '::warning::PRticket: ' + changedSources.length +
+          ' fuentes cambiaron; revisar el resumen de la ejecución.'
+        );
+      }
+    }
+
+    if (process.env.GITHUB_STEP_SUMMARY) {
+      const lines = [
+        '### PRticket: preparación de candidatos',
+        '',
+        '| Resultado | Cantidad |',
+        '| --- | ---: |',
+        ...Object.entries(summary).map(([key, value]) =>
+          `| ${key} | ${value} |`
+        ),
+        '',
+        ...(changedSources.length
+          ? [
+              'Fuentes con evidencia diferente; revisión conservada:',
+              '',
+              ...changedSources.map(url => `- <${url}>`),
+              ''
+            ]
+          : [])
+      ];
+
+      fs.appendFileSync(
+        process.env.GITHUB_STEP_SUMMARY,
+        lines.join('\n') + '\n'
+      );
+    }
 
     if (summary.errors > 0) {
       process.exitCode = 1;
