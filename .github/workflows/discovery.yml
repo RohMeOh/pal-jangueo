@@ -29,7 +29,7 @@ jobs:
   discover:
     name: Discover music events
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
 
     defaults:
       run:
@@ -58,6 +58,9 @@ jobs:
           node --check scripts/stage-prticket-candidates.js
           node --check utils/assessMusicEvidence.js
           node --check utils/extractBoleteraFlyer.js
+          node --check scripts/discover-ticketcenter.js
+          node --check scripts/stage-ticketcenter-candidates.js
+          node --check scripts/backfill-ticketcenter-flyers.js
 
       - name: Prepare Supabase certificate
         if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true) }}
@@ -124,6 +127,18 @@ jobs:
         working-directory: server
         run: node scripts/auto-publish-prticket.js --publish --all
 
+      - name: Discover and stage Ticket Center candidates
+        id: ticketcenter_stage
+        continue-on-error: true
+        if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true) }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SUPABASE_CA_PATH: ${{ runner.temp }}/supabase-ca.crt
+        run: |
+          set -euo pipefail
+          node scripts/discover-ticketcenter.js --json --details > /tmp/ticketcenter-details.json
+          node scripts/stage-ticketcenter-candidates.js --stage
+
       - name: Discover events from all sources
         id: multisource_discovery
         continue-on-error: true
@@ -175,6 +190,7 @@ jobs:
       - name: Report discovery stage failures
         if: ${{ always() }}
         env:
+          TICKETCENTER: ${{ steps.ticketcenter_stage.outcome }}
           PRTICKET: ${{ steps.prticket_stage.outcome }}
           PRTICKET_VENUES: ${{ steps.prticket_venues.outcome }}
           PRTICKET_PUBLISH: ${{ steps.prticket_publication.outcome }}
@@ -184,6 +200,7 @@ jobs:
           ARTISTS: ${{ steps.artist_enrichment.outcome }}
           SCENE: ${{ steps.scene_evaluation.outcome }}
         run: |
+          echo "Ticket Center staging: $TICKETCENTER"
           echo "PRticket: $PRTICKET"
           echo "PRticket venues: $PRTICKET_VENUES"
           echo "PRticket publication: $PRTICKET_PUBLISH"
@@ -193,7 +210,7 @@ jobs:
           echo "Artist enrichment: $ARTISTS"
           echo "Scene evaluation: $SCENE"
 
-          for result in "$PRTICKET" "$PRTICKET_VENUES" "$PRTICKET_PUBLISH" "$DISCOVERY" "$BOLETERA" "$BOLETERA_PUBLISH" "$ARTISTS" "$SCENE"; do
+          for result in "$TICKETCENTER" "$PRTICKET" "$PRTICKET_VENUES" "$PRTICKET_PUBLISH" "$DISCOVERY" "$BOLETERA" "$BOLETERA_PUBLISH" "$ARTISTS" "$SCENE"; do
             if [ "$result" = "failure" ]; then
               echo "::error::One or more discovery stages failed."
               exit 1
