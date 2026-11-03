@@ -176,7 +176,16 @@ function assessMusicEvidence(rawDescription) {
     /\btwo\s+music\s+styles\b/.test(text) &&
     /\btwo\s+djs?\b/.test(text);
 
+  // A dance programme can announce artists joining several named
+  // DJs without using the literal words "DJ set".
+  const announcedDanceLineup =
+    /\bnoche de (?:perreo|reggaeton|regueton)\b/.test(text) &&
+    /\bse unen a\b/.test(text) &&
+    (text.match(/\bdj\s+[a-z0-9]/g) || []).length >= 2 &&
+    !/\b(?:grabaciones?|pregrabado|playlist|musica de fondo|documental|charla|conferencia|panel)\b/.test(text);
+
   const liveDjPerformance =
+    announcedDanceLineup ||
     stagedDjShow ||
     /\bdjs?\s+sets?\b/.test(text) ||
     /\bdjs?\s+en\s+vivo\b/.test(text) ||
