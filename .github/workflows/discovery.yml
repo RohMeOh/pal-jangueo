@@ -61,6 +61,7 @@ jobs:
           node --check scripts/discover-ticketcenter.js
           node --check scripts/stage-ticketcenter-candidates.js
           node --check scripts/backfill-ticketcenter-flyers.js
+          node --check scripts/auto-publish-ticketcenter.js
 
       - name: Prepare Supabase certificate
         if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true) }}
@@ -139,6 +140,15 @@ jobs:
           node scripts/discover-ticketcenter.js --json --details > /tmp/ticketcenter-details.json
           node scripts/stage-ticketcenter-candidates.js --stage
 
+      - name: Publish verified Ticket Center events
+        id: ticketcenter_publication
+        continue-on-error: true
+        if: ${{ steps.ticketcenter_stage.outcome == 'success' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true)) }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SUPABASE_CA_PATH: ${{ runner.temp }}/supabase-ca.crt
+        run: node scripts/auto-publish-ticketcenter.js --publish
+
       - name: Discover events from all sources
         id: multisource_discovery
         continue-on-error: true
@@ -191,6 +201,7 @@ jobs:
         if: ${{ always() }}
         env:
           TICKETCENTER: ${{ steps.ticketcenter_stage.outcome }}
+          TICKETCENTER_PUBLISH: ${{ steps.ticketcenter_publication.outcome }}
           PRTICKET: ${{ steps.prticket_stage.outcome }}
           PRTICKET_VENUES: ${{ steps.prticket_venues.outcome }}
           PRTICKET_PUBLISH: ${{ steps.prticket_publication.outcome }}
@@ -201,6 +212,7 @@ jobs:
           SCENE: ${{ steps.scene_evaluation.outcome }}
         run: |
           echo "Ticket Center staging: $TICKETCENTER"
+          echo "Ticket Center publication: $TICKETCENTER_PUBLISH"
           echo "PRticket: $PRTICKET"
           echo "PRticket venues: $PRTICKET_VENUES"
           echo "PRticket publication: $PRTICKET_PUBLISH"
@@ -210,7 +222,7 @@ jobs:
           echo "Artist enrichment: $ARTISTS"
           echo "Scene evaluation: $SCENE"
 
-          for result in "$TICKETCENTER" "$PRTICKET" "$PRTICKET_VENUES" "$PRTICKET_PUBLISH" "$DISCOVERY" "$BOLETERA" "$BOLETERA_PUBLISH" "$ARTISTS" "$SCENE"; do
+          for result in "$TICKETCENTER" "$TICKETCENTER_PUBLISH" "$PRTICKET" "$PRTICKET_VENUES" "$PRTICKET_PUBLISH" "$DISCOVERY" "$BOLETERA" "$BOLETERA_PUBLISH" "$ARTISTS" "$SCENE"; do
             if [ "$result" = "failure" ]; then
               echo "::error::One or more discovery stages failed."
               exit 1
