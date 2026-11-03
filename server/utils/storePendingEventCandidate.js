@@ -91,14 +91,9 @@ function existingCandidateDecision(rows, newHash) {
     return 'YA_EXISTE';
   }
 
-  const canReopen = rows.every(row =>
-    ['rejected', 'needs_more_info'].includes(row.review_status) &&
-    row.approved_event_id == null
-  );
-
-  return canReopen
-    ? 'INSERT'
-    : 'FUENTE_CAMBIO_REQUIERE_REVISION';
+  // One real candidate per source. Preserve existing review decisions.
+  // Changed evidence requires review instead of a second INSERT.
+  return 'FUENTE_CAMBIO_REQUIERE_REVISION';
 }
 
 async function storePendingEventCandidate(input) {
@@ -142,8 +137,7 @@ async function storePendingEventCandidate(input) {
       return decision;
     }
 
-    // A changed source previously rejected or needing information
-    // creates a NEW pending candidate, preserving review history.
+    // Only sources without an existing real candidate reach this INSERT.
     // No automatic approval or publication is performed.
 
     const event = analysis.event;

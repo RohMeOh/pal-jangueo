@@ -17,17 +17,17 @@ test('New source can create a candidate', () => {
   assert.equal(existingCandidateDecision([], 'new'), 'INSERT');
 });
 
-test('Rejected source with changed evidence can be reviewed again', () => {
+test('Rejected source with changed evidence requires review without duplication', () => {
   assert.equal(
     existingCandidateDecision([record('rejected')], 'new'),
-    'INSERT'
+    'FUENTE_CAMBIO_REQUIERE_REVISION'
   );
 });
 
-test('Needs-more-info source can be reviewed again', () => {
+test('Needs-more-info source with changed evidence requires review without duplication', () => {
   assert.equal(
     existingCandidateDecision([record('needs_more_info')], 'new'),
-    'INSERT'
+    'FUENTE_CAMBIO_REQUIERE_REVISION'
   );
 });
 
