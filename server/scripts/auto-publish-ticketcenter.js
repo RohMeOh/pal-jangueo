@@ -1,6 +1,9 @@
 const pool = require('../db');
 const { safeUrl } = require('./discover-ticketcenter');
 const { buildSourceContentHash } = require('../utils/sourceContentHash');
+const {
+  ticketcenterCandidateSnapshot
+} = require('../utils/ticketcenterCandidateSnapshot');
 
 
 const fs = require('node:fs');
@@ -46,7 +49,7 @@ async function buildAutomaticAudit() {
   }
 
   const { rows } = await pool.query(`
-    SELECT id, source_url, caption_text, source_content_hash, analysis_result
+    SELECT id, source_url, flyer_url, caption_text, source_content_hash, analysis_result
     FROM public.event_candidates
     WHERE source_name = 'Ticket Center PR'
       AND is_test = FALSE
@@ -169,7 +172,7 @@ async function buildAutomaticAudit() {
 
     candidates.push({
       id: row.id,
-      hash: row.source_content_hash,
+      snapshot: ticketcenterCandidateSnapshot(row),
       resultado: 'COINCIDE'
     });
   }
@@ -185,7 +188,7 @@ async function buildAutomaticAudit() {
 
 async function main() {
   const audit = await buildAutomaticAudit();
-  const audited = new Map(audit.candidates.map(c => [c.id, c.hash]));
+  const audited = new Map(audit.candidates.map(c => [c.id, c.snapshot]));
   if (audited.size !== audit.candidates.length) {
     throw new Error('Lista automática duplicada.');
   }
@@ -217,7 +220,7 @@ async function main() {
     const selected = rows.filter(row => audited.has(row.id));
 
     if (selected.some(row =>
-      audited.get(row.id) !== row.source_content_hash ||
+      audited.get(row.id) !== ticketcenterCandidateSnapshot(row) ||
       row.analysis_result.editorial_research?.classification === 'non_music'
     )) {
       throw new Error('La evidencia cambió desde la auditoría.');
