@@ -202,9 +202,47 @@ async function main() {
 
         if (dateStatus === 'multiple_dates') {
           totals.multiplePerformances++;
-          console.log('Resultado: evento con varias funciones');
-          console.log('Fechas API:', item.api_dates);
-          console.log('Publicación automática: BLOQUEADA');
+
+          let performances;
+          try {
+            performances = require('../utils/resolveBoleteraPerformances')
+              .resolveBoleteraPerformances(raw, item);
+          } catch (error) {
+            totals.needsReview++;
+            console.log('Funciones pendientes de conciliación:', error.message);
+            continue;
+          }
+
+          if (performances.some(performance =>
+            Date.parse(performance.start_date) <= Date.now()
+          )) {
+            totals.needsReview++;
+            console.log('Funciones pasadas: requiere conciliación.');
+            continue;
+          }
+
+          console.log('Funciones verificadas:', performances.length);
+          console.table(performances.map(performance => ({
+            fecha: performance.start_date,
+            boletos: performance.offers.map(offer => offer.name).join('; ')
+          })));
+          totals.musicEvidence++;
+
+          if (stage) {
+            if (await alreadyPublished(pool, item.event_url)) {
+              totals.skippedPublished++;
+              console.log('Supabase: ya vinculado a evento aprobado');
+              continue;
+            }
+
+            const outcome = await stageCandidate(item.event_url);
+            if (outcome === 'GUARDADO') totals.saved++;
+            else if (outcome === 'REUTILIZADO') totals.reused++;
+            else if (outcome === 'ACTUALIZADO') totals.updated++;
+            else if (outcome === 'OMITIDO') totals.skippedReviewed++;
+
+            console.log('Supabase:', outcome);
+          }
           continue;
         }
 

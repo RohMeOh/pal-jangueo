@@ -1,4 +1,8 @@
 const pool = require('../db');
+const { extractApiEvents } = require('../utils/boleteraCatalog');
+const {
+  resolveBoleteraPerformances
+} = require('../utils/resolveBoleteraPerformances');
 const {
   planTicketVenue,
   ensureTicketVenue
@@ -128,8 +132,8 @@ async function verifyImage(url) {
   return response.ok && type.startsWith('image/');
 }
 
-async function evaluate(candidate) {
-  const { raw, flyer } = await getLiveEvent(candidate.source_url);
+async function evaluate(candidate, evidence) {
+  const { raw, flyer, originalRaw } = evidence;
   const enriched = await reuseVerifiedBoleteraVenue(raw, pool);
   const live = normalizeBoleteraCandidate(enriched);
   const currentAnalysis = buildBoleteraReviewAnalysis(enriched);
@@ -142,7 +146,7 @@ async function evaluate(candidate) {
   const problems = [];
 
   const liveHash = buildSourceContentHash({
-    captionText: JSON.stringify(raw)
+    captionText: JSON.stringify(originalRaw)
   });
 
   if (candidate.source_content_hash !== liveHash) {
@@ -311,38 +315,121 @@ async function evaluate(candidate) {
   };
 }
 
-async function writeEvent(candidate, result) {
+async function evaluateBatch(candidate) {
+  const fetched = await getLiveEvent(candidate.source_url);
+  const response = await fetch('https://boletera.net/api/events', {
+    redirect: 'error',
+    signal: AbortSignal.timeout(20000)
+  });
+  if (!response.ok) throw new Error('No se pudo verificar la API Boletera.');
+
+  const api = extractApiEvents(await response.json());
+  const item = api.find(item => item.event_url === candidate.source_url);
+  const originalRaw = fetched.raw;
+  let performances = [originalRaw];
+
+  if (item?.api_dates?.length > 1) {
+    performances = resolveBoleteraPerformances(originalRaw, item);
+  } else if (item?.api_invalid_dates) {
+    throw new Error('Fechas API inválidas.');
+  } else if (item?.api_dates?.length === 1) {
+    const date = new Date(originalRaw.start_date || '');
+    if (!Number.isFinite(+date) ||
+        date.toISOString() !== item.api_dates[0]) {
+      throw new Error('Conflicto entre fecha oficial y API.');
+    }
+  }
+
+  const storedPerformances =
+    candidate.analysis_result?.performance_evidence?.performances;
+
+  if (performances.length > 1) {
+    if (
+      !Array.isArray(storedPerformances) ||
+      storedPerformances.length !== performances.length ||
+      new Set(storedPerformances.map(p =>
+        p.event?.normalized?.start_at
+      )).size !== performances.length
+    ) {
+      throw new Error('Las funciones requieren actualizar el candidato.');
+    }
+  } else if (storedPerformances?.length > 1) {
+    throw new Error('La fuente ya no contiene las funciones almacenadas.');
+  }
+
+  const results = [];
+
+  for (const raw of performances) {
+    const saved = performances.length > 1
+      ? storedPerformances.find(p =>
+          p.event?.normalized?.start_at === raw.start_date
+        )?.event
+      : candidate.analysis_result.event;
+
+    if (!saved) throw new Error('Función almacenada ausente.');
+
+    const perPerformanceCandidate = {
+      ...candidate,
+      analysis_result: {
+        ...candidate.analysis_result,
+        event: saved
+      }
+    };
+
+    results.push(await evaluate(perPerformanceCandidate, {
+      raw,
+      originalRaw,
+      flyer: fetched.flyer
+    }));
+  }
+
+  return {
+    results,
+    problems: results.flatMap(r => r.problems),
+    liveHash: results[0].liveHash
+  };
+}
+
+async function writeEvent(candidate, batch) {
   const db = await pool.connect();
-  let started = false;
 
   try {
     await db.query('BEGIN');
-    started = true;
+    await db.query(
+      'SELECT pg_advisory_xact_lock(hashtext($1))',
+      [candidate.source_url]
+    );
 
     const locked = await db.query(`
-      SELECT *
-      FROM public.event_candidates
-      WHERE id = $1
-        AND source_name = 'Boletera'
-        AND is_test = FALSE
+      SELECT * FROM public.event_candidates
+      WHERE id = $1 AND source_name = 'Boletera' AND is_test = FALSE
       FOR UPDATE
     `, [candidate.id]);
 
     const current = locked.rows[0];
-
     if (
       !current ||
       current.review_status !== 'pending_review' ||
       current.approved_event_id ||
       current.source_url !== candidate.source_url ||
-      current.source_content_hash !== result.liveHash ||
+      current.source_content_hash !== batch.liveHash ||
       current.source_content_hash !== buildSourceContentHash({
         captionText: current.caption_text
-      })
+      }) ||
+      JSON.stringify(current.analysis_result) !==
+        JSON.stringify(candidate.analysis_result)
     ) {
       throw new Error('El candidato cambió durante la verificación.');
     }
 
+    const linked = await db.query(`
+      SELECT event_id FROM public.event_sources WHERE source_url = $1
+    `, [candidate.source_url]);
+    if (linked.rowCount) throw new Error('Fuente ya vinculada.');
+
+    const insertedEvents = [];
+    for (const result of batch.results) {
+      if (result.problems.length) throw new Error('Función no apta.');
     const venueRecord = await ensureTicketVenue(
       db, result.venuePlan
     );
@@ -403,13 +490,8 @@ async function writeEvent(candidate, result) {
       result.live.title
     ]);
 
-    const linked = await db.query(`
-      SELECT event_id FROM public.event_sources
-      WHERE source_url = $1 LIMIT 1
-    `, [candidate.source_url]);
-
-    if (duplicate.rowCount || linked.rowCount) {
-      throw new Error('Evento duplicado o fuente ya vinculada.');
+    if (duplicate.rowCount) {
+      throw new Error('Posible evento duplicado.');
     }
 
     // Reuse the verified, HTML-decoded description; the extractor
@@ -454,10 +536,19 @@ async function writeEvent(candidate, result) {
       candidate.source_url
     ]);
 
+
+      insertedEvents.push({
+        id: eventId,
+        start_at: result.date.toISOString()
+      });
+    }
+
     const analysis = {
-      ...(current.analysis_result || {}),
+      ...current.analysis_result,
+      status: 'approved',
+      review_required: false,
       validation: {
-        ...(current.analysis_result?.validation || {}),
+        ...current.analysis_result.validation,
         basic_checks_passed: true,
         safe_to_publish: true,
         review_required: false
@@ -466,54 +557,43 @@ async function writeEvent(candidate, result) {
         method: 'automated_source_verification',
         checked_at: new Date().toISOString(),
         source_url: candidate.source_url,
-        source_content_hash: result.liveHash,
-        venue_id: venueRecord.id,
-        venue_source_confirmed: true,
-        venue_independently_verified: venueRecord.verified,
-        music_classification: 'MusicEvent',
-        music_verification_method: 'official_boletera_json_ld',
-        description_music_assessment: result.assessment.classification,
-        musical_program_verified:
-          result.assessment.has_musical_program_evidence === true,
-        flyer_url: result.verifiedFlyer
+        source_content_hash: batch.liveHash,
+        performance_verification: batch.results.length > 1
+          ? 'official_api_dates_and_ticket_labels'
+          : 'official_json_ld_and_api',
+        events: insertedEvents
       }
     };
 
     const updated = await db.query(`
       UPDATE public.event_candidates
       SET review_status = 'approved',
-          approved_event_id = $1,
+          approved_event_id = $2,
           reviewed_at = NOW(),
-          flyer_url = $3,
-          analysis_result = $4::jsonb
-      WHERE id = $2
+          analysis_result = $3::jsonb,
+          flyer_url = $4
+      WHERE id = $1
         AND review_status = 'pending_review'
         AND approved_event_id IS NULL
         AND is_test = FALSE
       RETURNING id
     `, [
-      eventId,
       candidate.id,
-      result.verifiedFlyer,
-      JSON.stringify(analysis)
+      insertedEvents[0].id,
+      JSON.stringify(analysis),
+      batch.results[0].verifiedFlyer
     ]);
 
     if (updated.rowCount !== 1) {
       throw new Error('No se pudo vincular el candidato.');
     }
 
-    if (simulate) {
-      await db.query('ROLLBACK');
-      started = false;
-      return null;
-    }
-
-    await db.query('COMMIT');
-    started = false;
-    return eventId;
-
+    await db.query('SET CONSTRAINTS ALL IMMEDIATE');
+    await db.query(simulate ? 'ROLLBACK' : 'COMMIT');
+    console.table(insertedEvents);
+    return insertedEvents.map(e => e.id);
   } catch (error) {
-    if (started) await db.query('ROLLBACK');
+    await db.query('ROLLBACK');
     throw error;
   } finally {
     db.release();
@@ -572,7 +652,7 @@ async function main() {
         continue;
       }
 
-      const result = await evaluate(candidate);
+      const result = await evaluateBatch(candidate);
 
       if (result.problems.length) {
         blocked++;
@@ -581,16 +661,17 @@ async function main() {
       }
 
       ready++;
-      console.log('PASÓ PREVALIDACIÓN:', result.live.title);
+      console.log('PASÓ PREVALIDACIÓN:', result.results[0].live.title);
+      console.log('Funciones verificadas:', result.results.length);
 
       if (publish || simulate) {
         const eventId = await writeEvent(candidate, result);
 
         if (simulate) {
-          simulated++;
+          simulated += result.results.length;
           console.log('TRANSACCIÓN PROBADA Y REVERTIDA');
         } else {
-          published++;
+          published += result.results.length;
           console.log('PUBLICADO:', eventId);
         }
       }

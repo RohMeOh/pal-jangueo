@@ -158,6 +158,10 @@ async function main() {
   console.log('Registros guardados: 0');
   console.log('Eventos publicados: 0');
   console.log('Modo: SOLO LECTURA');
+
+  if (errors > 0) {
+    process.exitCode = 1;
+  }
 }
 
 main().catch(error => {

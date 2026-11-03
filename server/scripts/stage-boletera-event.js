@@ -28,6 +28,13 @@ const {
   reuseVerifiedBoleteraVenue
 } = require('../utils/reuseVerifiedBoleteraVenue');
 
+const {
+  extractApiEvents
+} = require('../utils/boleteraCatalog');
+const {
+  resolveBoleteraPerformances
+} = require('../utils/resolveBoleteraPerformances');
+
 async function main() {
   const input = process.argv[2];
   const stage = process.argv[3] === '--stage';
@@ -74,7 +81,33 @@ async function main() {
     );
   }
 
-  const event = events[0];
+  const originalEvent = events[0];
+
+  const apiResponse = await fetch('https://boletera.net/api/events', {
+    redirect: 'error',
+    signal: AbortSignal.timeout(20000),
+    headers: { Accept: 'application/json' }
+  });
+  if (!apiResponse.ok) {
+    throw new Error('No se pudo verificar la API de Boletera.');
+  }
+
+  const apiItems = extractApiEvents(await apiResponse.json());
+  const sourceUrl = url.href.replace(/\/$/, '');
+  const apiItem = apiItems.find(item => item.event_url === sourceUrl);
+  let resolvedPerformances = null;
+
+  if (apiItem?.api_dates?.length > 1) {
+    resolvedPerformances = resolveBoleteraPerformances(
+      originalEvent, apiItem
+    );
+    console.table(resolvedPerformances.map(item => ({
+      fecha: item.start_date,
+      boletos: item.offers.map(offer => offer.name).join('; ')
+    })));
+  }
+
+  const event = resolvedPerformances?.[0] || originalEvent;
   let candidate = normalizeBoleteraCandidate(event);
   let analysis = buildBoleteraReviewAnalysis(event);
 
@@ -134,6 +167,33 @@ async function main() {
     const enriched = await reuseVerifiedBoleteraVenue(event, pool);
     candidate = normalizeBoleteraCandidate(enriched);
     analysis = buildBoleteraReviewAnalysis(enriched);
+
+    if (resolvedPerformances) {
+      const performances = [];
+      for (const performance of resolvedPerformances) {
+        const verified = await reuseVerifiedBoleteraVenue(performance, pool);
+        const reviewed = buildBoleteraReviewAnalysis(verified);
+        const normalized = normalizeBoleteraCandidate(verified);
+        if (
+          !normalized.eligible_for_feed ||
+          reviewed.validation?.basic_checks_passed !== true
+        ) {
+          throw new Error('Una función no cumple los requisitos estructurales.');
+        }
+        performances.push({
+          event: reviewed.event,
+          labels: performance.offers.map(offer => offer.name)
+        });
+      }
+
+      analysis.performance_evidence = {
+        method: 'official_api_dates_and_ticket_labels',
+        checked_at: new Date().toISOString(),
+        api_dates: apiItem.api_dates,
+        performances,
+        external_date_conflict: false
+      };
+    }
   } catch (error) {
     await pool.end();
     throw error;
@@ -142,7 +202,7 @@ async function main() {
   console.log('Municipio para staging:', candidate.municipality);
 
   // Hash the untouched official source, never derived location data.
-  const captionText = JSON.stringify(event);
+  const captionText = JSON.stringify(originalEvent);
   const contentHash = buildSourceContentHash({
     captionText
   });
@@ -203,7 +263,14 @@ async function main() {
       candidateId = previous.id;
       finalStatus = previous.review_status;
 
-      if (previous.source_content_hash === contentHash) {
+      if (
+        previous.source_content_hash === contentHash &&
+        !(
+          resolvedPerformances &&
+          previous.review_status === 'pending_review' &&
+          previous.approved_event_id == null
+        )
+      ) {
         const previousCity = previous.analysis_result?.event?.municipality;
 
         if (
