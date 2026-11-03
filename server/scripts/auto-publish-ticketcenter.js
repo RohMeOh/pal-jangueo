@@ -1,3 +1,4 @@
+const { reportTicketPublication } = require('../utils/reportTicketPublication');
 const pool = require('../db');
 const { safeUrl } = require('./discover-ticketcenter');
 const { buildSourceContentHash } = require('../utils/sourceContentHash');
@@ -182,6 +183,7 @@ async function buildAutomaticAudit() {
   return {
     checked_at: new Date().toISOString(),
     passed: true,
+    evaluated: rows.length,
     candidates
   };
 }
@@ -194,6 +196,14 @@ async function main() {
   }
   if (!audited.size) {
     console.log('Eventos publicados: 0');
+    reportTicketPublication({
+      provider: 'Ticket Center PR',
+      mode: publish ? 'Publicación' : 'Simulación',
+      evaluated: audit.evaluated,
+      ready: 0,
+      blocked: audit.evaluated,
+      errors: 0, simulated: 0, published: 0
+    });
     return;
   }
   const db = await pool.connect();
@@ -398,6 +408,16 @@ async function main() {
     console.log('Inserciones y vínculos probados:', results.length);
     console.log('Modo:', publish ? 'PUBLICAR' : 'SIMULACIÓN REVERTIDA');
     console.log('Eventos publicados:', publish ? results.length : 0);
+    reportTicketPublication({
+      provider: 'Ticket Center PR',
+      mode: publish ? 'Publicación' : 'Simulación',
+      evaluated: audit.evaluated,
+      ready: audit.candidates.length,
+      blocked: audit.evaluated - audit.candidates.length,
+      errors: 0,
+      simulated: publish ? 0 : results.length,
+      published: publish ? results.length : 0
+    });
   } catch (error) {
     await db.query('ROLLBACK');
     throw error;

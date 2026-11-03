@@ -1,3 +1,4 @@
+const { reportTicketPublication } = require('../utils/reportTicketPublication');
 const pool = require('../db');
 const {
   extractPrticketFrontpageVenues
@@ -569,6 +570,13 @@ async function main() {
   console.log('Errores:', errors);
   console.log('Simulaciones revertidas:', simulated);
   console.log('Publicados:', published);
+
+  reportTicketPublication({
+    provider: 'PRticket',
+    mode: publish ? 'Publicación' : simulate ? 'Simulación' : 'Vista previa',
+    evaluated: selected.length,
+    ready, blocked, errors, simulated, published
+  });
 
   if (errors) process.exitCode = 1;
 }

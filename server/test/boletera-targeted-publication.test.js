@@ -13,7 +13,11 @@ function runMocked(args, candidates = 1) {
     const Module = require('node:module');
     const originalLoad = Module._load;
     Module._load = function(request, parent, isMain) {
-      if (parent?.filename === ${JSON.stringify(scriptPath)} && request.startsWith('../utils/')) {
+      if (
+        parent?.filename === ${JSON.stringify(scriptPath)} &&
+        request.startsWith('../utils/') &&
+        request !== '../utils/reportTicketPublication'
+      ) {
         return {};
       }
       if (request === '../db' && parent?.filename === ${JSON.stringify(scriptPath)}) {

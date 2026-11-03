@@ -1,3 +1,4 @@
+const { reportTicketPublication } = require('../utils/reportTicketPublication');
 const pool = require('../db');
 const { extractApiEvents } = require('../utils/boleteraCatalog');
 const {
@@ -717,6 +718,13 @@ async function main() {
   console.log('Errores:', errors);
   console.log('Simulaciones revertidas:', simulated);
   console.log('Publicados:', published);
+
+  reportTicketPublication({
+    provider: 'Boletera',
+    mode: publish ? 'Publicación' : simulate ? 'Simulación' : 'Vista previa',
+    evaluated: rows.length,
+    ready, blocked, errors, simulated, published
+  });
 
   if (errors) process.exitCode = 1;
 }
