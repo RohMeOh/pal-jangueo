@@ -246,8 +246,15 @@ function extractDetail(html) {
           .slice(0, 1800)
       : '';
 
+  // Event headings can differ from the prose title. Recover the
+  // bounded body after the last purchase action and before its date.
+  // Never include cookie notices or footer text.
+  const purchaseBody = beforeDate.match(
+    /\b(?:Comprar|Coming Soon)\b\s+\b(?:Comprar|Coming Soon)\b\s+([\s\S]+)$/i
+  )?.[1]?.trim().slice(0, 1800) || '';
+
   const extractedDescription = [
-    bodyDescription || fallbackDescription,
+    bodyDescription || fallbackDescription || purchaseBody,
     stageLineup
   ]
     .filter(Boolean)

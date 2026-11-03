@@ -106,6 +106,15 @@ function assessMusicEvidence(rawDescription) {
 
   // Explicit live acts can be described without the words "concierto"
   // or "musica en vivo". Require corroborating context, not a bare genre.
+  // Tunas are musical ensembles. Require an explicit stage
+  // announcement and a musical repertoire, not the word alone.
+  const tunaStagePerformance =
+    /\ben tarima\s+estara(?:n)?\b/.test(text) &&
+    /\btunas?\b/.test(text) &&
+    /\brepertorio\b/.test(text) &&
+    /\bmusica\b/.test(text) &&
+    !/\b(?:musica de fondo|karaoke|charla|conferencia|panel)\b/.test(text);
+
   const liveBandAnnounced =
     /\b(?:banda|orquesta|grupo musical)\s+en\s+vivo\b/.test(text);
 
@@ -173,6 +182,10 @@ function assessMusicEvidence(rawDescription) {
     /\bdjs?\s+en\s+vivo\b/.test(text) ||
     /\bdjs?\b[^.!?]{0,70}\b(?:tocara(?:n)?|se presentara(?:n)?|mezclara(?:n)?|actuara(?:n)?)\b/.test(text) ||
     /\b(?:tocara(?:n)?|se presentara(?:n)?|actuara(?:n)?|presentacion en vivo)\b[^.!?]{0,70}\bdjs?\b/.test(text);
+
+  if (tunaStagePerformance) {
+    signals.push('Tunas anunciadas en tarima con repertorio musical');
+  }
 
   if (liveAcousticAct) {
     signals.push('Actuación acústica en vivo');
@@ -247,6 +260,7 @@ function assessMusicEvidence(rawDescription) {
   const nonMusicEventDetected = nonMusicSignals.length > 0;
 
   const musicalPerformanceSignalDetected = signals.some(signal =>
+    signal === 'Tunas anunciadas en tarima con repertorio musical' ||
     signal === 'Concierto o presentación en vivo' ||
     signal === 'Actuación acústica en vivo' ||
     signal === 'Orquesta o banda anunciada en tarima' ||
