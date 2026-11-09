@@ -199,7 +199,7 @@ function EventCard({
               rel="noopener noreferrer"
               className="pj-event-map"
             >
-              {t(language, 'Ver ubicación')} <span aria-hidden="true">↗</span>
+              {t(language, 'Ver ubicación')} <svg className="pj-external-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d="M7 17 17 7M7 7h10v10" /></svg>
             </a>
           )}
 
@@ -210,7 +210,7 @@ function EventCard({
               rel="noopener noreferrer"
               className="pj-event-ticket"
             >
-              {t(language, 'Ver boletos')} <span aria-hidden="true">↗</span>
+              {t(language, 'Ver boletos')} <svg className="pj-external-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d="M7 17 17 7M7 7h10v10" /></svg>
             </a>
           )}
         </div>
@@ -544,7 +544,7 @@ export default function EventFeed({ language, onLanguageChange }) {
             </p>
             <div className="pj-hero-actions">
               <button className="pj-button pj-button-primary" type="button" onClick={() => openSection('search')}>
-                {t(language, 'Explorar eventos')} <span aria-hidden="true">↗</span>
+                {t(language, 'Explorar eventos')} <svg className="pj-external-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d="M7 17 17 7M7 7h10v10" /></svg>
               </button>
               <button
                 className="pj-button pj-button-calendar"
@@ -565,7 +565,7 @@ export default function EventFeed({ language, onLanguageChange }) {
                 type="button"
                 onClick={() => openSection('favorites')}
               >
-                Mi Jangueo <span aria-hidden="true">↗</span>
+                Mi Jangueo <svg className="pj-external-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d="M7 17 17 7M7 7h10v10" /></svg>
               </button>
             </div>
           </div>
@@ -760,7 +760,7 @@ export default function EventFeed({ language, onLanguageChange }) {
                   className="pj-button pj-button-primary"
                   onClick={() => openSection('search')}
                 >
-                  {t(language, 'Explorar eventos')} <span aria-hidden="true">↗</span>
+                  {t(language, 'Explorar eventos')} <svg className="pj-external-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d="M7 17 17 7M7 7h10v10" /></svg>
                 </button>
                 <button
                   type="button"
