@@ -1111,3 +1111,16 @@
   min-width: 0;
   padding: 10px 12px;
 }
+
+/* Keep event card actions side by side */
+.pj-site .pj-event-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+
+.pj-site .pj-event-actions a {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 10px 6px;
+}
