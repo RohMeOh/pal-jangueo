@@ -1075,3 +1075,39 @@
     font-size: 10px;
   }
 }
+
+/* Accessible red action buttons */
+.pj-site .pj-button-primary,
+.pj-site .pj-button-calendar,
+.pj-site .pj-event-map,
+.pj-site .pj-event-ticket {
+  background: #c81036;
+  border-color: #c81036;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.35;
+  min-height: 44px;
+  box-sizing: border-box;
+  text-align: center;
+  white-space: normal;
+}
+
+.pj-site .pj-button-primary:hover,
+.pj-site .pj-button-calendar:hover,
+.pj-site .pj-event-map:hover,
+.pj-site .pj-event-ticket:hover {
+  background: #aa0d2d;
+  border-color: #aa0d2d;
+  color: #fff;
+}
+
+.pj-site .pj-event-actions {
+  flex-wrap: wrap;
+}
+
+.pj-site .pj-event-actions a {
+  flex: 1 1 140px;
+  min-width: 0;
+  padding: 10px 12px;
+}
