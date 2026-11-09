@@ -693,3 +693,11 @@
   font-weight: 900;
   letter-spacing: -.02em;
 }
+
+/* Match calendar badges to red action buttons */
+.pj-site .pj-calendar-event-badge,
+.pj-site .pj-calendar-day.has-events .pj-calendar-count {
+  background: #c81036;
+  color: #fff;
+  font-weight: 700;
+}
