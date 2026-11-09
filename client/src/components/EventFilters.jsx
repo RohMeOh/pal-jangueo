@@ -332,6 +332,19 @@ export default function EventFilters({
       </div>
 
       <div className="pj-filter">
+        <label htmlFor="filter-price">{t(language, 'Precio')}</label>
+        <select
+          id="filter-price"
+          value={filters.price}
+          onChange={e => update('price', e.target.value)}
+        >
+          <option value="">{t(language, 'Todos los precios')}</option>
+          <option value="free">{t(language, 'Con opción gratis')}</option>
+          <option value="paid">{t(language, 'De pago')}</option>
+        </select>
+      </div>
+
+      <div className="pj-filter">
         <label htmlFor="filter-from">{t(language, 'Desde')}</label>
         <div className="pj-date-field">
           <input
@@ -369,19 +382,6 @@ export default function EventFilters({
             {formatFilterDate(filters.toDate, language)}
           </span>
         </div>
-      </div>
-
-      <div className="pj-filter">
-        <label htmlFor="filter-price">{t(language, 'Precio')}</label>
-        <select
-          id="filter-price"
-          value={filters.price}
-          onChange={e => update('price', e.target.value)}
-        >
-          <option value="">{t(language, 'Todos los precios')}</option>
-          <option value="free">{t(language, 'Con opción gratis')}</option>
-          <option value="paid">{t(language, 'De pago')}</option>
-        </select>
       </div>
 
       <button
