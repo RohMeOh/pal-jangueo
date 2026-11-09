@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import './EventFilters.css';
 import { t } from '../i18n';
+import FilterDropdown from './FilterDropdown';
 
 export const REGIONS = [
   'La Metro',
@@ -24,6 +25,16 @@ function formatFilterDate(value, language) {
     month: 'short',
     year: 'numeric'
   }).format(date);
+}
+
+function openDatePicker(event) {
+  // Chrome/Vivaldi: clicking anywhere on a native date input should open its calendar.
+  // Safari/mobile browsers without showPicker keep their native interaction.
+  try {
+    event.currentTarget.showPicker?.();
+  } catch {
+    // Ignore unsupported or restricted native picker calls.
+  }
 }
 
 export default function EventFilters({
@@ -285,63 +296,59 @@ export default function EventFilters({
       >
         <div className="pj-filter">
         <label htmlFor="filter-region">{t(language, 'Región')}</label>
-        <select
+        <FilterDropdown
           id="filter-region"
+          label={t(language, 'Región')}
           value={filters.region}
-          onChange={e => update('region', e.target.value)}
-        >
-          <option value="">{t(language, 'Todas las regiones')}</option>
-          {REGIONS.map(region => (
-            <option key={region} value={region}>
-              {t(language, region)}
-            </option>
-          ))}
-        </select>
+          onChange={value => update('region', value)}
+          options={[
+            { value: '', label: t(language, 'Todas las regiones') },
+            ...REGIONS.map(region => ({ value: region, label: t(language, region) }))
+          ]}
+        />
       </div>
 
       <div className="pj-filter">
         <label htmlFor="filter-municipality">{t(language, 'Municipio')}</label>
-        <select
+        <FilterDropdown
           id="filter-municipality"
+          label={t(language, 'Municipio')}
           value={filters.municipality}
-          onChange={e => update('municipality', e.target.value)}
-        >
-          <option value="">{t(language, 'Todos los municipios')}</option>
-          {municipalities.map(municipality => (
-            <option key={municipality} value={municipality}>
-              {municipality}
-            </option>
-          ))}
-        </select>
+          onChange={value => update('municipality', value)}
+          options={[
+            { value: '', label: t(language, 'Todos los municipios') },
+            ...municipalities.map(municipality => ({ value: municipality, label: municipality }))
+          ]}
+        />
       </div>
 
       <div className="pj-filter">
         <label htmlFor="filter-neighborhood">{t(language, 'Barrio / Sector')}</label>
-        <select
+        <FilterDropdown
           id="filter-neighborhood"
+          label={t(language, 'Barrio / Sector')}
           value={filters.neighborhood}
-          onChange={e => update('neighborhood', e.target.value)}
-        >
-          <option value="">{t(language, 'Todos los barrios')}</option>
-          {neighborhoods.map(neighborhood => (
-            <option key={neighborhood} value={neighborhood}>
-              {neighborhood}
-            </option>
-          ))}
-        </select>
+          onChange={value => update('neighborhood', value)}
+          options={[
+            { value: '', label: t(language, 'Todos los barrios') },
+            ...neighborhoods.map(neighborhood => ({ value: neighborhood, label: neighborhood }))
+          ]}
+        />
       </div>
 
       <div className="pj-filter">
         <label htmlFor="filter-price">{t(language, 'Precio')}</label>
-        <select
+        <FilterDropdown
           id="filter-price"
+          label={t(language, 'Precio')}
           value={filters.price}
-          onChange={e => update('price', e.target.value)}
-        >
-          <option value="">{t(language, 'Todos los precios')}</option>
-          <option value="free">{t(language, 'Con opción gratis')}</option>
-          <option value="paid">{t(language, 'De pago')}</option>
-        </select>
+          onChange={value => update('price', value)}
+          options={[
+            { value: '', label: t(language, 'Todos los precios') },
+            { value: 'free', label: t(language, 'Con opción gratis') },
+            { value: 'paid', label: t(language, 'De pago') }
+          ]}
+        />
       </div>
 
       <div className="pj-filter">
@@ -354,6 +361,13 @@ export default function EventFilters({
             value={filters.fromDate}
             max={filters.toDate || undefined}
             onChange={e => update('fromDate', e.target.value)}
+            onClick={openDatePicker}
+            onKeyDown={event => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                openDatePicker(event);
+              }
+            }}
           />
           <span
             className={`pj-date-hint${filters.fromDate ? ' pj-date-selected' : ''}`}
@@ -374,6 +388,13 @@ export default function EventFilters({
             value={filters.toDate}
             min={filters.fromDate || undefined}
             onChange={e => update('toDate', e.target.value)}
+            onClick={openDatePicker}
+            onKeyDown={event => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                openDatePicker(event);
+              }
+            }}
           />
           <span
             className={`pj-date-hint${filters.toDate ? ' pj-date-selected' : ''}`}
