@@ -5,6 +5,7 @@ function normalize(value) {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLocaleLowerCase('es')
+    .replace(/\s+/g, ' ')
     .trim();
 }
 
@@ -89,22 +90,28 @@ export function createEventSearch(events) {
 
     if (!term) return events;
 
-    let matches;
+    // A complete event title identifies every performance of that event.
+    // Do not mix an exact selection with unrelated fuzzy matches.
+    const exactTitles = records.filter(record => record.title === term);
+    if (exactTitles.length) return exactTitles.map(record => record.event);
 
-    // Para búsquedas muy cortas, evitar coincidencias demasiado amplias.
-    if (term.length < 3) {
-      matches = records
-        .filter(record =>
-          SEARCH_FIELDS.some(field => record[field].includes(term))
-        )
+    const literalMatches = records.filter(record =>
+      SEARCH_FIELDS.some(field => record[field].includes(term))
+    );
+
+    if (literalMatches.length) {
+      // Prefer titles to descriptions; retain date order within each group.
+      const priority = record => record.title.startsWith(term) ? 0
+        : record.title.includes(term) ? 1 : 2;
+      return literalMatches
+        .sort((a, b) => priority(a) - priority(b))
         .map(record => record.event);
-    } else {
-      matches = eventFuse.search(term).map(result => result.item.event);
     }
 
-    // Conservar el orden original de fechas próximas.
-    const matchingEvents = new Set(matches);
-    return events.filter(event => matchingEvents.has(event));
+    // Use typo tolerance only when no literal match exists. Keep Fuse's
+    // relevance order instead of restoring the original chronological order.
+    if (term.length < 3) return [];
+    return eventFuse.search(term).map(result => result.item.event);
   }
 
   function suggest(query) {
