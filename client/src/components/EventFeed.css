@@ -1124,3 +1124,19 @@
   min-width: 0;
   padding: 10px 6px;
 }
+
+/* Stack event actions on desktop only */
+@media (min-width: 621px) {
+  .pj-site .pj-event-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .pj-site .pj-event-actions a {
+    width: 100%;
+    min-height: 44px;
+    margin: 0;
+    padding: 10px 12px;
+  }
+}
