@@ -27,20 +27,32 @@ export default function BackToTop({ language }) {
       const mobile = window.matchMedia('(max-width: 620px)').matches;
       const defaultBottom = mobile ? 24 : 50;
 
+      if (mobile) {
+        // Anchor the button to the document's footer line.
+        // Stop following the line using a fixed viewport position.
+        if (lineY < radius || lineY > window.innerHeight - radius) {
+          setFooterPosition(null);
+          return;
+        }
+
+        const footerDocumentY = lineY + window.scrollY;
+
+        setFooterPosition({
+          position: 'absolute',
+          top: `${Math.round(footerDocumentY - radius)}px`,
+          bottom: 'auto'
+        });
+        return;
+      }
+
+      // Preserve the existing desktop behavior.
       const alignWithFooter =
         lineY >= radius &&
         lineY <= window.innerHeight - defaultBottom - radius;
 
-      if (!alignWithFooter) {
-        setFooterPosition(null);
-        return;
-      }
-
-      // Mobile: position directly from the footer line.
-      // Desktop: preserve the existing alignment behavior.
-      setFooterPosition(mobile
-        ? { top: `${Math.round(lineY - radius)}px`, bottom: 'auto' }
-        : { bottom: `${Math.round(window.innerHeight - lineY - radius)}px` }
+      setFooterPosition(alignWithFooter
+        ? { bottom: `${Math.round(window.innerHeight - lineY - radius)}px` }
+        : null
       );
     }
 
