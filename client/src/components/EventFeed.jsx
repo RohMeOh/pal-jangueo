@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import './EventFeed.css';
 import EventFilters from './EventFilters';
 import { createEventSearch } from '../utils/eventSearch';
+import { formatEventTitle } from '../utils/formatEventTitle';
 import './IconAction.css';
 
 import CalendarView from './CalendarView';
@@ -104,6 +105,7 @@ function EventCard({
 }) {
   const [flyerFailed, setFlyerFailed] = useState(false);
   const flyerUrl = safeLink(event.flyer_url);
+  const displayTitle = formatEventTitle(event.title);
 
   const location = [
     event.venue_name,
@@ -133,7 +135,7 @@ function EventCard({
             <img
               className="pj-event-poster-image"
               src={flyerUrl}
-              alt={`${t(language, 'Cartel de')} ${event.title}`}
+              alt={`${t(language, 'Cartel de')} ${displayTitle}`}
               loading="lazy"
               onError={() => setFlyerFailed(true)}
             />
@@ -151,7 +153,7 @@ function EventCard({
         </span>
 
         <div className="pj-event-title-row">
-          <h3>{event.title}</h3>
+          <h3>{displayTitle}</h3>
           <button
             type="button"
             className={`pj-favorite-heart${isFavorite ? ' is-favorite' : ''}`}

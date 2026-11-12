@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import './EventFilters.css';
 import { t } from '../i18n';
 import FilterDropdown from './FilterDropdown';
+import { formatEventTitle } from '../utils/formatEventTitle';
 
 export const REGIONS = [
   'La Metro',
@@ -250,7 +251,9 @@ export default function EventFilters({
                 onClick={() => chooseSuggestion(suggestion)}
               >
                 <span className="pj-suggestion-name">
-                  {suggestion.label}
+                  {suggestion.kind === 'title'
+                    ? formatEventTitle(suggestion.label)
+                    : suggestion.label}
                 </span>
                 <span className="pj-suggestion-kind">
                   {{
