@@ -50,7 +50,9 @@ function formatPrice(event, language) {
     return `${t(language, 'Desde')} $${Number(event.price_min).toFixed(2)}`;
   }
 
-  return t(language, 'Precio por confirmar');
+  return language === 'en'
+    ? 'Check price on ticket site'
+    : 'Ver precio en boletería';
 }
 
 function safeLink(value) {
