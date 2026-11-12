@@ -884,14 +884,16 @@
 
 
 
-/* Mi Jangueo: reuse the exact Welcome button layout */
+/* Mi Jangueo: stack the actions when the card is too narrow for both. */
 .pj-my-jangueo .pj-empty .pj-my-jangueo-actions {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr));
+  align-items: stretch;
   margin: 24px auto 0;
 }
 
 .pj-my-jangueo .pj-empty .pj-my-jangueo-actions .pj-button {
   margin: 0;
-  width: 100%;
+  padding-inline: 10px;
 }
 
 
