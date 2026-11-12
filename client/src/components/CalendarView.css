@@ -806,8 +806,8 @@
 
   .pj-calendar-toolbar-balanced .pj-calendar-today,
   .pj-calendar-toolbar-balanced .pj-calendar-month-arrow {
-    height: 30px;
-    min-width: 30px;
+    height: 36px;
+    min-width: 36px;
     padding: 0 6px;
   }
 
@@ -835,9 +835,9 @@
   }
 
   .pj-calendar-event-badge {
-    min-height: 15px;
+    min-height: 17px;
     padding: 2px 5px;
-    font-size: 9px;
+    font-size: 10px;
   }
 
   .pj-calendar-page > .pj-calendar-results {
