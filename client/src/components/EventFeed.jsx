@@ -2,6 +2,7 @@ import ApprovedHeroArt from './ApprovedHeroArt';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import './EventFeed.css';
 import EventFilters from './EventFilters';
+import FilterDropdown from './FilterDropdown';
 import { createEventSearch } from '../utils/eventSearch';
 import { formatEventTitle } from '../utils/formatEventTitle';
 import './IconAction.css';
@@ -691,30 +692,22 @@ export default function EventFeed({ language, onLanguageChange }) {
                   : 'Buscar eventos favoritos'}
               />
 
-              <select
-                id="pj-favorite-filter"
-                value={favoriteFilter}
-                onChange={event =>
-                  setFavoriteFilter(event.target.value)
-                }
-              >
-                <option value="upcoming">
-                  {language === 'en' ? 'Soonest first' : 'Próximos primero'}
-                </option>
-                <option value="farthest">
-                  {language === 'en' ? 'Latest dates first' : 'Fechas más lejanas'}
-                </option>
-                <option value="az">A–Z</option>
-                <option value="za">Z–A</option>
-                <option value="newest">
-                  {language === 'en'
-                    ? 'Recently saved' : 'Guardados recientemente'}
-                </option>
-                <option value="oldest">
-                  {language === 'en'
-                    ? 'Oldest saved' : 'Guardados hace más tiempo'}
-                </option>
-              </select>
+              <div className="pj-filter pj-favorite-sort">
+                <FilterDropdown
+                  id="pj-favorite-filter"
+                  label={language === 'en' ? 'Sort by' : 'Ordenar por'}
+                  value={favoriteFilter}
+                  onChange={setFavoriteFilter}
+                  options={[
+                    { value: 'upcoming', label: language === 'en' ? 'Soonest first' : 'Próximos primero' },
+                    { value: 'farthest', label: language === 'en' ? 'Latest dates first' : 'Fechas más lejanas' },
+                    { value: 'az', label: 'A–Z' },
+                    { value: 'za', label: 'Z–A' },
+                    { value: 'newest', label: language === 'en' ? 'Recently saved' : 'Guardados recientemente' },
+                    { value: 'oldest', label: language === 'en' ? 'Oldest saved' : 'Guardados hace más tiempo' }
+                  ]}
+                />
+              </div>
 
               <span className="pj-event-count">
                 {favoriteEvents.length}{' '}

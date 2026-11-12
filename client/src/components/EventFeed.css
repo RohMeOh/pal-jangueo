@@ -942,12 +942,11 @@
   margin: 0;
 }
 
-.pj-my-jangueo-controls select {
+.pj-my-jangueo-controls .pj-favorite-sort {
   grid-column: 3;
   grid-row: 1;
   width: 100%;
   min-width: 0;
-  max-width: none;
   margin: 0;
 }
 
@@ -959,29 +958,31 @@
   white-space: nowrap;
 }
 
-/* Mobile: preserve usability without horizontal overflow */
+/* Mi Jangueo: count on top, full-width search, then full-width sorting. */
 @media (max-width: 620px) {
   .pj-my-jangueo-controls {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: 10px;
   }
 
   .pj-my-jangueo-controls label {
-    grid-column: 1 / -1;
-    grid-row: 1;
-  }
-
-  .pj-my-jangueo-controls .pj-favorite-search {
     grid-column: 1;
-    grid-row: 2;
-  }
-
-  .pj-my-jangueo-controls select {
-    grid-column: 2;
-    grid-row: 2;
+    grid-row: 1;
+    align-self: center;
   }
 
   .pj-my-jangueo-controls .pj-event-count {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+  }
+
+  .pj-my-jangueo-controls .pj-favorite-search {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .pj-my-jangueo-controls .pj-favorite-sort {
     grid-column: 1 / -1;
     grid-row: 3;
   }
