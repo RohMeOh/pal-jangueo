@@ -701,3 +701,175 @@
   color: #fff;
   font-weight: 700;
 }
+
+
+/* Compact calendar layout v3: desktop + single-row mobile toolbar */
+.pj-calendar-page {
+  max-width: 840px;
+}
+
+.pj-calendar-panel {
+  padding: 20px;
+}
+
+.pj-calendar-toolbar.pj-calendar-toolbar-balanced {
+  margin-bottom: 12px;
+}
+
+.pj-calendar-month-short {
+  display: none;
+}
+
+.pj-calendar-grid {
+  column-gap: 6px;
+  row-gap: 6px;
+}
+
+.pj-calendar-weekday {
+  padding: 5px 0 8px;
+}
+
+.pj-calendar-day,
+.pj-calendar-outside {
+  height: 54px;
+}
+
+.pj-calendar-day,
+.pj-calendar-outside {
+  padding: 8px 9px;
+}
+
+.pj-calendar-page > .pj-calendar-results {
+  margin-top: 18px;
+}
+
+@media (max-width: 620px) {
+  .pj-calendar-page {
+    max-width: 100%;
+  }
+
+  .pj-calendar-intro h1 {
+    font-size: clamp(25px, 6vw, 31px);
+  }
+
+  .pj-calendar-panel {
+    padding: 10px;
+    border-radius: 14px;
+  }
+
+  .pj-calendar-toolbar.pj-calendar-toolbar-balanced {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .pj-calendar-today-slot {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .pj-calendar-month-navigation {
+    grid-column: 2;
+    grid-row: 1;
+    gap: 10px;
+    width: 100%;
+    min-width: 0;
+    justify-self: center;
+  }
+
+  .pj-calendar-month-navigation .pj-calendar-month {
+    min-width: 0;
+    font-size: clamp(12px, 3.5vw, 15px);
+  }
+
+  .pj-calendar-month-full {
+    display: none;
+  }
+
+  .pj-calendar-month-short {
+    display: inline;
+  }
+
+  .pj-calendar-toolbar-balanced .pj-calendar-month-count {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+    padding: 5px 7px;
+    font-size: 10px;
+  }
+
+  .pj-calendar-toolbar-balanced .pj-calendar-today,
+  .pj-calendar-toolbar-balanced .pj-calendar-month-arrow {
+    height: 30px;
+    min-width: 30px;
+    padding: 0 6px;
+  }
+
+  .pj-calendar-toolbar-balanced .pj-calendar-month-arrow {
+    font-size: 21px;
+  }
+
+  .pj-calendar-grid {
+    column-gap: 4px;
+    row-gap: 4px;
+  }
+
+  .pj-calendar-weekday {
+    padding: 4px 0 5px;
+  }
+
+  .pj-calendar-day,
+  .pj-calendar-outside {
+    height: 46px;
+    padding: 6px 5px;
+  }
+
+  .pj-calendar-day {
+    gap: 2px;
+  }
+
+  .pj-calendar-event-badge {
+    min-height: 15px;
+    padding: 2px 5px;
+    font-size: 9px;
+  }
+
+  .pj-calendar-page > .pj-calendar-results {
+    margin-top: 16px;
+  }
+
+  .pj-calendar-results h2 {
+    margin-bottom: 14px;
+    font-size: clamp(21px, 5vw, 25px);
+  }
+}
+
+@media (max-width: 360px) {
+  /* Visual-only hide: keep the word available to screen readers. */
+  .pj-calendar-month-count-word {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .pj-calendar-toolbar-balanced .pj-calendar-month-count {
+    min-width: 30px;
+  }
+}
+
+/* FIX: calendar counter spacing */
+.pj-calendar-toolbar-balanced .pj-calendar-month-count {
+  column-gap: 0;
+}
+
+.pj-calendar-toolbar-balanced
+.pj-calendar-month-count-number + .pj-calendar-month-count-word {
+  margin-inline-start: 3px;
+}

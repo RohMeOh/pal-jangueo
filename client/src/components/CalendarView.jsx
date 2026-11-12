@@ -29,12 +29,12 @@ function moveMonth(key, amount) {
   ).toISOString().slice(0, 7);
 }
 
-function formatMonth(key, language) {
+function formatMonth(key, language, abbreviated = false) {
   const locale = language === 'en' ? 'en-US' : 'es-PR';
   const date = new Date(`${key}-15T12:00:00Z`);
 
   const month = new Intl.DateTimeFormat(locale, {
-    month: 'long',
+    month: abbreviated ? 'short' : 'long',
     timeZone: 'UTC'
   }).format(date);
 
@@ -170,8 +170,16 @@ export default function CalendarView({
               ‹
             </button>
 
-            <h2 className="pj-calendar-month">
-              {formatMonth(month, language)}
+            <h2
+              className="pj-calendar-month"
+              aria-label={formatMonth(month, language)}
+            >
+              <span className="pj-calendar-month-full">
+                {formatMonth(month, language)}
+              </span>
+              <span className="pj-calendar-month-short" aria-hidden="true">
+                {formatMonth(month, language, true)}
+              </span>
             </h2>
 
             <button
@@ -184,11 +192,19 @@ export default function CalendarView({
             </button>
           </div>
 
-          <span className="pj-calendar-month-count">
-            {monthCount} {t(
+          <span
+            className="pj-calendar-month-count"
+            aria-label={`${monthCount} ${t(
               language,
               monthCount === 1 ? 'evento' : 'eventos'
-            )}
+            )}`}
+          >
+            <span className="pj-calendar-month-count-number">
+              {monthCount}
+            </span>
+            <span className="pj-calendar-month-count-word">
+              {' '}{t(language, monthCount === 1 ? 'evento' : 'eventos')}
+            </span>
           </span>
         </div>
 
