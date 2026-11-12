@@ -115,6 +115,16 @@ function assessMusicEvidence(rawDescription) {
     /\bmusica\b/.test(text) &&
     !/\b(?:musica de fondo|karaoke|charla|conferencia|panel)\b/.test(text);
 
+  // A concert may describe an actively conducted orchestra and
+  // an instrumental solo without literally saying "concierto".
+  // Require all elements to avoid treating background music as a concert.
+  const conductedOrchestralSolo =
+    /\bdirige\s+(?:la|una)\s+orquesta\b/.test(text) &&
+    /\binterpreta\s+(?:la\s+parte\s+)?solista\b/.test(text) &&
+    /\b(?:trombon|violin|fagot|piano|oboe|flauta|clarinete|violonchelo|trompeta)\b/.test(text) &&
+    /\b(?:sinfonia|obertura|concertino|repertorio|compositores?)\b/.test(text) &&
+    !/\b(?:documental|cine|pelicula|proyeccion|grabacion|musica de fondo|charla|conferencia|panel|karaoke)\b/.test(text);
+
   const liveBandAnnounced =
     /\b(?:banda|orquesta|grupo musical)\s+en\s+vivo\b/.test(text);
 
@@ -191,6 +201,10 @@ function assessMusicEvidence(rawDescription) {
     /\bdjs?\s+en\s+vivo\b/.test(text) ||
     /\bdjs?\b[^.!?]{0,70}\b(?:tocara(?:n)?|se presentara(?:n)?|mezclara(?:n)?|actuara(?:n)?)\b/.test(text) ||
     /\b(?:tocara(?:n)?|se presentara(?:n)?|actuara(?:n)?|presentacion en vivo)\b[^.!?]{0,70}\bdjs?\b/.test(text);
+
+  if (conductedOrchestralSolo) {
+    signals.push('Interpretación solista con orquesta dirigida');
+  }
 
   if (tunaStagePerformance) {
     signals.push('Tunas anunciadas en tarima con repertorio musical');
@@ -269,6 +283,7 @@ function assessMusicEvidence(rawDescription) {
   const nonMusicEventDetected = nonMusicSignals.length > 0;
 
   const musicalPerformanceSignalDetected = signals.some(signal =>
+    signal === 'Interpretación solista con orquesta dirigida' ||
     signal === 'Tunas anunciadas en tarima con repertorio musical' ||
     signal === 'Concierto o presentación en vivo' ||
     signal === 'Actuación acústica en vivo' ||
