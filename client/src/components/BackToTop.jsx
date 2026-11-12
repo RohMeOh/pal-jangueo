@@ -7,53 +7,75 @@ const SHOW_AFTER_PX = 420;
 
 export default function BackToTop({ language }) {
   const [visible, setVisible] = useState(false);
-  const [footerLineBottom, setFooterLineBottom] = useState(null);
+  const [footerPosition, setFooterPosition] = useState(null);
 
   useEffect(() => {
+    let frame = 0;
+
     function updatePosition() {
       setVisible(window.scrollY > SHOW_AFTER_PX);
 
       const footer = document.querySelector('.pj-site-footer');
 
       if (!footer) {
-        setFooterLineBottom(null);
+        setFooterPosition(null);
         return;
       }
 
-      // Posición exacta de la línea superior del footer.
       const lineY = footer.getBoundingClientRect().top;
-
-      // El círculo mide 46px: radio de 23px.
       const radius = 23;
-
-      const mobile = window.matchMedia(
-        '(max-width: 620px)'
-      ).matches;
-
+      const mobile = window.matchMedia('(max-width: 620px)').matches;
       const defaultBottom = mobile ? 24 : 50;
 
       const alignWithFooter =
         lineY >= radius &&
         lineY <= window.innerHeight - defaultBottom - radius;
 
-      // El centro de la burbuja coincide con la línea.
-      const nextBottom = alignWithFooter
-        ? Math.round(window.innerHeight - lineY - radius)
-        : null;
+      if (!alignWithFooter) {
+        setFooterPosition(null);
+        return;
+      }
 
-      setFooterLineBottom(nextBottom);
+      // Mobile: position directly from the footer line.
+      // Desktop: preserve the existing alignment behavior.
+      setFooterPosition(mobile
+        ? { top: `${Math.round(lineY - radius)}px`, bottom: 'auto' }
+        : { bottom: `${Math.round(window.innerHeight - lineY - radius)}px` }
+      );
     }
+
+    function scheduleUpdate() {
+      if (frame) return;
+
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        updatePosition();
+      });
+    }
+
+    const observer = new ResizeObserver(scheduleUpdate);
+
+    for (const selector of ['.pj-discovery', '.pj-site-footer']) {
+      const element = document.querySelector(selector);
+      if (element) observer.observe(element);
+    }
+
+    const viewport = window.visualViewport;
 
     updatePosition();
 
-    window.addEventListener('scroll', updatePosition, {
-      passive: true
-    });
-    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', scheduleUpdate, { passive: true });
+    window.addEventListener('resize', scheduleUpdate);
+    viewport?.addEventListener('resize', scheduleUpdate);
+    viewport?.addEventListener('scroll', scheduleUpdate);
 
     return () => {
-      window.removeEventListener('scroll', updatePosition);
-      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', scheduleUpdate);
+      window.removeEventListener('resize', scheduleUpdate);
+      viewport?.removeEventListener('resize', scheduleUpdate);
+      viewport?.removeEventListener('scroll', scheduleUpdate);
+      observer.disconnect();
+      if (frame) window.cancelAnimationFrame(frame);
     };
   }, []);
 
@@ -68,10 +90,7 @@ export default function BackToTop({ language }) {
     <button
       type="button"
       className="pj-back-to-top pj-icon-action"
-      style={footerLineBottom === null
-        ? undefined
-        : { bottom: `${footerLineBottom}px` }
-      }
+      style={footerPosition || undefined}
       onClick={scrollToTop}
       aria-label={t(language, 'Volver arriba')}
       title={t(language, 'Volver arriba')}
