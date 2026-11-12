@@ -41,6 +41,7 @@ const aliases = {
   'sala de festivales antonio paoli santurce': '75b6985f-998a-4504-b980-648d62fa56e2',
   'sala experimental carlos marichal': '8307ceab-6c07-4380-8cd7-6e261e804549',
   'fundacion nacional para la cultura': '3306e371-568e-4297-9b70-cfb74ebf4562',
+  'conservatorio de musica de pr': '657fe424-10a7-4cde-82f3-acfff47a88bb',
   'hollywood cafe ponce': 'cbde1ca9-ef85-439f-89c4-94dd504f97b7',
   'monero cafe teatro y bar': '15dcd01e-8606-47d4-a46a-d2322a7f5b95'
 };
