@@ -204,6 +204,15 @@ jobs:
           SUPABASE_CA_PATH: ${{ runner.temp }}/supabase-ca.crt
         run: node scripts/auto-publish-boletera.js --all --publish
 
+      - name: Audit published PRticket events
+        id: prticket_published_audit
+        continue-on-error: true
+        if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true) }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SUPABASE_CA_PATH: ${{ runner.temp }}/supabase-ca.crt
+        run: node scripts/audit-published-prticket.js
+
       - name: Remove temporary certificate
         if: ${{ always() && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.stage_candidates == true)) }}
         run: rm -f "$RUNNER_TEMP/supabase-ca.crt"
@@ -216,6 +225,7 @@ jobs:
           PRTICKET: ${{ steps.prticket_stage.outcome }}
           PRTICKET_VENUES: ${{ steps.prticket_venues.outcome }}
           PRTICKET_PUBLISH: ${{ steps.prticket_publication.outcome }}
+          PRTICKET_AUDIT: ${{ steps.prticket_published_audit.outcome }}
           DISCOVERY: ${{ steps.multisource_discovery.outcome }}
           BOLETERA: ${{ steps.boletera_stage.outcome }}
           BOLETERA_PUBLISH: ${{ steps.boletera_publication.outcome }}
@@ -227,13 +237,14 @@ jobs:
           echo "PRticket: $PRTICKET"
           echo "PRticket venues: $PRTICKET_VENUES"
           echo "PRticket publication: $PRTICKET_PUBLISH"
+          echo "PRticket audit: $PRTICKET_AUDIT"
           echo "Multi-source discovery: $DISCOVERY"
           echo "Boletera staging: $BOLETERA"
           echo "Boletera publication: $BOLETERA_PUBLISH"
           echo "Artist enrichment: $ARTISTS"
           echo "Scene evaluation: $SCENE"
 
-          for result in "$TICKETCENTER" "$TICKETCENTER_PUBLISH" "$PRTICKET" "$PRTICKET_VENUES" "$PRTICKET_PUBLISH" "$DISCOVERY" "$BOLETERA" "$BOLETERA_PUBLISH" "$ARTISTS" "$SCENE"; do
+          for result in "$TICKETCENTER" "$TICKETCENTER_PUBLISH" "$PRTICKET" "$PRTICKET_VENUES" "$PRTICKET_PUBLISH" "$PRTICKET_AUDIT" "$DISCOVERY" "$BOLETERA" "$BOLETERA_PUBLISH" "$ARTISTS" "$SCENE"; do
             if [ "$result" = "failure" ]; then
               echo "::error::One or more discovery stages failed."
               exit 1
