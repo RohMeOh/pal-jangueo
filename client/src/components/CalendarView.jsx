@@ -83,7 +83,7 @@ export default function CalendarView({
   favorites = {},
   onToggleFavorite = () => {}
 }) {
-  const today = puertoRicoDay(new Date());
+  const [today, setToday] = useState(() => puertoRicoDay(new Date()));
 
   const [month, setMonth] = useState(() => today.slice(0, 7));
   const [selectedDay, setSelectedDay] = useState(today);
@@ -129,6 +129,7 @@ export default function CalendarView({
 
   function goToday() {
     const currentDay = puertoRicoDay(new Date());
+    setToday(currentDay);
     setMonth(currentDay.slice(0, 7));
     setSelectedDay(currentDay);
   }

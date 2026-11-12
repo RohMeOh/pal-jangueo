@@ -4,7 +4,7 @@ import { t } from '../i18n';
 import FilterDropdown from './FilterDropdown';
 import { formatEventTitle } from '../utils/formatEventTitle';
 
-export const REGIONS = [
+const REGIONS = [
   'La Metro',
   'Norte',
   'Sur',
