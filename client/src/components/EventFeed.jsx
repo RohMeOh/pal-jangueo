@@ -5,6 +5,7 @@ import EventFilters from './EventFilters';
 import FilterDropdown from './FilterDropdown';
 import { createEventSearch } from '../utils/eventSearch';
 import { matchesEventFacets } from '../utils/eventFilterFacets';
+import { toggleFavoriteState } from '../utils/favoriteState';
 import { formatEventTitle } from '../utils/formatEventTitle';
 import './IconAction.css';
 
@@ -248,51 +249,38 @@ export default function EventFeed({ language, onLanguageChange }) {
       window.removeEventListener('hashchange', syncSection);
     };
   }, []);
-  const [favorites, setFavorites] = useState(readFavorites);
+  const [favoriteState, setFavoriteState] = useState(() => ({
+    favorites: readFavorites(),
+    dates: readFavoriteDates(),
+    source: 'storage'
+  }));
+  const { favorites, dates: favoriteDates } = favoriteState;
   const [favoriteFilter, setFavoriteFilter] = useState('upcoming');
   const [favoriteSearch, setFavoriteSearch] = useState('');
-  const [favoriteDates, setFavoriteDates] = useState(readFavoriteDates);
   const [events, setEvents] = useState([]);
 
   function toggleFavorite(event) {
-    setFavorites(previous => {
-      const next = { ...previous };
-      const id = String(event.id);
-
-      if (Object.prototype.hasOwnProperty.call(next, id)) {
-        delete next[id];
-      } else {
-        next[id] = event;
-      }
-
-      setFavoriteDates(previousDates => {
-        const dates = { ...previousDates };
-        if (Object.prototype.hasOwnProperty.call(next, id)) {
-          dates[id] = dates[id] || Date.now();
-        } else {
-          delete dates[id];
-        }
-        try {
-          window.localStorage.setItem(
-            FAVORITE_DATES_KEY, JSON.stringify(dates)
-          );
-        } catch (error) {
-          console.warn('Error guardando fecha del favorito', error);
-        }
-        return dates;
-      });
-
-      try {
-        window.localStorage.setItem(
-          FAVORITES_KEY, JSON.stringify(next)
-        );
-      } catch (error) {
-        console.warn('No se pudieron guardar los favoritos', error);
-      }
-
-      return next;
-    });
+    // Capture the timestamp before React executes the pure updater.
+    const savedAt = Date.now();
+    setFavoriteState(previous => toggleFavoriteState(previous, event, savedAt));
   }
+
+  // Persist only local clicks, never React state updater calculations or
+  // cross-tab storage notifications. This is safe under React Strict Mode.
+  useEffect(() => {
+    if (favoriteState.source !== 'local') return;
+
+    try {
+      window.localStorage.setItem(
+        FAVORITES_KEY, JSON.stringify(favoriteState.favorites)
+      );
+      window.localStorage.setItem(
+        FAVORITE_DATES_KEY, JSON.stringify(favoriteState.dates)
+      );
+    } catch (error) {
+      console.warn('No se pudieron guardar los favoritos', error);
+    }
+  }, [favoriteState]);
 
   useEffect(() => {
     const syncFavorites = event => {
@@ -301,8 +289,11 @@ export default function EventFeed({ language, onLanguageChange }) {
         event.key === FAVORITE_DATES_KEY ||
         event.key === null
       ) {
-        setFavorites(readFavorites());
-        setFavoriteDates(readFavoriteDates());
+        setFavoriteState({
+          favorites: readFavorites(),
+          dates: readFavoriteDates(),
+          source: 'storage'
+        });
       }
     };
 
@@ -442,7 +433,7 @@ export default function EventFeed({ language, onLanguageChange }) {
 
   function openSection(nextSection) {
     const hashes = {
-      home: '#bienvenidos',
+      home: '#bienvenido',
       search: '#buscar',
       calendar: '#calendario',
       favorites: '#mi-jangueo'
