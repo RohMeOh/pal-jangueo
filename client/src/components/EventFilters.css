@@ -443,3 +443,10 @@
   .pj-site .pj-filter .pj-filter-dropdown { display: none; }
   .pj-site .pj-filter .pj-filter-native-select { display: block; }
 }
+
+
+/* Search clear button pointer */
+.pj-site #filter-search::-webkit-search-cancel-button,
+.pj-site #pj-favorite-search::-webkit-search-cancel-button {
+  cursor: pointer;
+}
