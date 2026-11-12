@@ -269,6 +269,20 @@
 .pj-empty, .pj-event-status { border: 1px solid #263b4d; border-radius: 16px; background: #0b1420; color: #c1ccda; padding: 35px 24px; text-align: center; }
 .pj-empty h3 { color: #fff; margin-bottom: 10px; }
 
+/* Visible reset action when a search/filter combination yields no events. */
+.pj-empty .pj-empty-clear-filters {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  margin: 20px auto 0;
+  cursor: pointer;
+}
+.pj-empty .pj-empty-clear-filters:focus-visible {
+  outline: 2px solid var(--pj-blue);
+  outline-offset: 2px;
+}
+
 /* Animated event loading indicator */
 .pj-event-loading {
   display: flex;

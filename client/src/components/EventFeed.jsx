@@ -68,6 +68,16 @@ function safeLink(value) {
 const FAVORITES_KEY = 'pj-favorite-events-v1';
 const FAVORITE_DATES_KEY = 'pj-favorite-dates-v1';
 
+const EMPTY_EVENT_FILTERS = {
+  search: '',
+  region: '',
+  municipality: '',
+  neighborhood: '',
+  fromDate: '',
+  toDate: '',
+  price: ''
+};
+
 function readFavoriteDates() {
   try {
     return JSON.parse(
@@ -352,16 +362,12 @@ export default function EventFeed({ language, onLanguageChange }) {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [filters, setFilters] = useState({
-    search: '',
-    region: '',
-    municipality: '',
-    neighborhood: '',
-    fromDate: '',
-    toDate: '',
-    price: ''
-  });
+  const [filters, setFilters] = useState(EMPTY_EVENT_FILTERS);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  function clearEventFilters() {
+    setFilters({ ...EMPTY_EVENT_FILTERS });
+  }
 
   // Mostrar el aviso beta una sola vez por carga de la aplicación.
   // El botón About puede volver a abrirlo después de cerrarlo.
@@ -560,6 +566,7 @@ export default function EventFeed({ language, onLanguageChange }) {
             events={events}
             filters={filters}
             setFilters={setFilters}
+            onClearFilters={clearEventFilters}
             getSuggestions={suggestionSearch.suggest}
             searchMatchedEvents={searchMatchedEvents}
             language={language}
@@ -597,6 +604,13 @@ export default function EventFeed({ language, onLanguageChange }) {
             <div className="pj-empty">
               <h3>{t(language, 'No encontramos eventos con esos filtros.')}</h3>
               <p>{t(language, 'Prueba otra región, fecha o precio.')}</p>
+              <button
+                type="button"
+                className="pj-clear-filters pj-empty-clear-filters"
+                onClick={clearEventFilters}
+              >
+                {t(language, 'Quitar filtros')}
+              </button>
             </div>
           )}
 

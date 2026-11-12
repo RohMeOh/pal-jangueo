@@ -34,6 +34,7 @@ export default function EventFilters({
   events,
   filters,
   setFilters,
+  onClearFilters,
   language,
   getSuggestions,
   searchMatchedEvents = [],
@@ -105,18 +106,6 @@ export default function EventFilters({
     'toDate',
     'price'
   ].filter(field => Boolean(filters[field])).length;
-
-  function clearFilters() {
-    setFilters({
-      search: '',
-      region: '',
-      municipality: '',
-      neighborhood: '',
-      fromDate: '',
-      toDate: '',
-      price: ''
-    });
-  }
 
   return (
     <div className="pj-filters">
@@ -372,7 +361,7 @@ export default function EventFilters({
       <button
         className="pj-clear-filters"
         type="button"
-        onClick={clearFilters}
+        onClick={onClearFilters}
       >
         {t(language, 'Quitar filtros')}
       </button>

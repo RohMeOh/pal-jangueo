@@ -806,8 +806,8 @@
 
   .pj-calendar-toolbar-balanced .pj-calendar-today,
   .pj-calendar-toolbar-balanced .pj-calendar-month-arrow {
-    height: 36px;
-    min-width: 36px;
+    height: 44px;
+    min-width: 44px;
     padding: 0 6px;
   }
 
