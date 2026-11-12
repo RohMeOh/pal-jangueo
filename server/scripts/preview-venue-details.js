@@ -103,6 +103,7 @@ async function main() {
   console.log('Eventos a procesar:', selected.length);
 
   let processed = 0;
+  let pending = 0;
   let errors = 0;
 
   for (const url of selected) {
@@ -112,7 +113,12 @@ async function main() {
       const html = await fetchPage(url);
       const performances = extractDetails(html, url);
       if (!performances.length) {
-        throw new Error('Funciones con fecha y hora no confirmadas: ' + url);
+        pending++;
+        console.warn(
+          'PENDIENTE: funciones sin fecha y hora confirmadas:',
+          url
+        );
+        continue;
       }
 
       for (const details of performances) {
@@ -146,10 +152,18 @@ async function main() {
 
   console.log('\n=== RESUMEN ===');
   console.log('Eventos procesados:', processed);
+  console.log('Fichas pendientes:', pending);
   console.log('Errores:', errors);
   console.log('Registros guardados: 0');
   console.log('Eventos publicados: 0');
   console.log('Modo: SOLO LECTURA');
+
+  if (selected.length > 0 && processed === 0) {
+    console.error(
+      'ERROR: Ninguna función confirmada; revisar el extractor.'
+    );
+    process.exitCode = 1;
+  }
 
   if (errors > 0) {
     process.exitCode = 1;
