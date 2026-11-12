@@ -10,6 +10,24 @@ if (process.argv.slice(2).some(arg => arg !== '--apply')) {
 // Se pueden incorporar otros municipios y venues más adelante.
 const trustedVenues = [
   {
+    name: 'FOK Brewing',
+    region: 'El Centro',
+    municipality: 'Caguas',
+    neighborhood: null,
+    address: 'Carr. 189 Km 2.8, Caguas, PR 00725',
+    website_url: 'https://fokbrewing.com/',
+    location_source_url:
+      'https://www.visitacaguas.com/fok-brewing-co',
+    evidence: [
+      {
+        label: 'Directorio turístico de Caguas',
+        url: 'https://www.visitacaguas.com/fok-brewing-co',
+        matchName: 'F.O.K. Brewing Co',
+        required: ['caguas', '189', '2.8']
+      }
+    ]
+  },
+  {
     name: 'Teatro Braulio Castillo',
     region: 'La Metro',
     municipality: 'Bayamón',
@@ -152,7 +170,7 @@ async function main() {
         const text = await fetchOfficialText(source.url);
 
         const matched = matchesVenueSection(
-          text, venue.name, source.required
+          text, source.matchName || venue.name, source.required
         );
 
         console.log(
