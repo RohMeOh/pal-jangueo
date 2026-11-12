@@ -704,11 +704,16 @@
 
 
 /* Compact calendar layout v3: desktop + single-row mobile toolbar */
+
+/* Same overall width as Buscar */
 .pj-calendar-page {
-  max-width: 840px;
+  max-width: 960px;
 }
 
+/* Keep only the monthly calendar compact */
 .pj-calendar-panel {
+  max-width: 840px;
+  margin-inline: auto;
   padding: 20px;
 }
 
@@ -873,3 +878,6 @@
 .pj-calendar-month-count-number + .pj-calendar-month-count-word {
   margin-inline-start: 3px;
 }
+
+
+

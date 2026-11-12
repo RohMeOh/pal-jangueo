@@ -198,7 +198,16 @@
 .pj-event-card:hover { border-color: #3a6077; transform: translateY(-3px); }
 .pj-event-poster { display: grid; place-items: center; position: relative; width: 100%; aspect-ratio: 4 / 5; overflow: hidden; background: #0c1927; }
 .pj-event-poster img.pj-event-poster-backdrop { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(1.12); filter: blur(18px) brightness(.50) saturate(1.12); pointer-events: none; }
-.pj-event-poster img.pj-event-poster-image { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: contain; }
+.pj-event-poster img.pj-event-poster-image {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
 .pj-event-poster-fallback {
   position: relative;
   z-index: 1;
