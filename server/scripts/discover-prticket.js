@@ -172,9 +172,24 @@ function extractDetail(html) {
   // A date mentioned inside the event prose is not the end of its
   // description. Prefer the explicit date label as the boundary; this
   // also keeps pricing and site-wide legal text out of the evidence.
+  // The first weekday date may be inside a SINOPSIS (e.g. "El domingo...").
+  // In that case use the provider's FECHAS DEL EVENTO section as the prose
+  // boundary. Date/time validation remains unchanged.
+  const synopsisMarker = text.match(/\bSINOPSIS\b/i);
+  const datesHeading = text.match(/\bFECHAS DEL EVENTO\b/i);
+  const proseDateIndex = weekdayDate ? text.indexOf(weekdayDate) : -1;
+  const dateInsideSynopsis =
+    !labelledDateMatch &&
+    synopsisMarker &&
+    proseDateIndex > synopsisMarker.index &&
+    datesHeading &&
+    datesHeading.index > proseDateIndex;
+
   const descriptionEnd = labelledDateMatch
     ? labelledDateMatch.index
-    : date ? text.indexOf(date) : -1;
+    : dateInsideSynopsis
+      ? datesHeading.index
+      : date ? text.indexOf(date) : -1;
 
   const beforeDate = descriptionEnd >= 0
     ? text.slice(0, descriptionEnd)
