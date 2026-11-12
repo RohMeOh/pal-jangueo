@@ -529,7 +529,7 @@ export default function EventFeed({ language, onLanguageChange }) {
               aria-haspopup="dialog"
               aria-controls="pj-about-dialog"
             >
-              About
+              {t(language, 'Acerca de')}
             </button>
           </nav>
         </div>
@@ -833,8 +833,8 @@ export default function EventFeed({ language, onLanguageChange }) {
               <path d="M18 6 6 18M6 6l12 12" />
             </svg>
           </button>
-          <span className="pj-about-label">PA'L JANGUEO™ <span>BETA</span></span>
-          <h2 id="pj-about-title">{t(language, "Sobre el app")}</h2>
+          <span className="pj-about-label">PA’L JANGUEO™ <span>BETA</span></span>
+          <h2 id="pj-about-title">{t(language, "Sobre la aplicación")}</h2>
           <p id="pj-about-description">
             {t(language, "Pa'l Jangueo es una aplicación en desarrollo. Esta versión beta continúa evolucionando. El registro de la marca está previsto para una próxima etapa.")}
           </p>
