@@ -51,8 +51,8 @@ function formatPrice(event, language) {
   }
 
   return language === 'en'
-    ? 'Press “View tickets” to see the price'
-    : 'Presiona «Ver boletos» para ver el precio';
+    ? 'Check price at ticket site'
+    : 'Verifique precio en boletería';
 }
 
 function safeLink(value) {
