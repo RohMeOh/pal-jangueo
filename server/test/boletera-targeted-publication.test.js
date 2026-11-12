@@ -16,7 +16,10 @@ function runMocked(args, candidates = 1) {
       if (
         parent?.filename === ${JSON.stringify(scriptPath)} &&
         request.startsWith('../utils/') &&
-        request !== '../utils/reportTicketPublication'
+        ![
+          '../utils/reportTicketPublication',
+          '../utils/excludedBoleteraSources'
+        ].includes(request)
       ) {
         return {};
       }

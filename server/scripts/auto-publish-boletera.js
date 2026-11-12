@@ -1,4 +1,5 @@
 const { reportTicketPublication } = require('../utils/reportTicketPublication');
+const { isExcludedBoleteraSource } = require('../utils/excludedBoleteraSources');
 const pool = require('../db');
 const { extractApiEvents } = require('../utils/boleteraCatalog');
 const {
@@ -661,6 +662,12 @@ async function main() {
 
   for (const candidate of rows) {
     console.log('\nFuente:', candidate.source_url);
+
+    if (isExcludedBoleteraSource(candidate.source_url)) {
+      blocked++;
+      console.log('BLOQUEADO: fuente de prueba excluida.');
+      continue;
+    }
 
     try {
       // Do not fetch expired candidates during publication.

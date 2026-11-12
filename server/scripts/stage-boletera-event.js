@@ -1,6 +1,8 @@
 // Pa'l Jangueo - Manual staging of Boletera events
 // Preview by default. Never approves or publishes events.
 
+const { isExcludedBoleteraSource } = require('../utils/excludedBoleteraSources');
+
 const {
   extractEventJsonLd
 } = require('../utils/extractEventJsonLd');
@@ -57,6 +59,10 @@ async function main() {
 
   url.search = '';
   url.hash = '';
+
+  if (isExcludedBoleteraSource(url.href)) {
+    throw new Error('Fuente de prueba excluida.');
+  }
 
   const response = await fetch(url.href, {
     signal: AbortSignal.timeout(15000),

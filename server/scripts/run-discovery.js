@@ -3,6 +3,7 @@
 // Never approves or publishes events.
 
 const path = require('node:path');
+const { isExcludedBoleteraSource } = require('../utils/excludedBoleteraSources');
 const { execFile } = require('node:child_process');
 const { promisify } = require('node:util');
 
@@ -178,6 +179,11 @@ async function main() {
     for (const [index, item] of selected.entries()) {
       console.log(`\n--- ${index + 1}/${selected.length} ---`);
       console.log('URL:', item.event_url);
+
+      if (isExcludedBoleteraSource(item.event_url)) {
+        console.log('Resultado: fuente de prueba excluida');
+        continue;
+      }
 
       try {
         const html = await fetchPage(item.event_url);
