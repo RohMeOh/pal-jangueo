@@ -10,6 +10,24 @@ if (process.argv.slice(2).some(arg => arg !== '--apply')) {
 // Se pueden incorporar otros municipios y venues más adelante.
 const trustedVenues = [
   {
+    name: 'Club Caribe Distillers',
+    region: 'El Centro',
+    municipality: 'Cidra',
+    neighborhood: null,
+    address: 'Carr. 172 Km 9.1, Cidra, PR 00739',
+    website_url: null,
+    location_source_url:
+      'https://www.rumcapital.pr.gov/rum-route',
+    evidence: [
+      {
+        label: 'Ruta del Ron de Puerto Rico',
+        url: 'https://www.rumcapital.pr.gov/rum-route',
+        matchName: 'Destilería Club Caribe',
+        required: ['172', '9.1', 'cidra']
+      }
+    ]
+  },
+  {
     name: 'FOK Brewing',
     region: 'El Centro',
     municipality: 'Caguas',

@@ -153,6 +153,15 @@ function assessMusicEvidence(rawDescription) {
     (text.match(/\b(?:orquestas?|bandas?)\b/g) || []).length >= 2 &&
     !/\b(?:musica de fondo|karaoke|charla|conferencia|panel)\b/.test(text);
 
+  // A named stage lineup supported by an explicitly musical
+  // programme is evidence of a live performance.
+  // Genre mentions alone are never sufficient.
+  const stagedGenreLineup =
+    /\ben tarima\s*:\s*[a-z0-9]/.test(text) &&
+    /\b(?:exponentes?|cantantes?|interpretes?|artistas?)\s+de\s+(?:la\s+|el\s+|los\s+|las\s+)?(?:salsa|bachata|musica\s+tropical|merengue|plena|bolero|reggae|rock|jazz)\b/.test(text) &&
+    /\b(?:experiencia musical|noche musical|fiesta musical|junte musical)\b/.test(text) &&
+    !/\b(?:charla|conferencia|panel|karaoke|musica de fondo|banda sonora|grabaciones?|pregrabada|obra de teatro|comedia|stand[\s-]*up|proyeccion|pelicula|documental|festival)\b/.test(text);
+
   // A live musical tribute needs an announced return to the stage
   // AND an explicitly musical tribute. A tribute title alone is not enough.
   const onStageMusicTribute =
@@ -216,6 +225,10 @@ function assessMusicEvidence(rawDescription) {
 
   if (onStageEnsemble) {
     signals.push('Orquesta o banda anunciada en tarima');
+  }
+
+  if (stagedGenreLineup) {
+    signals.push('Cartel de artistas musicales en tarima');
   }
 
   if (onStageMusicTribute) {
@@ -288,6 +301,7 @@ function assessMusicEvidence(rawDescription) {
     signal === 'Concierto o presentación en vivo' ||
     signal === 'Actuación acústica en vivo' ||
     signal === 'Orquesta o banda anunciada en tarima' ||
+    signal === 'Cartel de artistas musicales en tarima' ||
     signal === 'Tributo musical anunciado en tarima' ||
     signal === 'DJs o música electrónica' ||
     signal === 'Músicos e instrumentos en presentación' ||
