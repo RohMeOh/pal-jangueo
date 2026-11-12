@@ -3,15 +3,7 @@ import './EventFilters.css';
 import { t } from '../i18n';
 import FilterDropdown from './FilterDropdown';
 import { formatEventTitle } from '../utils/formatEventTitle';
-
-const REGIONS = [
-  'La Metro',
-  'Norte',
-  'Sur',
-  'Este',
-  'El West',
-  'El Centro'
-];
+import { REGIONS, availableFacetValues, updateFilterState } from '../utils/eventFilterFacets';
 
 function formatFilterDate(value, language) {
   if (!value) return t(language, 'Selecciona una fecha');
@@ -44,6 +36,7 @@ export default function EventFilters({
   setFilters,
   language,
   getSuggestions,
+  searchMatchedEvents = [],
   resultCount = null,
   expanded = false,
   onToggleExpanded
@@ -81,61 +74,27 @@ export default function EventFilters({
     setActiveIndex(-1);
   }
 
-  const municipalities = [...new Set(
-    events
-      .filter(event =>
-        !filters.region || event.region === filters.region
-      )
-      .map(event => event.municipality)
-      .filter(Boolean)
-  )].sort((a, b) => a.localeCompare(b, 'es'));
+  // Facets react to every current filter, including text, dates and price.
+  // Keep any selected value visible even if another filter yields zero matches.
+  const availableRegions = availableFacetValues(searchMatchedEvents, filters, 'region');
+  const availableTowns = availableFacetValues(searchMatchedEvents, filters, 'municipality');
+  const availableAreas = availableFacetValues(searchMatchedEvents, filters, 'neighborhood');
+  const availablePrices = availableFacetValues(searchMatchedEvents, filters, 'price');
 
-  const neighborhoods = [...new Set(
-    events
-      .filter(event =>
-        (!filters.region || event.region === filters.region) &&
-        (!filters.municipality ||
-          event.municipality === filters.municipality)
-      )
-      .map(event => event.neighborhood)
-      .filter(Boolean)
-  )].sort((a, b) => a.localeCompare(b, 'es'));
+  const regions = REGIONS.filter(region =>
+    availableRegions.has(region) || region === filters.region
+  );
+  const municipalities = [...new Set([
+    ...availableTowns,
+    filters.municipality
+  ].filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
+  const neighborhoods = [...new Set([
+    ...availableAreas,
+    filters.neighborhood
+  ].filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es'));
 
   function update(field, value) {
-    setFilters(previous => {
-      const next = { ...previous, [field]: value };
-
-      if (field === 'region') {
-        next.municipality = '';
-        next.neighborhood = '';
-      }
-
-      if (field === 'municipality') {
-        next.neighborhood = '';
-
-        // Al volver a Todos los municipios, limpiar también Región.
-        if (!value) {
-          next.region = '';
-        }
-
-        // Completar automáticamente la región si no hay una seleccionada.
-        if (value && !previous.region) {
-          const matchingRegions = [...new Set(
-            events
-              .filter(event => event.municipality === value)
-              .map(event => event.region)
-              .filter(region => REGIONS.includes(region))
-          )];
-
-          // Solo autoseleccionar cuando la asociación sea inequívoca.
-          if (matchingRegions.length === 1) {
-            next.region = matchingRegions[0];
-          }
-        }
-      }
-
-      return next;
-    });
+    setFilters(previous => updateFilterState(previous, field, value, events));
   }
 
   const activeCount = [
@@ -306,7 +265,7 @@ export default function EventFilters({
           onChange={value => update('region', value)}
           options={[
             { value: '', label: t(language, 'Todas las regiones') },
-            ...REGIONS.map(region => ({ value: region, label: t(language, region) }))
+            ...regions.map(region => ({ value: region, label: t(language, region) }))
           ]}
         />
       </div>
@@ -348,8 +307,10 @@ export default function EventFilters({
           onChange={value => update('price', value)}
           options={[
             { value: '', label: t(language, 'Todos los precios') },
-            { value: 'free', label: t(language, 'Con opción gratis') },
-            { value: 'paid', label: t(language, 'De pago') }
+            ...(availablePrices.has('free') || filters.price === 'free'
+              ? [{ value: 'free', label: t(language, 'Con opción gratis') }] : []),
+            ...(availablePrices.has('paid') || filters.price === 'paid'
+              ? [{ value: 'paid', label: t(language, 'De pago') }] : [])
           ]}
         />
       </div>

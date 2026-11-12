@@ -4,6 +4,7 @@ import './EventFeed.css';
 import EventFilters from './EventFilters';
 import FilterDropdown from './FilterDropdown';
 import { createEventSearch } from '../utils/eventSearch';
+import { matchesEventFacets } from '../utils/eventFilterFacets';
 import { formatEventTitle } from '../utils/formatEventTitle';
 import './IconAction.css';
 
@@ -407,71 +408,31 @@ export default function EventFeed({ language, onLanguageChange }) {
     return () => controller.abort();
   }, []);
 
-  function getPuertoRicoDate(value) {
-    const date = new Date(value);
-
-    if (Number.isNaN(date.getTime())) return '';
-
-    const parts = new Intl.DateTimeFormat('en-US', {
-      timeZone: 'America/Puerto_Rico',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
-    }).formatToParts(date);
-
-    const part = type =>
-      parts.find(item => item.type === type)?.value;
-
-    return `${part('year')}-${part('month')}-${part('day')}`;
-  }
-
   const eventSearch = useMemo(
     () => createEventSearch(events),
     [events]
   );
 
-  const filteredEvents = eventSearch.find(filters.search).filter(event => {
-    if (filters.region && event.region !== filters.region) {
-      return false;
-    }
+  // The search term is applied first; every other facet uses those matches.
+  const searchMatchedEvents = eventSearch.find(filters.search);
+  const filteredEvents = searchMatchedEvents.filter(event =>
+    matchesEventFacets(event, filters)
+  );
 
-    if (
-      filters.municipality &&
-      event.municipality !== filters.municipality
-    ) return false;
-
-    if (
-      filters.neighborhood &&
-      event.neighborhood !== filters.neighborhood
-    ) return false;
-
-    const day = getPuertoRicoDate(event.start_at);
-
-    if (filters.fromDate && day < filters.fromDate) {
-      return false;
-    }
-
-    if (filters.toDate && day > filters.toDate) {
-      return false;
-    }
-
-    const hasFreeOption =
-      event.price_type === 'free' ||
-      (event.price_type === 'paid' &&
-        event.price_min != null &&
-        Number(event.price_min) === 0);
-
-    if (filters.price === 'free' && !hasFreeOption) {
-      return false;
-    }
-
-    if (
-      filters.price === 'paid' &&
-      event.price_type !== 'paid'
-    ) return false;
-
-    return true;
-  });
+  // Suggestions only reference events allowed by current structured filters.
+  // Search text is intentionally excluded so users can refine their query.
+  const suggestionSearch = useMemo(
+    () => createEventSearch(events.filter(event => matchesEventFacets(event, {
+      region: filters.region,
+      municipality: filters.municipality,
+      neighborhood: filters.neighborhood,
+      fromDate: filters.fromDate,
+      toDate: filters.toDate,
+      price: filters.price
+    }))),
+    [events, filters.region, filters.municipality, filters.neighborhood,
+      filters.fromDate, filters.toDate, filters.price]
+  );
 
   function openSection(nextSection) {
     const hashes = {
@@ -599,7 +560,8 @@ export default function EventFeed({ language, onLanguageChange }) {
             events={events}
             filters={filters}
             setFilters={setFilters}
-            getSuggestions={eventSearch.suggest}
+            getSuggestions={suggestionSearch.suggest}
+            searchMatchedEvents={searchMatchedEvents}
             language={language}
             resultCount={!loading && !error ? filteredEvents.length : null}
             expanded={mobileFiltersOpen}
