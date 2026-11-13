@@ -25,23 +25,11 @@ export default function BackToTop({ language }) {
       const lineY = footer.getBoundingClientRect().top;
       const radius = 23;
       const mobile = window.matchMedia('(max-width: 620px)').matches;
-      const defaultBottom = mobile ? 24 : 50;
+      const defaultBottom = 50;
 
       if (mobile) {
-        // Anchor the button to the document's footer line.
-        // Stop following the line using a fixed viewport position.
-        if (lineY < radius || lineY > window.innerHeight - radius) {
-          setFooterPosition(null);
-          return;
-        }
-
-        const footerDocumentY = lineY + window.scrollY;
-
-        setFooterPosition({
-          position: 'absolute',
-          top: `${Math.round(footerDocumentY - radius)}px`,
-          bottom: 'auto'
-        });
+        // Keep the button fixed to the viewport on small screens.
+        setFooterPosition(null);
         return;
       }
 
