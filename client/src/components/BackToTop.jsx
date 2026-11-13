@@ -29,21 +29,8 @@ export default function BackToTop({ language }) {
       const defaultBottom = 50;
 
       if (mobile) {
-        // Position relative to the document to avoid iOS fixed-position drift.
-        const viewport = window.visualViewport;
-        const pageTop = viewport?.pageTop ?? window.scrollY;
-        const height = viewport?.height ?? window.innerHeight;
-
-        const top = Math.max(
-          0,
-          Math.round(pageTop + height - radius * 2 - 24)
-        );
-
-        setFooterPosition({
-          position: 'absolute',
-          top: `calc(${top}px - env(safe-area-inset-bottom, 0px))`,
-          bottom: 'auto'
-        });
+        // Keep the button anchored to the viewport on mobile.
+        setFooterPosition(null);
         return;
       }
 
