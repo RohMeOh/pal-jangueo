@@ -171,6 +171,24 @@ export default function EventFilters({
           }}
         />
 
+        {Boolean(filters.search) && (
+          <button
+            type="button"
+            className="pj-search-clear"
+            aria-label={language === 'en' ? 'Clear search' : 'Borrar búsqueda'}
+            onMouseDown={event => event.preventDefault()}
+            onClick={() => {
+              update('search', '');
+              setSuggestionsOpen(false);
+              setActiveIndex(-1);
+            }}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
+        )}
+
         {suggestionsVisible && (
           <div
             id={listId}

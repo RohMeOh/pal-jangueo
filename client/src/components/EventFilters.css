@@ -450,3 +450,67 @@
 .pj-site #pj-favorite-search::-webkit-search-cancel-button {
   cursor: pointer;
 }
+
+/* Consistent search clearing across desktop, iPhone and iPad. */
+.pj-site #filter-search,
+.pj-site #pj-favorite-search {
+  padding-right: 48px;
+}
+
+.pj-site #filter-search::-webkit-search-cancel-button,
+.pj-site #pj-favorite-search::-webkit-search-cancel-button {
+  display: none;
+  -webkit-appearance: none;
+}
+
+.pj-search-clear {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #b9c6d3;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pj-search-clear svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.pj-search-clear:hover,
+.pj-search-clear:focus-visible {
+  color: #13c5ff;
+  background: #192b3b;
+}
+
+.pj-search-suggest-wrap > .pj-search-clear {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  z-index: 1;
+}
+
+.pj-my-jangueo-controls > .pj-favorite-search-clear {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  align-self: center;
+  margin-right: 5px;
+  z-index: 1;
+}
+
+@media (max-width: 620px) {
+  .pj-my-jangueo-controls > .pj-favorite-search-clear {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}

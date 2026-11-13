@@ -661,6 +661,19 @@ export default function EventFeed({ language, onLanguageChange }) {
                   : 'Buscar eventos favoritos'}
               />
 
+              {Boolean(favoriteSearch) && (
+                <button
+                  type="button"
+                  className="pj-search-clear pj-favorite-search-clear"
+                  aria-label={language === 'en' ? 'Clear search' : 'Borrar búsqueda'}
+                  onClick={() => setFavoriteSearch('')}
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M18 6 6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+
               <div className="pj-filter pj-favorite-sort">
                 <FilterDropdown
                   id="pj-favorite-filter"
