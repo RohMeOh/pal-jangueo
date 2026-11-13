@@ -28,8 +28,16 @@ export default function BackToTop({ language }) {
       const defaultBottom = 50;
 
       if (mobile) {
-        // Keep the button fixed to the viewport on small screens.
-        setFooterPosition(null);
+        // Follow the visible viewport when mobile browser bars resize.
+        const viewport = window.visualViewport;
+        const visibleBottom = viewport
+          ? viewport.offsetTop + viewport.height
+          : window.innerHeight;
+
+        setFooterPosition({
+          top: `calc(${Math.round(visibleBottom - radius * 2 - 24)}px - env(safe-area-inset-bottom, 0px))`,
+          bottom: 'auto'
+        });
         return;
       }
 
