@@ -12,3 +12,9 @@ client/src/*.backup
 
 # Local database certificates
 server/certs/
+
+# Local editor and recovery files
+*.bak
+*.backup
+*.orig
+*.rej

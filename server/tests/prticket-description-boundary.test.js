@@ -11,7 +11,7 @@ test('does not extract cookies when only the metadata has the exact title', () =
     <button>Comprar</button><button>Comprar</button>
     <div>Cuando un asesinato sacude a los invitados,
     el detective decide investigar el misterio.</div>
-    <div>🗓 sábado, 27 de febrero de 2027 ⏰ 8:30 PM</div>
+    <div>\uD83D\uDDD3 sábado, 27 de febrero de 2027 \u23F0 8:30 PM</div>
     <footer>Acerca de. Política de privacidad.</footer>
   `;
   const result = extractDetail(html);

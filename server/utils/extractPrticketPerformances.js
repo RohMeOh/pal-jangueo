@@ -13,7 +13,7 @@ function extractPrticketPerformances(html) {
     .replace(/\s+/g, ' ');
 
   const pattern =
-    /(?:🗓\uFE0F?|📅)\s*((?:(?:lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|domingo)\s*,?\s*)?\d{1,2}\s+de\s+[a-záéíóúñ]+\s+de\s+20\d{2})\s*(?:⏰|🕒)\s*(\d{1,2}:[0-5]\d\s*[ap]\.?\s*m\.?)/giu;
+    /(?:\uD83D\uDDD3\uFE0F?|\uD83D\uDCC5)\s*((?:(?:lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|domingo)\s*,?\s*)?\d{1,2}\s+de\s+[a-záéíóúñ]+\s+de\s+20\d{2})\s*(?:\u23F0|\uD83D\uDD52)\s*(\d{1,2}:[0-5]\d\s*[ap]\.?\s*m\.?)/giu;
 
   const results = new Map();
 

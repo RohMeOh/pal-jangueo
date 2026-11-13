@@ -30,8 +30,8 @@ test('PRticket still prioritizes an explicitly labelled official date', () => {
   const html = htmlFor(`
     Comprar Comprar Ricky Colón: Esencia SINOPSIS
     El domingo 25 de abril de 2027 cantaremos boleros, con música en vivo.
-    🗓️ Sábado, 14 de noviembre de 2026
-    ⏰ 8:00 PM Precios: $30 Acerca de PRticket
+    \uD83D\uDDD3\uFE0F Sábado, 14 de noviembre de 2026
+    \u23F0 8:00 PM Precios: $30 Acerca de PRticket
   `);
   const detail = extractDetail(html);
   assert.match(detail.description_evidence || '', /domingo 25 de abril de 2027/i);

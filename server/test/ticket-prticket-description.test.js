@@ -12,8 +12,8 @@ test('description survives an introductory unlabelled event date before the offi
     <p>El domingo 25 de abril de 2027, a las 4:30 p. m.,
       vuelve un concierto de boleros con músicos en vivo.</p>
     <p>Será una tarde para cantar y escuchar interpretaciones musicales.</p>
-    <p>📅 25 de abril de 2027</p>
-    <p>🕟 4:30 p. m.</p>
+    <p>\uD83D\uDCC5 25 de abril de 2027</p>
+    <p>\uD83D\uDD5F 4:30 p. m.</p>
     <p>Precio: $25</p><p>PRticket Terms of Use</p>`);
   const detail = extractDetail(html);
   assert.ok(detail.description_evidence?.includes('músicos en vivo'));
@@ -54,8 +54,8 @@ test('an official on-stage lineup appearing after event date can be extracted', 
     <meta property="og:title" content="Día Nacional del Bailador - Coliseo Roberto Clemente">
     </head><body><h1>Día Nacional del Bailador</h1>
     <p>¡EL DÍA NACIONAL DEL BAILADOR!</p>
-    <p>📅 miércoles, 25 de noviembre de 2026</p>
-    <p>⏰ 8:00 PM</p><p>📍 Coliseo Roberto Clemente, San Juan</p>
+    <p>\uD83D\uDCC5 miércoles, 25 de noviembre de 2026</p>
+    <p>\u23F0 8:00 PM</p><p>\uD83D\uDCCD Coliseo Roberto Clemente, San Juan</p>
     <p>En tarima:</p><p>La Banda que Deleita</p>
     <p>Willie Rosario y su Orquesta</p>
     <p>Bobby Valentín y su Orquesta</p>
@@ -68,8 +68,8 @@ test('an official on-stage lineup appearing after event date can be extracted', 
 });
 
 test('unlabelled generic text after a date is not repurposed as musical evidence', () => {
-  const html = documentFor(`<p>📅 12 de mayo de 2028</p>
-    <p>⏰ 8:00 PM</p><p>📍 Teatro Principal</p>
+  const html = documentFor(`<p>\uD83D\uDCC5 12 de mayo de 2028</p>
+    <p>\u23F0 8:00 PM</p><p>\uD83D\uDCCD Teatro Principal</p>
     <p>Comprar boletos. Precios: $25.</p>`);
   assert.equal(extractDetail(html).description_evidence, null);
 });

@@ -1,8 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { t } from '../i18n';
 
-// Preview local: recupera solamente los elementos gráficos
-// del arte aprobado y deja el fondo al CSS original.
+// Preserve the approved artwork while rendering translated copy in HTML.
 export default function ApprovedHeroArt({ language }) {
   const canvasRef = useRef(null);
 
@@ -51,14 +50,12 @@ export default function ApprovedHeroArt({ language }) {
             (x >= 1040 && x < 1360 && y >= 415 && y < 590) ||
             (x >= 50 && x < 1190 && y >= 640 && y < 920);
 
-          // Eliminar el fondo y el borde incorporados
-          // en la imagen, manteniendo barras y textos.
+          // Remove the baked-in background while keeping the artwork.
           pixels[i + 3] = 0;
 
           if (!inside) continue;
 
-          // El texto original se sustituye por HTML
-          // para permitir el cambio de idioma.
+          // HTML handles the language-dependent text.
           const embeddedText =
             (x >= 40 && x < 480 &&
              y >= 55 && y < 180) ||

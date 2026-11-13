@@ -11,7 +11,7 @@ const {
   assessMusicEvidence
 } = require('../utils/assessMusicEvidence');
 
-function page(title, body, date = '🗓️Funciones:') {
+function page(title, body, date = '\uD83D\uDDD3\uFE0FFunciones:') {
   return `
     <html>
       <head>
@@ -86,7 +86,7 @@ test('Existing descriptions with valid dates are preserved', () => {
   const detail = extractDetail(page(
     'Concierto de Prueba',
     'Presentación de música en vivo con músicos invitados y canciones originales.',
-    '🗓️ viernes, 22 de enero de 2027 ⏰ 7:00PM'
+    '\uD83D\uDDD3\uFE0F viernes, 22 de enero de 2027 \u23F0 7:00PM'
   ));
 
   assert.match(

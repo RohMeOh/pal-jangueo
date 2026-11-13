@@ -12,7 +12,7 @@ test('recovers concert prose when its heading differs from its full title', () =
     <button>Coming Soon</button><button>Coming Soon</button>
     <div>65 Aniversario Tuna UPR. Concierto Generacional.
     Cada generación entonará canciones de sus repertorios.</div>
-    <div>🗓 domingo, 6 de diciembre de 2026 ⏰ 4:00 PM</div>
+    <div>\uD83D\uDDD3 domingo, 6 de diciembre de 2026 \u23F0 4:00 PM</div>
     <footer>Acerca de. Política de privacidad.</footer>
   `;
   const detail = extractDetail(html);

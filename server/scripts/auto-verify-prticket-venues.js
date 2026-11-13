@@ -6,8 +6,8 @@ if (process.argv.slice(2).some(arg => arg !== '--apply')) {
   throw new Error('Uso: node scripts/auto-verify-prticket-venues.js [--apply]');
 }
 
-// Fuentes autorizadas para verificar locales.
-// Se pueden incorporar otros municipios y venues más adelante.
+// Trusted sources used to verify venue locations.
+// Add new venues when authoritative location evidence is available.
 const trustedVenues = [
   {
     name: 'Club Caribe Distillers',

@@ -145,7 +145,7 @@ function extractDetail(html) {
   // before accepting an unlabelled Spanish date to avoid picking up
   // arbitrary years mentioned in descriptions.
   const labelledDateMatch = text.match(
-    /(?:🗓️?|📅|fecha\s*:)\s*((?:(?:lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|domingo)\s*,?\s*)?\d{1,2}\s+de\s+[a-záéíóúñ]+\s+de\s+20\d{2})/i
+    /(?:\uD83D\uDDD3\uFE0F?|\uD83D\uDCC5|fecha\s*:)\s*((?:(?:lunes|martes|mi[eé]rcoles|jueves|viernes|s[aá]bado|domingo)\s*,?\s*)?\d{1,2}\s+de\s+[a-záéíóúñ]+\s+de\s+20\d{2})/i
   );
   const labelled = labelledDateMatch?.[1] || null;
 
@@ -263,7 +263,7 @@ function extractDetail(html) {
     : '';
 
   const fallbackBoundary = fallbackTail.match(
-    /(?:🗓|📅|⏰|\bprecios?\s*:|\bacerca de\b|©)/i
+    /(?:\uD83D\uDDD3|\uD83D\uDCC5|\u23F0|\bprecios?\s*:|\bacerca de\b|©)/i
   );
 
   const fallbackDescription =

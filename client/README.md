@@ -1,93 +1,73 @@
-# Pa’l Jangueo — Web Client
+# Pa’l Jangueo — Frontend
 
-> **Status:** Active development · Beta/MVP · Trademark registration planned
+The React client for Pa’l Jangueo, a bilingual live music discovery application for Puerto Rico. Spanish is the default language; English is available through the navigation toggle.
 
-The **Pa’l Jangueo web client** is the React-based, Spanish-first interface for discovering live music events across Puerto Rico. This frontend is part of an **independent project under ongoing development**; its current implementation is not presented as a finished commercial release.
+[Live MVP](https://pal-jangueo.vercel.app) · [Project overview](../README.md) · [Backend guide](../server/README.md)
 
-**[Live MVP](https://pal-jangueo.vercel.app)** · **[Main project README](../README.md)**
+## Features
 
-## Current capabilities
+- Browse upcoming music events and follow the original ticketing links.
+- Search by event, artist, or venue; narrow results by date, location, and price.
+- Navigate a month-by-month event calendar.
+- Save or remove favorites in **Mi Jangueo**, with local browser persistence and independent search/sorting.
+- Switch between Spanish and English without losing the current browsing experience.
+- View a responsive interface with event flyers, fallback images, and location links.
 
-- **React + Vite** interface with responsive layouts for desktop and mobile.
-- **Spanish / English toggle**, with Spanish as the default experience.
-- **Browse and search events** with filters for date, location, and price.
-- **Mi Jangueo** browser-based favorites using local storage; no user account is required.
-- **Event calendar** for exploring upcoming performances by day.
-- **Event cards** with flyer fallback art and official ticket and location links.
-- **Puerto Rico date and time formatting** for event information.
+The browser reads the **Express API**. It does not scrape ticketing sites, call Gemini, approve candidates, or modify the database. The number of visible events depends on the backend's verified catalog, not on a hardcoded frontend list.
 
-The UI reads published event data from the Express backend. **Availability and coverage depend on the current catalog and validation process**; this beta does not claim to include every event in Puerto Rico.
+## Stack
 
-## Tech stack
+React, Vite, JavaScript, CSS, Fuse.js for search, and the project's translation module in `src/i18n.js`.
 
-| Purpose | Technology |
-| --- | --- |
-| UI | React, JavaScript, CSS |
-| Development and bundling | Vite |
-| Search | Fuse.js and application search utilities |
-| Localization | Project translation module (`src/i18n.js`) |
-| Linting | Oxlint |
-| Data | Express API (`GET /api/events`) |
-
-## Project layout
+## Organization
 
 ```text
 client/
-├── public/              # Static frontend assets (when present)
+├── public/           Favicon and approved artwork
 ├── src/
-│   ├── assets/          # Application assets
-│   ├── components/      # Event feed, cards, filters and calendar
-│   ├── utils/           # Search and display utilities
-│   ├── App.jsx          # Application entry view and language state
-│   ├── i18n.js          # Spanish / English UI translations
-│   └── main.jsx         # React bootstrap
-├── package.json
-└── README.md
+│   ├── components/   Event feed, cards, filters, calendar, navigation
+│   ├── utils/        Search, favorites, formatting, filter facets
+│   ├── App.jsx       Top-level language state
+│   ├── i18n.js       Interface translations
+│   └── main.jsx      React entry point
+├── tests/            Frontend utility tests
+├── index.html
+└── package.json
 ```
 
 ## Run locally
 
-**Requirements:** Node.js 24 and npm. Run the backend separately if you want live event data.
+Use Node.js 24 and npm. Start the backend separately if you need live data.
 
 ```bash
 cd client
 npm ci
 ```
 
-Create `client/.env.local`:
+Set `client/.env.local`:
 
 ```dotenv
 VITE_API_URL=http://localhost:3001
 ```
 
-Start Vite:
-
 ```bash
 npm run dev
 ```
 
-Check the production build and lint rules:
+The default Vite address is usually `http://localhost:5173`.
+
+## Verify changes
 
 ```bash
-npm run build
+node --test tests/*.test.*
 npm run lint
+npm run build
 ```
 
-The default local Vite URL is typically `http://localhost:5173`.
+The frontend should continue working when browser storage is unavailable, although favorites and language preference cannot persist in that case. UI data such as venue names, event titles, and dates comes from the backend and is displayed using Puerto Rico-specific formatting.
 
-## Integration and development notes
+## Project status
 
-- The client **does not scrape ticketing sites or execute Gemini requests on demand**; ingestion and AI-assisted analysis are handled by the backend workflows.
-- Event publishing is governed by backend source validation and review safeguards.
-- Features and copy may change while the beta is being refined.
-- Keep secrets and private credentials out of frontend source files and environment values exposed through `VITE_`.
+This client is part of an **active-development beta**, not a finished commercial release. The application is independent of the ticketing providers. Purchases and final event availability remain on their official websites. The Pa’l Jangueo name is intended for a future trademark registration; no registration or application is claimed here.
 
-## Development and trademark notice
-
-**Pa’l Jangueo remains in development.** Registration of the **Pa’l Jangueo** name as a trademark is **planned for a future stage**; this README does **not** claim that the trademark has already been registered or that a registration application has been filed.
-
-The project is an independent music-event discovery application; purchases and final event information remain with the relevant official ticketing provider.
-
-## Maintainer
-
-**[Romeo González (RohMeOh)](https://github.com/RohMeOh)** · [Project repository](https://github.com/RohMeOh/pal-jangueo)
+Maintained by **[Romeo González (RohMeOh)](https://github.com/RohMeOh)**.

@@ -420,15 +420,15 @@ async function main() {
       await db.query('ROLLBACK');
       transaction = false;
 
-      console.log('\n✓ SIMULACIÓN COMPLETADA');
-      console.log('✓ Transacción revertida');
-      console.log('✓ Eventos publicados: 0');
-      console.log('✓ Cambios permanentes: 0');
+      console.log('\n\u2713 SIMULACIÓN COMPLETADA');
+      console.log('\u2713 Transacción revertida');
+      console.log('\u2713 Eventos publicados: 0');
+      console.log('\u2713 Cambios permanentes: 0');
     } else {
       await db.query('COMMIT');
       transaction = false;
 
-      console.log('\n✓ AMBAS FUNCIONES PUBLICADAS');
+      console.log('\n\u2713 AMBAS FUNCIONES PUBLICADAS');
     }
 
   } catch (error) {

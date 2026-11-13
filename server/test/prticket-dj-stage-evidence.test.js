@@ -54,8 +54,8 @@ test('Extracts official DJ programme after event price', () => {
       content="Two stages. Two music styles. Reggaeton Y2K.">
     </head><body>
     <h1>Y2KOMEBACK</h1>
-    <p>🗓️ sábado, 31 de octubre de 2026</p>
-    <p>⏰ 9:00 PM</p>
+    <p>\uD83D\uDDD3\uFE0F sábado, 31 de octubre de 2026</p>
+    <p>\u23F0 9:00 PM</p>
     <p>Precio: $20.00</p>
     <p>Two DJs. Two music styles. One Y2KOMEBACK.</p>
     <p>Acerca de Cookies y otros servicios</p>

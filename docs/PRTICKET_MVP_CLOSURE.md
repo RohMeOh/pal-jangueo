@@ -98,11 +98,10 @@ The 11 published musical performances were not modified.
 
 ## Future source updates
 
-Changed evidence from previously rejected sources can create
-a new pending-review candidate.
-
-Unchanged sources are not staged again.
-Existing approved events are not automatically duplicated.
+Changed evidence from approved or rejected sources is flagged
+for editorial reconciliation without creating a duplicate candidate.
+Unchanged sources are not restaged. Pending, unlinked candidates
+may be refreshed while preserving their previous evidence.
 Human review and publication safeguards remain required.
 
 ## Database changes

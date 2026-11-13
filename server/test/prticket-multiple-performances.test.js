@@ -10,10 +10,10 @@ const {
 test('Primavera preserves both official performances', () => {
   const html = `
     <p>Se abre SEGUNDA función:</p>
-    <p>🗓 viernes , 22 de enero de 2027</p>
-    <p>⏰ &nbsp;7:00PM</p>
-    <p>🗓️ sábado, 23 de enero de 2027</p>
-    <p>⏰ &nbsp;6:00PM</p>
+    <p>\uD83D\uDDD3 viernes , 22 de enero de 2027</p>
+    <p>\u23F0 &nbsp;7:00PM</p>
+    <p>\uD83D\uDDD3\uFE0F sábado, 23 de enero de 2027</p>
+    <p>\u23F0 &nbsp;6:00PM</p>
   `;
 
   const sessions = extractPrticketPerformances(html);
@@ -29,7 +29,7 @@ test('Primavera preserves both official performances', () => {
 
 test('A single performance stays single', () => {
   const sessions = extractPrticketPerformances(
-    '<p>📅 25 de abril de 2027</p><p>⏰ 4:30 PM</p>'
+    '<p>\uD83D\uDCC5 25 de abril de 2027</p><p>\u23F0 4:30 PM</p>'
   );
 
   assert.equal(sessions.length, 1);
@@ -45,19 +45,19 @@ test('Unlabelled dates do not create performances', () => {
 
 test('Contradictory weekdays are rejected', () => {
   assert.throws(() => extractPrticketPerformances(
-    '🗓 lunes, 22 de enero de 2027 ⏰ 7:00PM'
+    '\uD83D\uDDD3 lunes, 22 de enero de 2027 \u23F0 7:00PM'
   ));
 });
 
 test('Impossible dates are rejected', () => {
   assert.throws(() => extractPrticketPerformances(
-    '🗓 30 de febrero de 2027 ⏰ 7:00PM'
+    '\uD83D\uDDD3 30 de febrero de 2027 \u23F0 7:00PM'
   ));
 });
 
 test('Dates inside scripts are ignored', () => {
   const sessions = extractPrticketPerformances(
-    '<script>const value="🗓 22 de enero de 2027 ⏰ 7:00PM"</script>'
+    '<script>const value="\uD83D\uDDD3 22 de enero de 2027 \u23F0 7:00PM"</script>'
   );
 
   assert.equal(sessions.length, 0);
