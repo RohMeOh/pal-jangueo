@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import './BackToTop.css';
 import './IconAction.css';
 import { t } from '../i18n';
@@ -28,14 +29,19 @@ export default function BackToTop({ language }) {
       const defaultBottom = 50;
 
       if (mobile) {
-        // Follow the visible viewport when mobile browser bars resize.
+        // Position relative to the document to avoid iOS fixed-position drift.
         const viewport = window.visualViewport;
-        const visibleBottom = viewport
-          ? viewport.offsetTop + viewport.height
-          : window.innerHeight;
+        const pageTop = viewport?.pageTop ?? window.scrollY;
+        const height = viewport?.height ?? window.innerHeight;
+
+        const top = Math.max(
+          0,
+          Math.round(pageTop + height - radius * 2 - 24)
+        );
 
         setFooterPosition({
-          top: `calc(${Math.round(visibleBottom - radius * 2 - 24)}px - env(safe-area-inset-bottom, 0px))`,
+          position: 'absolute',
+          top: `calc(${top}px - env(safe-area-inset-bottom, 0px))`,
           bottom: 'auto'
         });
         return;
@@ -94,7 +100,7 @@ export default function BackToTop({ language }) {
 
   if (!visible) return null;
 
-  return (
+  return createPortal(
     <button
       type="button"
       className="pj-back-to-top pj-icon-action"
@@ -106,6 +112,7 @@ export default function BackToTop({ language }) {
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M12 19V5m-6 6 6-6 6 6" />
       </svg>
-    </button>
+    </button>,
+    document.body
   );
 }
