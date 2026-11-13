@@ -9,6 +9,9 @@
 @media (max-width: 620px) {
   .pj-back-to-top {
     right: calc(40px + env(safe-area-inset-right, 0px));
-    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(
+      24px + env(safe-area-inset-bottom, 0px) +
+      var(--pj-footer-lift, 0px)
+    );
   }
 }

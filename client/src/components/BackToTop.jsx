@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import './BackToTop.css';
 import './IconAction.css';
@@ -9,6 +9,7 @@ const SHOW_AFTER_PX = 420;
 export default function BackToTop({ language }) {
   const [visible, setVisible] = useState(false);
   const [footerPosition, setFooterPosition] = useState(null);
+  const buttonRef = useRef(null);
 
   useEffect(() => {
     let frame = 0;
@@ -29,8 +30,23 @@ export default function BackToTop({ language }) {
       const defaultBottom = 50;
 
       if (mobile) {
-        // Keep the button anchored to the viewport on mobile.
-        setFooterPosition(null);
+        const button = buttonRef.current;
+
+        if (!button) return;
+
+        // Keep the button fixed until it reaches the footer line.
+        const appliedLift = Number.parseFloat(
+          button.style.getPropertyValue('--pj-footer-lift')
+        ) || 0;
+
+        const bounds = button.getBoundingClientRect();
+        const restingCenter = bounds.top + bounds.height / 2 + appliedLift;
+        const lift = Math.max(0, Math.round(restingCenter - lineY));
+
+        setFooterPosition(lift > 0
+          ? { '--pj-footer-lift': `${lift}px` }
+          : null
+        );
         return;
       }
 
@@ -89,6 +105,7 @@ export default function BackToTop({ language }) {
 
   return createPortal(
     <button
+      ref={buttonRef}
       type="button"
       className="pj-back-to-top pj-icon-action"
       style={footerPosition || undefined}
